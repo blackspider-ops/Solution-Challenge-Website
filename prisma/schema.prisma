@@ -1,0 +1,255 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ─── Enums ─────────────────────────────────────────────────────────────────
+
+enum Role {
+  participant
+  volunteer
+  admin
+}
+
+enum RegistrationStatus {
+  pending
+  confirmed
+  waitlisted
+}
+
+enum SubmissionStatus {
+  draft
+  submitted
+  reviewed
+}
+
+enum SponsorTier {
+  platinum
+  gold
+  silver
+}
+
+enum TimelineStatus {
+  active
+  upcoming
+  completed
+}
+
+// ─── Auth.js adapter tables ────────────────────────────────────────────────
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ─── Core domain models ────────────────────────────────────────────────────
+
+/// A person who has signed up. Role controls what they can access.
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?   // null for OAuth-only users
+  role          Role      @default(participant)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Auth.js relations
+  accounts  Account[]
+  sessions  Session[]
+
+  // Domain relations
+  registration  Registration?
+  teamMemberships TeamMember[]
+  ledTeams      Team[]         @relation("TeamLeader")
+  announcements Announcement[]
+  checkInsPerformed CheckIn[]  @relation("CheckInPerformedBy")
+}
+
+/// Created when a user registers for the event.
+/// One user → one registration.
+model Registration {
+  id        String             @id @default(cuid())
+  userId    String             @unique
+  status    RegistrationStatus @default(pending)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ticket Ticket?
+}
+
+/// A QR-code ticket issued when a registration is confirmed.
+/// One registration → one ticket.
+model Ticket {
+  id             String   @id @default(cuid())
+  registrationId String   @unique
+  qrToken        String   @unique @default(cuid())
+  issuedAt       DateTime @default(now())
+
+  registration Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  checkIn      CheckIn?
+}
+
+/// Records the moment a ticket was scanned at the event entrance.
+/// One ticket → at most one check-in (enforced by unique on ticketId).
+model CheckIn {
+  id          String   @id @default(cuid())
+  ticketId    String   @unique
+  performedBy String   // userId of the volunteer/admin who scanned
+  checkedInAt DateTime @default(now())
+
+  ticket    Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  performer User   @relation("CheckInPerformedBy", fields: [performedBy], references: [id])
+}
+
+/// A challenge category. Seeded from the landing page tracks.
+/// visible = false means the detail page is hidden from public users.
+/// slug is used as the URL path segment.
+model Track {
+  id              String  @id @default(cuid())
+  slug            String  @unique
+  name            String  @unique
+  description     String  // short summary shown on landing page cards
+  fullDescription String  // full detail shown on the track detail page
+  promptContent   String  // challenge prompt/problem statement (released at event start)
+  icon            String
+  gradient        String
+  order           Int     @default(0)
+  visible         Boolean @default(false) // false = hidden from public
+
+  teams       Team[]
+  submissions Submission[]
+}
+
+/// A group of up to 4 participants competing together.
+/// leaderId points to the User who created the team.
+/// inviteCode is a short 6-char uppercase code for easy sharing.
+model Team {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  leaderId    String
+  trackId     String?
+  inviteCode  String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  leader     User         @relation("TeamLeader", fields: [leaderId], references: [id])
+  track      Track?       @relation(fields: [trackId], references: [id])
+  members    TeamMember[]
+  submission Submission?
+}
+
+/// Join table between User and Team.
+/// A user can only be on one team at a time (enforced by unique on userId).
+model TeamMember {
+  id       String @id @default(cuid())
+  teamId   String
+  userId   String
+  joinedAt DateTime @default(now())
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@unique([userId]) // one team per user
+}
+
+/// A project submitted by a team for judging.
+/// One team → one submission (enforced by unique on teamId).
+model Submission {
+  id          String           @id @default(cuid())
+  teamId      String           @unique
+  trackId     String
+  title       String
+  description String
+  repoUrl     String?
+  demoUrl     String?
+  videoUrl    String?
+  status      SubmissionStatus @default(draft)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  team  Team  @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  track Track @relation(fields: [trackId], references: [id])
+}
+
+/// A message posted by an admin, visible to all participants on their dashboard.
+model Announcement {
+  id          String   @id @default(cuid())
+  title       String
+  body        String
+  published   Boolean  @default(false)
+  pinned      Boolean  @default(false)
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  createdBy User @relation(fields: [createdById], references: [id])
+}
+
+// ─── Content / seed models ─────────────────────────────────────────────────
+
+model Sponsor {
+  id         String      @id @default(cuid())
+  name       String
+  initial    String
+  tier       SponsorTier
+  logoUrl    String?
+  websiteUrl String?
+  active     Boolean     @default(true)
+  order      Int         @default(0)
+}
+
+model FAQ {
+  id        String  @id @default(cuid())
+  question  String
+  answer    String
+  order     Int     @default(0)
+  published Boolean @default(true)
+}
+
+model TimelineEvent {
+  id          String         @id @default(cuid())
+  title       String
+  date        String
+  description String
+  status      TimelineStatus @default(upcoming)
+  order       Int            @default(0)
+}

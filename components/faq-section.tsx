@@ -13,7 +13,11 @@ import { Button } from "@/components/ui/button"
 const faqs = [
   {
     question: "Who can participate in the Solution Challenge?",
-    answer: "The challenge is open to students, developers, designers, and anyone passionate about using technology for social good. You can participate individually or as a team of up to 4 members from anywhere in the world.",
+    answer: "The challenge is open to Penn State students of all majors and skill levels. You can participate individually or as a team of up to 4 members. No prior hackathon experience is required.",
+  },
+  {
+    question: "When and where does the event take place?",
+    answer: "The Solution Challenge runs from April 11 at 7:00 PM through April 12 at 12:00 PM — a 17-hour hackathon. It is held at the ECoRE Building, University Park, PA.",
   },
   {
     question: "What technologies can I use?",
@@ -21,30 +25,40 @@ const faqs = [
   },
   {
     question: "Is there a registration fee?",
-    answer: "No, participation in the Solution Challenge is completely free. We believe in making innovation accessible to everyone regardless of their financial situation.",
+    answer: "No, participation in the Solution Challenge is completely free. We believe in making innovation accessible to everyone.",
   },
   {
     question: "How are projects judged?",
-    answer: "Projects are evaluated based on impact potential, technical implementation, user experience, scalability, and alignment with the UN Sustainable Development Goals. A panel of industry experts will review all submissions.",
+    answer: "Projects are evaluated based on impact potential, technical implementation, user experience, scalability, and alignment with the UN Sustainable Development Goals. A panel of expert judges will review all submissions.",
   },
   {
-    question: "What are the prizes?",
-    answer: "Winners will receive cash prizes totaling $100,000, mentorship opportunities, cloud credits, and the chance to present their solutions to global tech leaders and investors.",
+    question: "What do winners receive?",
+    answer: "Winning teams advance to the North America regional round of the Google Solution Challenge, held by Google. This is a prestigious opportunity to compete at a global level and gain recognition from the Google Developer community.",
+  },
+  {
+    question: "When does team formation happen?",
+    answer: "Team formation for new participants happens at 8:00 PM on April 11 — one hour after the event kickoff. At that same time, the challenge prompts are released and hacking officially begins.",
+  },
+  {
+    question: "When is the submission deadline?",
+    answer: "All project submissions must be completed by 10:00 AM on April 12 — two hours before judging begins at 12:00 PM. Late submissions will not be accepted.",
   },
   {
     question: "Can I work on an existing project?",
-    answer: "Yes, you can continue developing an existing project, but you must clearly document the progress made during the challenge period. New projects are also welcome.",
+    answer: "Yes, you can continue developing an existing project, but you must clearly document the progress made during the hackathon period. New projects are also welcome.",
+  },
+  {
+    question: "How do I contact the organizers?",
+    answer: "Email us at gdg@psu.edu for any questions about the event, sponsorship opportunities, or general inquiries. We'll get back to you as soon as possible.",
   },
 ]
 
 export function FAQSection() {
   return (
     <section id="faq" className="py-32 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Background */}
       <div className="absolute inset-0 -z-10 bg-gradient-to-b from-background via-muted/30 to-muted/50" />
 
       <div className="max-w-4xl mx-auto">
-        {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -52,7 +66,7 @@ export function FAQSection() {
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           className="text-center mb-16"
         >
-          <motion.span 
+          <motion.span
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
@@ -67,12 +81,11 @@ export function FAQSection() {
             </span>
           </h2>
           <p className="text-lg text-muted-foreground leading-relaxed">
-            Everything you need to know about the Solution Challenge. 
+            Everything you need to know about the Solution Challenge.
             Can&apos;t find your answer? Reach out to our team.
           </p>
         </motion.div>
 
-        {/* FAQ Accordion */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -118,11 +131,16 @@ export function FAQSection() {
             </div>
             <h3 className="text-xl font-semibold text-foreground mb-2">Still have questions?</h3>
             <p className="text-muted-foreground mb-6 max-w-sm">
-              Our team is here to help. Reach out and we&apos;ll get back to you within 24 hours.
+              Our team is here to help. Email us and we&apos;ll get back to you as soon as possible.
             </p>
-            <Button className="bg-gradient-to-r from-primary to-primary/90 text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-xl hover:scale-105 transition-all duration-300 group rounded-xl px-6">
-              <Mail className="mr-2 w-4 h-4" />
-              Contact Support
+            <Button
+              className="bg-gradient-to-r from-primary to-primary/90 text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-xl hover:scale-105 transition-all duration-300 group rounded-xl px-6"
+              asChild
+            >
+              <a href="mailto:gdg@psu.edu?subject=Solution%20Challenge%20General%20Inquiry">
+                <Mail className="mr-2 w-4 h-4" />
+                Contact Us
+              </a>
             </Button>
           </div>
         </motion.div>

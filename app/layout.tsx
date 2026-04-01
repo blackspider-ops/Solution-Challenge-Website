@@ -1,14 +1,15 @@
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { Toaster } from '@/components/ui/sonner'
 import './globals.css'
 
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Solution Challenge 2026 | Build. Innovate. Impact.',
-  description: 'Join the premier hackathon event where innovators build solutions that matter. Register now for Solution Challenge 2026.',
+  title: 'Solution Challenge | Google Developer Groups at Penn State',
+  description: 'A two-day hackathon organized by Google Developer Groups On Campus at Penn State. April 11–12 at the ECoRE Building, University Park, PA. Winners advance to the North America regional round held by Google.',
   generator: 'v0.app',
   icons: {
     icon: [
@@ -38,6 +39,7 @@ export default function RootLayout({
     <html lang="en">
       <body className="font-sans antialiased">
         {children}
+        <Toaster richColors position="top-right" />
         <Analytics />
       </body>
     </html>

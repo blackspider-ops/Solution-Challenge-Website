@@ -1,8 +1,21 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { ArrowRight, Sparkles, Play } from "lucide-react"
+import { ArrowRight, MapPin, Calendar, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
+
+/** Google "G" logo — four-color SVG */
+function GoogleLogo({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 48 48" className={className} aria-label="Google">
+      <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+      <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+      <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+      <path fill="none" d="M0 0h48v48H0z"/>
+    </svg>
+  )
+}
 
 export function HeroSection() {
   return (
@@ -10,28 +23,24 @@ export function HeroSection() {
       id="home"
       className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 pb-16"
     >
-      {/* Hero-specific overlay for depth */}
+      {/* Depth overlays */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-background to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background/50 to-transparent" />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
-        {/* Badge */}
+
+        {/* GDG Organizer badge */}
         <motion.div
           initial={{ opacity: 0, y: 20, scale: 0.9 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-gradient-to-r from-primary/10 to-chart-2/10 border border-primary/20 mb-10 backdrop-blur-sm shadow-lg shadow-primary/5"
+          className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-gradient-to-r from-primary/10 to-chart-2/10 border border-primary/20 mb-10 backdrop-blur-sm shadow-lg shadow-primary/5"
         >
-          <motion.div
-            animate={{ rotate: [0, 15, -15, 0] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          >
-            <Sparkles className="w-4 h-4 text-primary" />
-          </motion.div>
-          <span className="text-sm font-semibold bg-gradient-to-r from-primary to-chart-2 bg-clip-text text-transparent">
-            Solution Challenge 2026 is Live
+          <GoogleLogo className="w-5 h-5 shrink-0" />
+          <span className="text-sm font-semibold text-foreground">
+            Google Developer Groups On Campus, Penn State
           </span>
         </motion.div>
 
@@ -40,75 +49,110 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-          className="text-5xl sm:text-6xl lg:text-8xl font-bold text-foreground mb-8 tracking-tight"
+          className="text-5xl sm:text-6xl lg:text-8xl font-bold text-foreground mb-6 tracking-tight"
         >
-          <span className="block text-balance">Build Solutions</span>
+          <span className="block text-balance">Solution</span>
           <span className="block mt-2">
             <span className="bg-gradient-to-r from-primary via-chart-5 to-chart-2 bg-clip-text text-transparent">
-              That Matter
+              Challenge
             </span>
           </span>
         </motion.h1>
 
-        {/* Subtext */}
+        {/* Tagline */}
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-          className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-12 leading-relaxed text-pretty"
+          className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 leading-relaxed text-pretty"
         >
-          Join a global community of innovators using technology to address the 
-          world&apos;s most pressing challenges. Build with purpose. Create lasting impact.
+          A thrilling two-day hackathon where you build technology solutions for the world&apos;s
+          most pressing challenges. Winners advance to the{" "}
+          <span className="text-foreground font-medium">North America regional round held by Google.</span>
         </motion.p>
+
+        {/* Event details pill row */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.28, ease: [0.22, 1, 0.36, 1] }}
+          className="flex flex-wrap items-center justify-center gap-3 mb-12 text-sm text-muted-foreground"
+        >
+          <span className="flex items-center gap-1.5 bg-card border border-border rounded-full px-4 py-1.5">
+            <Calendar className="w-3.5 h-3.5 text-primary" />
+            April 11 – 12, 2025
+          </span>
+          <span className="flex items-center gap-1.5 bg-card border border-border rounded-full px-4 py-1.5">
+            <Clock className="w-3.5 h-3.5 text-primary" />
+            7:00 PM – 12:00 PM
+          </span>
+          <span className="flex items-center gap-1.5 bg-card border border-border rounded-full px-4 py-1.5">
+            <MapPin className="w-3.5 h-3.5 text-primary" />
+            ECoRE Building, University Park, PA
+          </span>
+        </motion.div>
 
         {/* CTA Buttons */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.6, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
           className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-5"
         >
           <Button
             size="lg"
             className="relative bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/40 hover:scale-105 transition-all duration-300 group px-8 py-6 text-base font-semibold rounded-xl"
+            asChild
           >
-            <span className="relative z-10 flex items-center">
+            <a href="/register">
               Register Now
               <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
-            </span>
+            </a>
           </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            className="border-2 border-border/60 hover:border-primary/40 hover:bg-primary/5 transition-all duration-300 group px-8 py-6 text-base font-medium rounded-xl backdrop-blur-sm"
+          <a
+            href="mailto:gdg@psu.edu?subject=Solution%20Challenge%20General%20Inquiry"
+            className="inline-flex items-center gap-2 px-8 py-4 text-base font-medium text-muted-foreground border-2 border-border/60 hover:border-primary/40 hover:bg-primary/5 hover:text-foreground transition-all duration-300 rounded-xl backdrop-blur-sm"
           >
-            <Play className="mr-2 w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
-            Watch Video
-          </Button>
+            Contact Us
+          </a>
+        </motion.div>
+
+        {/* Google branding lockup */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          className="mt-16 flex items-center justify-center gap-3 text-sm text-muted-foreground"
+        >
+          <span>Presented by</span>
+          <div className="flex items-center gap-2 bg-card border border-border rounded-xl px-4 py-2 shadow-sm">
+            <GoogleLogo className="w-5 h-5" />
+            <span className="font-semibold text-foreground">Google Developer Groups</span>
+          </div>
         </motion.div>
 
         {/* Stats */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-24 relative"
+          transition={{ duration: 0.7, delay: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          className="mt-16 relative"
         >
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent rounded-3xl" />
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 p-6 md:p-10 rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm shadow-xl shadow-primary/5">
             {[
-              { value: "10K+", label: "Global Participants", accent: "primary" },
-              { value: "150+", label: "Countries Represented", accent: "chart-2" },
-              { value: "$100K", label: "Total Prize Pool", accent: "chart-3" },
-              { value: "48h", label: "Of Innovation", accent: "chart-5" },
+              { value: "17h", label: "Of Hacking" },
+              { value: "6", label: "Challenge Tracks" },
+              { value: "4", label: "Members Per Team" },
+              { value: "🌎", label: "Regional Finals" },
             ].map((stat, index) => (
-              <motion.div 
-                key={index} 
+              <motion.div
+                key={index}
                 className="text-center group cursor-default"
                 whileHover={{ scale: 1.05 }}
                 transition={{ duration: 0.2 }}
               >
-                <div className={`text-4xl sm:text-5xl font-bold bg-gradient-to-br from-${stat.accent} to-${stat.accent}/70 bg-clip-text text-transparent mb-2`}>
+                <div className="text-4xl sm:text-5xl font-bold text-foreground mb-2">
                   {stat.value}
                 </div>
                 <div className="text-sm text-muted-foreground font-medium">{stat.label}</div>
