@@ -10,51 +10,10 @@ export function HeroSection() {
       id="home"
       className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 pb-16"
     >
-      {/* Animated Background */}
+      {/* Hero-specific overlay for depth */}
       <div className="absolute inset-0 -z-10">
-        {/* Animated Gradient Mesh */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-chart-2/5" />
-        
-        {/* Floating Gradient Orbs with Animation */}
-        <motion.div 
-          animate={{ 
-            x: [0, 30, 0],
-            y: [0, -20, 0],
-            scale: [1, 1.1, 1]
-          }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-gradient-to-br from-primary/25 to-primary/5 rounded-full blur-[100px]" 
-        />
-        <motion.div 
-          animate={{ 
-            x: [0, -40, 0],
-            y: [0, 30, 0],
-            scale: [1, 1.15, 1]
-          }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-          className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-gradient-to-br from-chart-2/25 to-chart-2/5 rounded-full blur-[100px]" 
-        />
-        <motion.div 
-          animate={{ 
-            x: [0, 20, 0],
-            y: [0, 40, 0],
-            scale: [1, 1.05, 1]
-          }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-          className="absolute top-1/2 right-1/3 w-[300px] h-[300px] bg-gradient-to-br from-chart-3/20 to-chart-3/5 rounded-full blur-[80px]" 
-        />
-
-        {/* Subtle Grid Pattern */}
-        <div 
-          className="absolute inset-0 opacity-[0.025]"
-          style={{
-            backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)`,
-            backgroundSize: '40px 40px'
-          }}
-        />
-
-        {/* Top Gradient Fade */}
         <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-background to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background/50 to-transparent" />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">

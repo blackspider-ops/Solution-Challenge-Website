@@ -5,10 +5,12 @@ import { TracksSection } from "@/components/tracks-section"
 import { SponsorsSection } from "@/components/sponsors-section"
 import { FAQSection } from "@/components/faq-section"
 import { Footer } from "@/components/footer"
+import { AnimatedBackground } from "@/components/animated-background"
 
 export default function Home() {
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen relative">
+      <AnimatedBackground />
       <Navbar />
       <HeroSection />
       <TimelineSection />
