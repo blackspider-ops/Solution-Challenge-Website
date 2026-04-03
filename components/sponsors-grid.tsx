@@ -121,21 +121,36 @@ export function SponsorsGrid({ sponsors }: SponsorsGridProps) {
                     }`} />
                     
                     <div className="relative z-10 flex flex-col items-center">
-                      <div className={`
-                        rounded-xl flex items-center justify-center mb-2 transition-all duration-300
-                        ${tier === 'platinum' ? 'w-14 h-14 bg-violet-500/10 group-hover:bg-violet-500/20' : ''}
-                        ${tier === 'gold' ? 'w-11 h-11 bg-amber-500/10 group-hover:bg-amber-500/20' : ''}
-                        ${tier === 'silver' ? 'w-9 h-9 bg-slate-500/10 group-hover:bg-slate-500/20' : ''}
-                      `}>
-                        <span className={`
-                          font-bold transition-colors duration-300
-                          ${tier === 'platinum' ? 'text-2xl text-violet-500' : ''}
-                          ${tier === 'gold' ? 'text-xl text-amber-500' : ''}
-                          ${tier === 'silver' ? 'text-lg text-slate-500' : ''}
+                      {sponsor.logoUrl ? (
+                        <div className={`
+                          flex items-center justify-center mb-2 transition-all duration-300
+                          ${tier === 'platinum' ? 'w-28 h-20' : ''}
+                          ${tier === 'gold' ? 'w-24 h-16' : ''}
+                          ${tier === 'silver' ? 'w-20 h-14' : ''}
                         `}>
-                          {sponsor.initial}
-                        </span>
-                      </div>
+                          <img
+                            src={sponsor.logoUrl}
+                            alt={sponsor.name}
+                            className="max-w-full max-h-full object-contain"
+                          />
+                        </div>
+                      ) : (
+                        <div className={`
+                          rounded-xl flex items-center justify-center mb-2 transition-all duration-300
+                          ${tier === 'platinum' ? 'w-14 h-14 bg-violet-500/10 group-hover:bg-violet-500/20' : ''}
+                          ${tier === 'gold' ? 'w-11 h-11 bg-amber-500/10 group-hover:bg-amber-500/20' : ''}
+                          ${tier === 'silver' ? 'w-9 h-9 bg-slate-500/10 group-hover:bg-slate-500/20' : ''}
+                        `}>
+                          <span className={`
+                            font-bold transition-colors duration-300
+                            ${tier === 'platinum' ? 'text-2xl text-violet-500' : ''}
+                            ${tier === 'gold' ? 'text-xl text-amber-500' : ''}
+                            ${tier === 'silver' ? 'text-lg text-slate-500' : ''}
+                          `}>
+                            {sponsor.initial}
+                          </span>
+                        </div>
+                      )}
                       <span className={`
                         font-medium text-muted-foreground group-hover:text-foreground transition-colors text-center px-2
                         ${tier === 'platinum' ? 'text-sm' : 'text-xs'}
