@@ -10,10 +10,10 @@
 // ─── Source of truth ────────────────────────────────────────────────────────
 
 /** April 11, 7:00 PM Eastern */
-export const EVENT_START = new Date("2025-04-11T19:00:00-04:00");
+export const EVENT_START = new Date("2026-04-11T19:00:00-04:00");
 
 /** April 12, 12:00 PM Eastern */
-export const EVENT_END = new Date("2025-04-12T12:00:00-04:00");
+export const EVENT_END = new Date("2026-04-12T12:00:00-04:00");
 
 // ─── Derived milestones ──────────────────────────────────────────────────────
 

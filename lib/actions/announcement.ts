@@ -3,6 +3,7 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { announcementSchema } from "@/lib/schemas/announcement";
+import { sendAnnouncementEmail } from "@/lib/email";
 
 // ─── Create ────────────────────────────────────────────────────────────────
 
@@ -23,6 +24,53 @@ export async function createAnnouncement(
     return { data: { id: announcement.id } };
   } catch {
     return { error: "Failed to create announcement." };
+  }
+}
+
+// ─── Send announcement email ───────────────────────────────────────────────
+
+export async function sendAnnouncementAsEmail(
+  id: string
+): Promise<{ error: string } | { data: { sent: number } }> {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "Not authenticated" };
+  if (session.user.role !== "admin") return { error: "Unauthorized" };
+
+  try {
+    // Get announcement
+    const announcement = await db.announcement.findUnique({
+      where: { id },
+    });
+
+    if (!announcement) return { error: "Announcement not found" };
+
+    // Get all registered users' emails
+    const registrations = await db.registration.findMany({
+      where: { status: "confirmed" },
+      include: { user: { select: { email: true } } },
+    });
+
+    const emails = registrations.map((r) => r.user.email);
+
+    if (emails.length === 0) {
+      return { error: "No registered participants to email" };
+    }
+
+    // Send email
+    const result = await sendAnnouncementEmail(
+      emails,
+      announcement.title,
+      announcement.body
+    );
+
+    if (!result.success) {
+      return { error: result.error || "Failed to send emails" };
+    }
+
+    return { data: { sent: emails.length } };
+  } catch (error) {
+    console.error("Send announcement email error:", error);
+    return { error: "Failed to send announcement email" };
   }
 }
 

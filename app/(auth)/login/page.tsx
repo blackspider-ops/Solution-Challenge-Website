@@ -33,8 +33,8 @@ export default async function LoginPage({
   }
 
   const params = await searchParams;
-  // Use /auth/redirect as default so role-based routing happens after login
-  const callbackUrl = params.callbackUrl ?? "/auth/redirect";
+  // Default to homepage instead of auto-redirecting to dashboard
+  const callbackUrl = params.callbackUrl ?? "/";
   const errorMsg = params.error
     ? (ERROR_MESSAGES[params.error] ?? ERROR_MESSAGES.Default)
     : null;

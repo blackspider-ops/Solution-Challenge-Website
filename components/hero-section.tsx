@@ -80,7 +80,7 @@ export function HeroSection() {
         >
           <span className="flex items-center gap-1.5 bg-card border border-border rounded-full px-4 py-1.5">
             <Calendar className="w-3.5 h-3.5 text-primary" />
-            April 11 – 12, 2025
+            April 11 – 12, 2026
           </span>
           <span className="flex items-center gap-1.5 bg-card border border-border rounded-full px-4 py-1.5">
             <Clock className="w-3.5 h-3.5 text-primary" />

@@ -13,7 +13,8 @@ export default async function RegisterPage({
   searchParams: Promise<{ callbackUrl?: string; error?: string }>;
 }) {
   const params = await searchParams;
-  const callbackUrl = params.callbackUrl ?? "/dashboard";
+  // Default to homepage instead of auto-redirecting to dashboard
+  const callbackUrl = params.callbackUrl ?? "/";
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-background">

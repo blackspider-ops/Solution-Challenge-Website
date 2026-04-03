@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { CheckCircle, Clock, Download } from "lucide-react";
+import { CheckCircle, Clock, Download, Wallet, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface QRTicketProps {
@@ -37,9 +37,35 @@ export function QRTicket({ qrToken, name, email, status, checkedIn, checkedInAt 
     const canvas = canvasRef.current;
     if (!canvas) return;
     const link = document.createElement("a");
-    link.download = `sc2026-ticket-${qrToken.slice(0, 8)}.png`;
+    link.download = `solution-challenge-ticket-${qrToken.slice(0, 8)}.png`;
     link.href = canvas.toDataURL("image/png");
     link.click();
+  }
+
+  function handleAddToWallet() {
+    // Generate wallet pass URL
+    const walletUrl = `/api/wallet/pass?token=${qrToken}`;
+    window.open(walletUrl, "_blank");
+  }
+
+  function handleEmailTicket() {
+    // Trigger email resend
+    fetch("/api/ticket/resend", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          alert("Ticket sent to your email!");
+        } else {
+          alert("Failed to send email. Please try again.");
+        }
+      })
+      .catch(() => {
+        alert("Failed to send email. Please try again.");
+      });
   }
 
   return (
@@ -104,25 +130,56 @@ export function QRTicket({ qrToken, name, email, status, checkedIn, checkedInAt 
           )}
         </div>
 
-        {/* Download */}
+        {/* Actions */}
         {qrReady && (
-          <div className="px-6 pb-6">
+          <div className="px-6 pb-6 space-y-2">
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleDownload}
+                className="gap-2 text-muted-foreground"
+              >
+                <Download className="w-3.5 h-3.5" />
+                Download
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleEmailTicket}
+                className="gap-2 text-muted-foreground"
+              >
+                <Mail className="w-3.5 h-3.5" />
+                Email Me
+              </Button>
+            </div>
             <Button
-              variant="outline"
+              variant="default"
               size="sm"
-              onClick={handleDownload}
-              className="w-full gap-2 text-muted-foreground"
+              onClick={handleAddToWallet}
+              className="w-full gap-2 bg-gradient-to-r from-primary to-primary/90"
             >
-              <Download className="w-3.5 h-3.5" />
-              Save QR code
+              <Wallet className="w-3.5 h-3.5" />
+              Add to Wallet
             </Button>
           </div>
         )}
       </div>
 
-      <p className="text-xs text-center text-muted-foreground mt-4">
-        Show this QR code at the event entrance. Screenshot or download it for offline use.
-      </p>
+      <div className="mt-4 space-y-2">
+        <p className="text-xs text-center text-muted-foreground">
+          Show this QR code at the event entrance. Screenshot or download it for offline use.
+        </p>
+        <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+          <span>Compatible with:</span>
+          <span className="font-medium">Apple Wallet</span>
+          <span>•</span>
+          <span className="font-medium">Google Wallet</span>
+          <span>•</span>
+          <span className="font-medium">Samsung Wallet</span>
+        </div>
+      </div>
     </div>
   );
 }
+
