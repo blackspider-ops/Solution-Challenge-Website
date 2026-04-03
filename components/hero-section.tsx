@@ -167,12 +167,19 @@ export function HeroSection() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1, delay: 1 }}
-        className="absolute bottom-20 md:bottom-32 left-1/2 -translate-x-1/2 z-10"
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 cursor-pointer"
+        onClick={() => {
+          const tracksSection = document.getElementById('tracks');
+          if (tracksSection) {
+            tracksSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }}
       >
-        <motion.div
+        <motion.button
           animate={{ y: [0, 8, 0] }}
           transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-          className="flex flex-col items-center gap-2"
+          className="flex flex-col items-center gap-2 hover:opacity-80 transition-opacity"
+          aria-label="Scroll to tracks section"
         >
           <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Scroll</span>
           <div className="w-6 h-10 border-2 border-muted-foreground/30 rounded-full flex items-start justify-center p-2">
@@ -182,7 +189,7 @@ export function HeroSection() {
               className="w-1.5 h-1.5 bg-primary rounded-full"
             />
           </div>
-        </motion.div>
+        </motion.button>
       </motion.div>
     </section>
   )
