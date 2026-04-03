@@ -44,8 +44,8 @@ export default async function LoginPage({
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <Link href="/">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg shadow-primary/25 mx-auto mb-4">
-              <span className="text-primary-foreground font-bold">SC</span>
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center shadow-lg mx-auto mb-4 border border-primary/20">
+              <img src="/icon.svg" alt="Solution Challenge" className="w-10 h-10" />
             </div>
           </Link>
           <h1 className="text-2xl font-bold text-foreground">Sign in</h1>
