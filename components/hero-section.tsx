@@ -3,6 +3,7 @@
 import { motion } from "framer-motion"
 import { ArrowRight, MapPin, Calendar, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { RegisterDialog } from "@/components/auth/register-dialog"
 
 /** Google "G" logo — four-color SVG */
 function GoogleLogo({ className }: { className?: string }) {
@@ -99,16 +100,15 @@ export function HeroSection() {
           transition={{ duration: 0.6, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
           className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-5"
         >
-          <Button
-            size="lg"
-            className="relative bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/40 hover:scale-105 transition-all duration-300 group px-8 py-6 text-base font-semibold rounded-xl"
-            asChild
-          >
-            <a href="/register">
+          <RegisterDialog>
+            <Button
+              size="lg"
+              className="relative bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/40 hover:scale-105 transition-all duration-300 group px-8 py-6 text-base font-semibold rounded-xl"
+            >
               Register Now
               <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
-            </a>
-          </Button>
+            </Button>
+          </RegisterDialog>
           <a
             href="mailto:gdg@psu.edu?subject=Solution%20Challenge%20General%20Inquiry"
             className="inline-flex items-center gap-2 px-8 py-4 text-base font-medium text-muted-foreground border-2 border-border/60 hover:border-primary/40 hover:bg-primary/5 hover:text-foreground transition-all duration-300 rounded-xl backdrop-blur-sm"

@@ -5,6 +5,7 @@ import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 import { Menu, X, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { RegisterDialog } from "@/components/auth/register-dialog"
 
 const navLinks = [
   { href: "#home", label: "Home" },
@@ -91,12 +92,12 @@ export function Navbar() {
                 Sign in
               </Button>
             </Link>
-            <Link href="/register">
+            <RegisterDialog>
               <Button className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:scale-105 transition-all duration-300 group rounded-xl px-6">
                 Register Now
                 <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </Button>
-            </Link>
+            </RegisterDialog>
           </div>
 
           {/* Mobile Menu Button */}
@@ -147,12 +148,12 @@ export function Navbar() {
                   <Link href="/login" onClick={() => setIsOpen(false)}>
                     <Button variant="outline" className="w-full rounded-xl">Sign in</Button>
                   </Link>
-                  <Link href="/register" onClick={() => setIsOpen(false)}>
+                  <RegisterDialog>
                     <Button className="w-full bg-gradient-to-r from-primary to-primary/90 text-primary-foreground py-6 rounded-xl shadow-lg shadow-primary/25">
                       Register Now
                       <ArrowRight className="ml-2 w-4 h-4" />
                     </Button>
-                  </Link>
+                  </RegisterDialog>
                 </div>
               </motion.div>
             </div>
