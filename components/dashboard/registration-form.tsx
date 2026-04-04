@@ -197,28 +197,40 @@ export function RegistrationForm({
     if (!validateCurrentSection()) return;
 
     startTransition(async () => {
-      // Save all answers to database for the first time
-      const saveResult = await saveFormResponse(answers);
-      if ("error" in saveResult) {
-        toast.error(saveResult.error);
-        return;
-      }
+      try {
+        // Save all answers to database for the first time
+        console.log("Submitting answers:", answers);
+        const saveResult = await saveFormResponse(answers);
+        console.log("Save result:", saveResult);
+        
+        if ("error" in saveResult) {
+          console.error("Save error:", saveResult.error);
+          toast.error(saveResult.error);
+          return;
+        }
 
-      // Mark as completed
-      const submitResult = await submitFormResponse();
-      if ("error" in submitResult) {
-        toast.error(submitResult.error);
-      } else {
-        toast.success("Registration form submitted successfully!");
-        // Clear localStorage after successful submission
-        if (typeof window !== "undefined") {
-          localStorage.removeItem("registration-form-section");
-          localStorage.removeItem("registration-form-answers");
+        // Mark as completed
+        const submitResult = await submitFormResponse();
+        console.log("Submit result:", submitResult);
+        
+        if ("error" in submitResult) {
+          console.error("Submit error:", submitResult.error);
+          toast.error(submitResult.error);
+        } else {
+          toast.success("Registration form submitted successfully!");
+          // Clear localStorage after successful submission
+          if (typeof window !== "undefined") {
+            localStorage.removeItem("registration-form-section");
+            localStorage.removeItem("registration-form-answers");
+          }
+          // Notify parent component
+          if (onComplete) {
+            onComplete();
+          }
         }
-        // Notify parent component
-        if (onComplete) {
-          onComplete();
-        }
+      } catch (error) {
+        console.error("Unexpected error:", error);
+        toast.error("An unexpected error occurred");
       }
     });
   }
