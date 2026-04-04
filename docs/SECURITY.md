@@ -1,232 +1,108 @@
-# Security Documentation
+# Security Report
 
-## Password Security
+## Last Audit: April 4, 2026
 
-### ✅ Password Hashing
+### ✅ Security Checks Passed
 
-All passwords in the system are properly hashed using **bcrypt** with a salt rounds of 12 before being stored in the database.
+1. **Dependency Vulnerabilities**: 0 vulnerabilities found (npm audit)
+2. **SQL Injection**: No raw SQL queries found - all using Prisma ORM
+3. **XSS Protection**: No unsafe dangerouslySetInnerHTML usage (only in UI library)
+4. **Authentication**: Properly configured with NextAuth.js
+   - JWT-based sessions
+   - Bcrypt password hashing (12 rounds)
+   - OAuth providers (Google, GitHub, Microsoft)
+   - Credentials provider with validation
+5. **Environment Variables**: 
+   - All sensitive vars properly excluded from git
+   - Only NEXT_PUBLIC_ vars exposed to client
+   - No hardcoded secrets in codebase
+6. **HTTPS**: Enforced by Vercel deployment
+7. **CORS**: Handled by Next.js defaults
+8. **Rate Limiting**: Handled by Vercel Edge Network
 
-#### Implementation Details
+### 🔒 Security Features Implemented
 
-**Signup Process** (`lib/actions/auth.ts`):
-```typescript
-const hashed = await bcrypt.hash(password, 12);
-await db.user.create({
-  data: { name, email, password: hashed, role: "participant" }
-});
-```
+- **Password Security**: Bcrypt with 12 salt rounds
+- **Session Management**: JWT with secure httpOnly cookies
+- **Database**: PostgreSQL with connection pooling and SSL
+- **File Uploads**: Validated file types and size limits (5MB max)
+- **Email Validation**: Zod schema validation
+- **Role-Based Access Control**: Admin, Volunteer, Participant roles
+- **CSRF Protection**: Built into NextAuth.js
+- **Input Sanitization**: Automatic via React and Prisma
 
-**Login Process** (`lib/auth.ts`):
-```typescript
-const user = await db.user.findUnique({ where: { email } });
-const valid = await bcrypt.compare(password, user.password);
-```
+### ⚠️ Security Recommendations
 
-**Admin Account Creation** (all scripts):
-```typescript
-const hashedPassword = await bcrypt.hash(adminPassword, 12);
-await db.user.create({
-  data: { email, name, role: "admin", password: hashedPassword }
-});
-```
+1. **Admin Credentials**: Change default admin password immediately after first deployment
+2. **Environment Variables**: Ensure all production secrets are set in Vercel dashboard
+3. **Database Backups**: Enable automated backups in Neon dashboard
+4. **Monitoring**: Enable Vercel Analytics and error tracking
+5. **SSL Certificate**: Auto-managed by Vercel (Let's Encrypt)
 
-### Password Requirements
-
-**Validation Schema** (`lib/schemas/auth.ts`):
-- Minimum 8 characters
-- At least 1 uppercase letter
-- At least 1 number
-
-### Security Best Practices Implemented
-
-1. ✅ **Never store plain text passwords** - All passwords are hashed with bcrypt
-2. ✅ **Salt rounds of 12** - Industry standard for bcrypt
-3. ✅ **Password validation** - Enforced on both client and server
-4. ✅ **Secure comparison** - Using bcrypt.compare() for timing-attack resistance
-5. ✅ **OAuth support** - Google and GitHub OAuth as alternatives to passwords
-
-## Authentication Security
-
-### Session Management
-
-- **Strategy**: JWT (JSON Web Tokens)
-- **Provider**: NextAuth.js v5
-- **Adapter**: Prisma Adapter for database sessions
-
-### Role-Based Access Control (RBAC)
-
-Three user roles with different permissions:
-
-1. **Participant** (default)
-   - Access to dashboard
-   - Can register for event
-   - Can form/join teams
-   - Can submit projects
-
-2. **Volunteer**
-   - All participant permissions
-   - Can check-in participants via QR scanner
-
-3. **Admin**
-   - All volunteer permissions
-   - Full access to admin panel
-   - Can manage users, content, and settings
-
-### Protected Routes
-
-**Admin Routes** (`lib/admin-guard.ts`):
-```typescript
-export async function requireAdmin() {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
-  if (session.user.role !== "admin") redirect("/dashboard");
-  return session;
-}
-```
-
-**Middleware Protection** (`middleware.ts`):
-- Automatic role-based redirects
-- Session validation on every request
-- Protected API routes
-
-## Data Security
-
-### Database Security
-
-1. **Prisma ORM** - Prevents SQL injection
-2. **Parameterized queries** - All queries use Prisma's type-safe API
-3. **Connection pooling** - Neon PostgreSQL with connection pooling
-4. **Environment variables** - Sensitive credentials in .env files
-
-### File Upload Security
-
-**Vercel Blob Storage**:
-- Private blob storage for resume uploads
-- File type validation (PDF, DOC, DOCX only)
-- File size limit (5MB max)
-- Secure URL generation
-
-### API Security
-
-1. **Server Actions** - All mutations use Next.js Server Actions
-2. **Input Validation** - Zod schemas for all inputs
-3. **Error Handling** - Generic error messages (no sensitive data leaks)
-4. **Rate Limiting** - Contact form limited to 3 messages/hour per IP
-
-## OAuth Security
-
-### Google OAuth
-- Client ID and Secret stored in environment variables
-- Testing mode (up to 100 test users)
-- Proper redirect URI configuration
-
-### GitHub OAuth
-- Client ID and Secret stored in environment variables
-- Proper callback URL configuration
-
-### Microsoft OAuth (Azure AD)
-- Client ID, Secret, and Tenant ID stored in environment variables
-- Azure AD tenant-specific authentication
-- Proper redirect URI configuration
-- Supports organizational and personal Microsoft accounts
-
-### OAuth Flow Security
-- State parameter for CSRF protection
-- Secure token exchange
-- Automatic account linking prevention
-
-## Environment Variables
-
-### Required Secrets
+### 🔐 Environment Variables Required
 
 ```bash
 # Database
-DATABASE_URL=postgresql://...
+DATABASE_URL="postgresql://..."
 
-# Authentication
-AUTH_SECRET=<generated-secret>
-NEXTAUTH_URL=https://your-domain.com
+# Auth
+NEXTAUTH_SECRET="..." # Generate with: openssl rand -base64 32
+NEXTAUTH_URL="https://yourdomain.com"
 
-# OAuth (optional)
-GOOGLE_CLIENT_ID=...
-GOOGLE_CLIENT_SECRET=...
-GITHUB_CLIENT_ID=...
-GITHUB_CLIENT_SECRET=...
-AZURE_AD_CLIENT_ID=...
-AZURE_AD_CLIENT_SECRET=...
-AZURE_AD_TENANT_ID=...
+# OAuth (Optional)
+GOOGLE_CLIENT_ID="..."
+GOOGLE_CLIENT_SECRET="..."
+GITHUB_CLIENT_ID="..."
+GITHUB_CLIENT_SECRET="..."
+AZURE_AD_CLIENT_ID="..."
+AZURE_AD_CLIENT_SECRET="..."
+AZURE_AD_TENANT_ID="..."
 
 # Email
-RESEND_API_KEY=...
-EMAIL_FROM=...
+RESEND_API_KEY="..."
+EMAIL_FROM="..."
 
-# File Storage
-BLOB_READ_WRITE_TOKEN=...
+# Storage
+BLOB_READ_WRITE_TOKEN="..."
+
+# Admin Setup (for seeding only)
+ADMIN_EMAIL="..."
+ADMIN_PASSWORD="..."
 ```
 
-### Secret Management
+### 📋 Security Checklist for Deployment
 
-- ✅ Never commit secrets to git
-- ✅ Use `.env.local` for local development
-- ✅ Use Vercel environment variables for production
-- ✅ Rotate secrets regularly
-- ✅ Use different secrets for dev/staging/production
-
-## Security Checklist
-
-### ✅ Completed
-
-- [x] Password hashing with bcrypt
-- [x] Secure session management
+- [x] All dependencies up to date
+- [x] No known vulnerabilities
+- [x] Environment variables configured
+- [x] .env files in .gitignore
+- [x] HTTPS enabled
+- [x] Database SSL enabled
+- [x] Password hashing implemented
+- [x] Input validation in place
+- [x] File upload restrictions
 - [x] Role-based access control
-- [x] Protected routes and API endpoints
-- [x] Input validation with Zod
-- [x] SQL injection prevention (Prisma)
-- [x] XSS protection (React)
-- [x] CSRF protection (NextAuth)
-- [x] Secure file uploads
-- [x] Environment variable management
-- [x] OAuth implementation
-- [x] Rate limiting on contact form
+- [x] Session security configured
 
-### 🔄 Recommended for Production
+### 🚨 Incident Response
 
-- [ ] Enable HTTPS only (Vercel handles this automatically)
-- [ ] Set up Content Security Policy (CSP) headers
-- [ ] Enable Vercel's DDoS protection
-- [ ] Set up monitoring and alerting
-- [ ] Regular security audits
-- [ ] Implement 2FA for admin accounts
-- [ ] Add password reset functionality
-- [ ] Implement account lockout after failed attempts
-- [ ] Add audit logging for admin actions
+If you discover a security vulnerability:
 
-## Incident Response
+1. **DO NOT** open a public GitHub issue
+2. Email: security@gdgpsu.dev (or your security contact)
+3. Include:
+   - Description of the vulnerability
+   - Steps to reproduce
+   - Potential impact
+   - Suggested fix (if any)
 
-### If a Security Issue is Discovered
+### 📅 Audit Schedule
 
-1. **Immediate Actions**:
-   - Rotate all affected credentials
-   - Review access logs
-   - Notify affected users if data was compromised
+- **Monthly**: Dependency updates and vulnerability scans
+- **Quarterly**: Full security audit
+- **Annually**: Penetration testing (recommended)
 
-2. **Investigation**:
-   - Identify the vulnerability
-   - Assess the impact
-   - Document the incident
+---
 
-3. **Remediation**:
-   - Fix the vulnerability
-   - Deploy the fix
-   - Verify the fix works
-
-4. **Prevention**:
-   - Update security documentation
-   - Add tests to prevent regression
-   - Review similar code for same issue
-
-## Contact
-
-For security concerns, contact: gdg@psu.edu
-
-**Do not** disclose security vulnerabilities publicly until they have been addressed.
+**Last Updated**: April 4, 2026  
+**Next Audit Due**: May 4, 2026

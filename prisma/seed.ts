@@ -8,8 +8,13 @@ async function main() {
 
   // ── Admin account ────────────────────────────────────────────────────────
   // Credentials are hashed — never stored in plaintext
-  const adminEmail = "rva5573@psu.edu";
-  const adminPassword = "RajAwinashe@17";
+  const adminEmail = process.env.ADMIN_EMAIL || "admin@example.com";
+  const adminPassword = process.env.ADMIN_PASSWORD || "ChangeMe123!";
+  
+  if (!process.env.ADMIN_EMAIL || !process.env.ADMIN_PASSWORD) {
+    console.warn("⚠️  WARNING: Using default credentials. Set ADMIN_EMAIL and ADMIN_PASSWORD environment variables.");
+  }
+  
   const hashedPassword = await bcrypt.hash(adminPassword, 12);
 
   await db.user.upsert({
