@@ -32,12 +32,28 @@ html {
 /* Prevent flash of unstyled content */
 body {
   opacity: 1;
-  transition: opacity 0.1s ease-in;
 }
 
 /* Prevent layout shift from scrollbar */
 html {
   overflow-y: scroll;
+}
+
+/* Disable animations on mobile to prevent jitter */
+@media (max-width: 768px) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    transition-duration: 0.15s !important;
+  }
+  
+  /* Keep essential animations */
+  .animate-spin,
+  .animate-pulse {
+    animation-duration: 1s !important;
+  }
 }
 
 :root {

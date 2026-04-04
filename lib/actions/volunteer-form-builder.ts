@@ -252,6 +252,12 @@ export async function submitVolunteerFormResponse() {
     });
 
     revalidatePath("/dashboard");
+    revalidatePath("/volunteer/checkin");
+    revalidatePath("/admin/volunteers");
+    
+    // Add a small delay to allow database propagation
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
     return { data: true };
   } catch (error) {
     console.error("Submit volunteer form response error:", error);

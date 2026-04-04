@@ -27,6 +27,10 @@ export function HeroSection() {
     setMounted(true)
   }, [])
 
+  // Disable animations on mobile
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+  const shouldAnimate = !isMobile
+
   return (
     <section
       id="home"
@@ -42,9 +46,9 @@ export function HeroSection() {
 
         {/* GDG Organizer badge */}
         <motion.div
-          initial={{ opacity: 0, y: 20, scale: 0.9 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          initial={shouldAnimate ? { opacity: 0, y: 20 } : false}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
           className="inline-flex items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2 sm:py-2.5 rounded-full bg-gradient-to-r from-primary/10 to-chart-2/10 border border-primary/20 mb-6 sm:mb-10 backdrop-blur-sm shadow-lg shadow-primary/5"
         >
           <GoogleLogo className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
@@ -56,9 +60,9 @@ export function HeroSection() {
 
         {/* Headline */}
         <motion.h1
-          initial={{ opacity: 0, y: 30 }}
+          initial={shouldAnimate ? { opacity: 0, y: 20 } : false}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.3, delay: shouldAnimate ? 0.1 : 0 }}
           className="text-4xl sm:text-6xl lg:text-8xl font-bold text-foreground mb-4 sm:mb-6 tracking-tight leading-tight"
         >
           <span className="block">Solution</span>
@@ -71,9 +75,9 @@ export function HeroSection() {
 
         {/* Tagline */}
         <motion.p
-          initial={{ opacity: 0, y: 20 }}
+          initial={shouldAnimate ? { opacity: 0, y: 20 } : false}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.3, delay: shouldAnimate ? 0.15 : 0 }}
           className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto mb-6 sm:mb-8 leading-relaxed px-2"
         >
           A thrilling two-day hackathon where you build technology solutions for the world&apos;s
@@ -83,9 +87,9 @@ export function HeroSection() {
 
         {/* Event details pill row */}
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={shouldAnimate ? { opacity: 0, y: 16 } : false}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.3, delay: shouldAnimate ? 0.2 : 0 }}
           className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-2 sm:gap-3 mb-8 sm:mb-12 text-xs sm:text-sm text-muted-foreground"
         >
           <span className="flex items-center gap-1.5 bg-card border border-border rounded-full px-3 sm:px-4 py-1.5 whitespace-nowrap">
@@ -106,9 +110,9 @@ export function HeroSection() {
 
         {/* CTA Buttons */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={shouldAnimate ? { opacity: 0, y: 20 } : false}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.3, delay: shouldAnimate ? 0.25 : 0 }}
           className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-5 max-w-md sm:max-w-none mx-auto"
           suppressHydrationWarning
         >
@@ -118,26 +122,26 @@ export function HeroSection() {
             <Link href="/dashboard" className="w-full sm:w-auto">
               <Button
                 size="lg"
-                className="w-full sm:w-auto relative bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/40 active:scale-95 sm:hover:scale-105 transition-all duration-300 group px-6 sm:px-8 py-5 sm:py-6 text-sm sm:text-base font-semibold rounded-xl"
+                className="w-full sm:w-auto relative bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/40 active:scale-95 sm:hover:scale-105 transition-all duration-200 group px-6 sm:px-8 py-5 sm:py-6 text-sm sm:text-base font-semibold rounded-xl"
               >
                 Go to Dashboard
-                <ArrowRight className="ml-2 w-4 sm:w-5 h-4 sm:h-5 group-hover:translate-x-1 transition-transform duration-300" />
+                <ArrowRight className="ml-2 w-4 sm:w-5 h-4 sm:h-5 group-hover:translate-x-1 transition-transform duration-200" />
               </Button>
             </Link>
           ) : (
             <RegisterDialog>
               <Button
                 size="lg"
-                className="w-full sm:w-auto relative bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/40 active:scale-95 sm:hover:scale-105 transition-all duration-300 group px-6 sm:px-8 py-5 sm:py-6 text-sm sm:text-base font-semibold rounded-xl"
+                className="w-full sm:w-auto relative bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/40 active:scale-95 sm:hover:scale-105 transition-all duration-200 group px-6 sm:px-8 py-5 sm:py-6 text-sm sm:text-base font-semibold rounded-xl"
               >
                 Register Now
-                <ArrowRight className="ml-2 w-4 sm:w-5 h-4 sm:h-5 group-hover:translate-x-1 transition-transform duration-300" />
+                <ArrowRight className="ml-2 w-4 sm:w-5 h-4 sm:h-5 group-hover:translate-x-1 transition-transform duration-200" />
               </Button>
             </RegisterDialog>
           )}
           <a
             href="#contact"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-4 text-sm sm:text-base font-medium text-muted-foreground border-2 border-border/60 hover:border-primary/40 hover:bg-primary/5 hover:text-foreground active:scale-95 transition-all duration-300 rounded-xl backdrop-blur-sm"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-4 text-sm sm:text-base font-medium text-muted-foreground border-2 border-border/60 hover:border-primary/40 hover:bg-primary/5 hover:text-foreground active:scale-95 transition-all duration-200 rounded-xl backdrop-blur-sm"
           >
             Contact Us
           </a>
@@ -145,9 +149,9 @@ export function HeroSection() {
 
         {/* Google branding lockup */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={shouldAnimate ? { opacity: 0, y: 20 } : false}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.3, delay: shouldAnimate ? 0.35 : 0 }}
           className="mt-12 sm:mt-16 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground"
         >
           <span>Presented by</span>
@@ -162,9 +166,9 @@ export function HeroSection() {
 
         {/* Stats */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={shouldAnimate ? { opacity: 0, y: 20 } : false}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.3, delay: shouldAnimate ? 0.4 : 0 }}
           className="mt-12 sm:mt-16 relative"
         >
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent rounded-2xl sm:rounded-3xl" />
@@ -175,51 +179,51 @@ export function HeroSection() {
               { value: "4", label: "Members Per Team" },
               { value: "🌎", label: "Regional Finals" },
             ].map((stat, index) => (
-              <motion.div
+              <div
                 key={index}
-                className="text-center group cursor-default"
-                whileHover={{ scale: 1.05 }}
-                transition={{ duration: 0.2 }}
+                className="text-center"
               >
                 <div className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-1 sm:mb-2">
                   {stat.value}
                 </div>
                 <div className="text-xs sm:text-sm text-muted-foreground font-medium">{stat.label}</div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </motion.div>
       </div>
 
       {/* Scroll Indicator - Hidden on mobile */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1, delay: 1 }}
-        className="hidden sm:block absolute bottom-8 left-1/2 -translate-x-1/2 z-10 cursor-pointer"
-        onClick={() => {
-          const tracksSection = document.getElementById('tracks');
-          if (tracksSection) {
-            tracksSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
-        }}
-      >
-        <motion.button
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-          className="flex flex-col items-center gap-2 hover:opacity-80 transition-opacity"
-          aria-label="Scroll to tracks section"
+      {shouldAnimate && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1, delay: 1 }}
+          className="hidden sm:block absolute bottom-8 left-1/2 -translate-x-1/2 z-10 cursor-pointer"
+          onClick={() => {
+            const tracksSection = document.getElementById('tracks');
+            if (tracksSection) {
+              tracksSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }}
         >
-          <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Scroll</span>
-          <div className="w-6 h-10 border-2 border-muted-foreground/30 rounded-full flex items-start justify-center p-2">
-            <motion.div
-              animate={{ y: [0, 12, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-              className="w-1.5 h-1.5 bg-primary rounded-full"
-            />
-          </div>
-        </motion.button>
-      </motion.div>
+          <motion.button
+            animate={{ y: [0, 8, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+            className="flex flex-col items-center gap-2 hover:opacity-80 transition-opacity"
+            aria-label="Scroll to tracks section"
+          >
+            <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Scroll</span>
+            <div className="w-6 h-10 border-2 border-muted-foreground/30 rounded-full flex items-start justify-center p-2">
+              <motion.div
+                animate={{ y: [0, 12, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                className="w-1.5 h-1.5 bg-primary rounded-full"
+              />
+            </div>
+          </motion.button>
+        </motion.div>
+      )}
     </section>
   )
 }

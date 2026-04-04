@@ -67,6 +67,9 @@ function CameraScanner({ onScan, active }: CameraScannerProps) {
   const readerRef = useRef<import("@zxing/browser").BrowserQRCodeReader | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [scanning, setScanning] = useState(false);
+  const scanningRef = useRef(false);
+  const lastScanRef = useRef<string>("");
+  const lastScanTimeRef = useRef<number>(0);
 
   const startCamera = useCallback(async () => {
     setError(null);
@@ -84,20 +87,29 @@ function CameraScanner({ onScan, active }: CameraScannerProps) {
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
         setScanning(true);
+        scanningRef.current = true;
 
         // Continuously decode frames with proper loop
-        let isScanning = true;
         const decode = async (): Promise<void> => {
-          if (!isScanning || !videoRef.current || !readerRef.current || !streamRef.current?.active) {
+          if (!scanningRef.current || !videoRef.current || !readerRef.current || !streamRef.current?.active) {
             return;
           }
           
           try {
             const result = await readerRef.current.decodeOnceFromVideoElement(videoRef.current);
             if (result?.getText()) {
-              onScan(result.getText());
-              // Continue scanning after a brief pause
-              await new Promise(resolve => setTimeout(resolve, 2000));
+              const scannedText = result.getText();
+              const now = Date.now();
+              
+              // Prevent duplicate scans within 3 seconds
+              if (scannedText !== lastScanRef.current || now - lastScanTimeRef.current > 3000) {
+                lastScanRef.current = scannedText;
+                lastScanTimeRef.current = now;
+                onScan(scannedText);
+              }
+              
+              // Continue scanning after a pause
+              await new Promise(resolve => setTimeout(resolve, 2500));
               return decode();
             }
           } catch {
@@ -105,28 +117,26 @@ function CameraScanner({ onScan, active }: CameraScannerProps) {
           }
           
           // Continue scanning immediately if no QR found or error
-          if (streamRef.current?.active) {
-            await new Promise(resolve => setTimeout(resolve, 100));
+          if (scanningRef.current && streamRef.current?.active) {
+            await new Promise(resolve => setTimeout(resolve, 150));
             return decode();
           }
         };
         
         decode();
-        
-        // Cleanup function to stop scanning loop
-        return () => {
-          isScanning = false;
-        };
       }
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Camera access denied";
       setError(msg.includes("Permission") || msg.includes("NotAllowed")
         ? "Camera permission denied. Allow camera access and try again."
         : "Could not start camera. Try manual input instead.");
+      setScanning(false);
+      scanningRef.current = false;
     }
   }, [onScan]);
 
   const stopCamera = useCallback(() => {
+    scanningRef.current = false;
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
     readerRef.current = null;
@@ -184,10 +194,17 @@ function CameraScanner({ onScan, active }: CameraScannerProps) {
 export function CheckInScanner() {
   const [result, setResult] = useState<CheckInResult | null>(null);
   const [isPending, startTransition] = useTransition();
+  const processingRef = useRef(false);
+  const lastTokenRef = useRef<string>("");
 
   function processToken(raw: string) {
     const trimmed = raw.trim();
-    if (!trimmed) return;
+    if (!trimmed || processingRef.current) return;
+    
+    // Prevent duplicate processing
+    if (trimmed === lastTokenRef.current) return;
+    lastTokenRef.current = trimmed;
+    processingRef.current = true;
 
     startTransition(async () => {
       try {
@@ -196,13 +213,16 @@ export function CheckInScanner() {
       } catch {
         setResult({ status: "invalid" });
         toast.error("Network error — please try again");
+      } finally {
+        // Allow new scans after 2 seconds
+        setTimeout(() => {
+          processingRef.current = false;
+        }, 2000);
       }
     });
   }
 
   function handleCameraScan(scanned: string) {
-    // Avoid processing the same token twice in quick succession
-    if (isPending) return;
     processToken(scanned);
   }
 
