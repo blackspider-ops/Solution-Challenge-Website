@@ -23,7 +23,7 @@ const ERROR_MESSAGES: Record<string, string> = {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ callbackUrl?: string; error?: string }>;
+  searchParams: Promise<{ callbackUrl?: string; error?: string; email?: string }>;
 }) {
   // If already logged in, redirect based on role
   const session = await auth();
@@ -38,6 +38,7 @@ export default async function LoginPage({
   const errorMsg = params.error
     ? (ERROR_MESSAGES[params.error] ?? ERROR_MESSAGES.Default)
     : null;
+  const emailValue = params.email ?? "";
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-background">
@@ -73,7 +74,8 @@ export default async function LoginPage({
                 });
               } catch (e) {
                 if (e instanceof AuthError) {
-                  redirect(`/login?error=${e.type}&callbackUrl=${callbackUrl}`);
+                  const email = formData.get("email");
+                  redirect(`/login?error=${e.type}&callbackUrl=${callbackUrl}&email=${encodeURIComponent(email as string)}`);
                 }
                 throw e;
               }
@@ -89,6 +91,7 @@ export default async function LoginPage({
                 placeholder="you@example.com"
                 required
                 autoComplete="email"
+                defaultValue={emailValue}
               />
             </div>
             <div className="space-y-1.5">
