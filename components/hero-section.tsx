@@ -87,7 +87,7 @@ export function HeroSection() {
           </span>
           <span className="flex items-center gap-1.5 bg-card border border-border rounded-full px-4 py-1.5">
             <Clock className="w-3.5 h-3.5 text-primary" />
-            7:00 PM – 12:00 PM
+            April 11, 7:00 PM – April 12, 12:00 PM (Noon)
           </span>
           <span className="flex items-center gap-1.5 bg-card border border-border rounded-full px-4 py-1.5">
             <MapPin className="w-3.5 h-3.5 text-primary" />

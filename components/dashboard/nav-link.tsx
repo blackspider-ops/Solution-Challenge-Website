@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, Upload, QrCode, Megaphone, Shield } from "lucide-react";
+import { LayoutDashboard, Users, Upload, QrCode, Megaphone, Shield, UserCheck } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -56,6 +56,7 @@ function NavLinkItem({ href, icon: Icon, children, badge, highlight }: NavLinkPr
 /** Renders the full dashboard nav — owns navItems internally, no server→client prop passing */
 export function DashboardNav({ announcementCount, userRole }: { announcementCount: number; userRole?: string }) {
   const isAdmin = userRole === "admin";
+  const isVolunteer = userRole === "volunteer" || userRole === "admin";
 
   return (
     <>
@@ -71,6 +72,19 @@ export function DashboardNav({ announcementCount, userRole }: { announcementCoun
           {item.label}
         </NavLinkItem>
       ))}
+      
+      {isVolunteer && (
+        <>
+          <div className="my-2 border-t border-border" />
+          <Link
+            href="/volunteer/checkin"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors bg-gradient-to-r from-blue-500/10 to-blue-600/10 text-blue-600 hover:from-blue-500/20 hover:to-blue-600/20 border border-blue-500/20"
+          >
+            <UserCheck className="w-4 h-4 shrink-0" />
+            <span className="flex-1">Volunteer Panel</span>
+          </Link>
+        </>
+      )}
       
       {isAdmin && (
         <>

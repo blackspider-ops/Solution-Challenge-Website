@@ -61,7 +61,7 @@ function generateTicketEmailHTML(name: string, email: string, qrToken: string): 
                           <p style="margin: 0 0 10px 0; font-size: 14px; font-weight: bold; color: #1e40af;">📅 Event Details</p>
                           <p style="margin: 0; font-size: 14px; color: #1e3a8a; line-height: 1.8;">
                             <strong>Date:</strong> April 11-12, 2026<br>
-                            <strong>Time:</strong> 7:00 PM - 12:00 PM<br>
+                            <strong>Time:</strong> April 11, 7:00 PM – April 12, 12:00 PM (Noon)<br>
                             <strong>Location:</strong> ECoRE Building, University Park, PA<br>
                             <strong>Organizer:</strong> Google Developer Groups at Penn State
                           </p>
@@ -73,9 +73,9 @@ function generateTicketEmailHTML(name: string, email: string, qrToken: string): 
                     <div style="margin: 30px 0; padding: 20px; background-color: #f0fdf4; border-radius: 8px; border: 1px solid #86efac;">
                       <p style="margin: 0 0 10px 0; font-size: 14px; font-weight: bold; color: #166534;">✓ What to do next:</p>
                       <ol style="margin: 0; padding-left: 20px; font-size: 14px; color: #166534; line-height: 1.8;">
-                        <li>Save this email or screenshot the QR code</li>
+                        <li>Print this ticket or save the QR code to your device</li>
                         <li>Show it at the event entrance on April 11</li>
-                        <li>Add to your digital wallet for easy access</li>
+                        <li>Keep this email for reference</li>
                       </ol>
                     </div>
                     
@@ -98,18 +98,7 @@ function generateTicketEmailHTML(name: string, email: string, qrToken: string): 
                     <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
                       <tr>
                         <td align="center">
-                          <table cellpadding="0" cellspacing="0">
-                            <tr>
-                              <td align="center" style="padding-bottom: 10px;">
-                                <a href="${ticketUrl}" style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">View Ticket Online</a>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td align="center">
-                                <a href="${BASE_URL}/api/wallet/pass?token=${qrToken}" style="display: inline-block; padding: 14px 32px; background-color: #000000; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">📱 Add to Wallet</a>
-                              </td>
-                            </tr>
-                          </table>
+                          <a href="${ticketUrl}" style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">View Ticket Online</a>
                         </td>
                       </tr>
                     </table>
