@@ -4,10 +4,8 @@
  * 
  * Usage: npx tsx scripts/create-production-admin.ts
  */
-import { PrismaClient } from "@prisma/client";
+import { db } from "../lib/db";
 import bcrypt from "bcryptjs";
-
-const prisma = new PrismaClient();
 
 async function main() {
   const adminEmail = "rva5573@psu.edu";
@@ -17,13 +15,13 @@ async function main() {
   console.log("🔧 Creating admin account...");
   console.log(`Email: ${adminEmail}`);
 
-  const existing = await prisma.user.findUnique({ 
+  const existing = await db.user.findUnique({ 
     where: { email: adminEmail } 
   });
 
   if (existing) {
     // Update existing user to admin
-    await prisma.user.update({
+    await db.user.update({
       where: { email: adminEmail },
       data: { 
         role: "admin", 
@@ -34,7 +32,7 @@ async function main() {
     console.log(`✅ Updated ${adminEmail} to admin with new password`);
   } else {
     // Create new admin user
-    await prisma.user.create({
+    await db.user.create({
       data: {
         email: adminEmail,
         name: "GDG Admin",
@@ -56,4 +54,4 @@ main()
     console.error("❌ Error:", e); 
     process.exit(1); 
   })
-  .finally(() => prisma.$disconnect());
+  .finally(() => process.exit(0));
