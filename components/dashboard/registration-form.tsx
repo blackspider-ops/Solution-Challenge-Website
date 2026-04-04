@@ -278,9 +278,11 @@ export function RegistrationForm({
               // Check if this field was autofilled
               const isNameField = question.label.toLowerCase().includes("full name") || 
                                  question.label.toLowerCase() === "name";
-              const isEmailField = question.type === "email" || 
-                                  question.label.toLowerCase().includes("email");
-              const isAutofilled = Boolean((isNameField && userName) || (isEmailField && userEmail));
+              // Only autofill the main email field, not team members email
+              const isMainEmailField = question.type === "email" || 
+                                      (question.label.toLowerCase().includes("email") && 
+                                       !question.label.toLowerCase().includes("team"));
+              const isAutofilled = Boolean((isNameField && userName) || (isMainEmailField && userEmail));
               
               return (
                 <QuestionField
