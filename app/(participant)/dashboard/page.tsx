@@ -99,7 +99,6 @@ export default async function DashboardPage() {
 
       {/* Volunteer Registration CTA */}
       {(!volunteerRegistration || !volunteerRegistration.completed) && 
-       volunteerFormSections.length > 0 && 
        session.user.role !== "admin" && 
        session.user.role !== "volunteer" && (
         <div className="rounded-2xl border-2 border-dashed border-blue-500/30 bg-blue-500/5 p-8 text-center">
