@@ -296,27 +296,53 @@ export function FormResponses() {
                           </div>
 
                           <div className="space-y-4">
-                            {response.answers.map((answer) => (
-                              <div key={answer.id} className="p-4 rounded-lg border bg-card">
-                                <p className="font-medium mb-2">{answer.question.label}</p>
-                                <p className="text-muted-foreground whitespace-pre-wrap">
-                                  {(() => {
-                                    try {
-                                      const parsed = JSON.parse(answer.value);
-                                      if (Array.isArray(parsed)) {
-                                        return parsed.join(", ");
-                                      }
-                                      if (typeof parsed === "object") {
-                                        return JSON.stringify(parsed, null, 2);
-                                      }
-                                      return answer.value || "No answer provided";
-                                    } catch {
-                                      return answer.value || "No answer provided";
-                                    }
-                                  })()}
-                                </p>
-                              </div>
-                            ))}
+                            {response.answers.map((answer) => {
+                              // Check if this is a file upload (resume)
+                              let displayValue = answer.value || "No answer provided";
+                              let isFile = false;
+                              let fileData: { url?: string; name?: string; type?: string } = {};
+
+                              try {
+                                const parsed = JSON.parse(answer.value);
+                                
+                                // Check if it's a file object
+                                if (parsed && typeof parsed === "object" && parsed.url) {
+                                  isFile = true;
+                                  fileData = parsed;
+                                  displayValue = parsed.name || "File";
+                                } else if (Array.isArray(parsed)) {
+                                  displayValue = parsed.join(", ");
+                                } else if (typeof parsed === "object") {
+                                  displayValue = JSON.stringify(parsed, null, 2);
+                                }
+                              } catch {
+                                // Not JSON, use as-is
+                              }
+
+                              return (
+                                <div key={answer.id} className="p-4 rounded-lg border bg-card">
+                                  <p className="font-medium mb-2">{answer.question.label}</p>
+                                  {isFile && fileData.url ? (
+                                    <a
+                                      href={fileData.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary font-medium transition-colors"
+                                    >
+                                      <FileText className="w-4 h-4" />
+                                      {fileData.name || "View File"}
+                                      <span className="text-xs opacity-75">
+                                        ({fileData.type || "PDF"})
+                                      </span>
+                                    </a>
+                                  ) : (
+                                    <p className="text-muted-foreground whitespace-pre-wrap">
+                                      {displayValue}
+                                    </p>
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
                       </DialogContent>
