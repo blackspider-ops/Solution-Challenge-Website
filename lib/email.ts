@@ -360,3 +360,119 @@ export async function sendFormSubmissionNotification(
     return { success: false, error: "Failed to send notification" };
   }
 }
+
+/**
+ * Send password reset confirmation email
+ */
+export async function sendPasswordResetConfirmationEmail(
+  email: string,
+  name: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    if (!resend || !process.env.RESEND_API_KEY) {
+      console.warn("RESEND_API_KEY not set - skipping email");
+      return { success: false, error: "Email service not configured" };
+    }
+
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: email,
+      subject: "Password Reset Successful - Solution Challenge",
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <table width="100%" cellpadding="0" cellspacing="0" style="padding: 40px 20px;">
+              <tr>
+                <td align="center">
+                  <table width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #ffffff; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+                    
+                    <!-- Header -->
+                    <tr>
+                      <td style="padding: 40px 40px 30px 40px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <img src="https://www.gdgpsu.dev/api/media?path=1762291432641-c8uv057d7gi.png" alt="GDG PSU" style="width: 60px; height: 60px; margin-bottom: 20px;" />
+                        <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700;">Password Reset Successful</h1>
+                      </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                      <td style="padding: 40px;">
+                        <p style="margin: 0 0 20px 0; font-size: 18px; color: #111827; font-weight: 600;">Hi ${name},</p>
+                        
+                        <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 24px; color: #374151;">
+                          Your password for Solution Challenge 2026 has been successfully reset.
+                        </p>
+                        
+                        <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
+                          <tr>
+                            <td style="background-color: #d1fae5; border-left: 4px solid #10b981; border-radius: 8px; padding: 16px;">
+                              <p style="margin: 0; font-size: 14px; color: #065f46; line-height: 20px;">
+                                ✅ <strong>Security Notice:</strong> If you did not make this change, please contact us immediately at gdg@psu.edu
+                              </p>
+                            </td>
+                          </tr>
+                        </table>
+                        
+                        <p style="margin: 20px 0 0 0; font-size: 14px; color: #6b7280;">
+                          You can now sign in with your new password.
+                        </p>
+                        
+                        <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
+                          <tr>
+                            <td align="center">
+                              <a href="${BASE_URL}" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 10px; font-weight: 600; font-size: 16px;">
+                                Sign In Now
+                              </a>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                      <td style="padding: 30px 40px; background-color: #f9fafb; border-top: 1px solid #e5e7eb;">
+                        <table width="100%" cellpadding="0" cellspacing="0">
+                          <tr>
+                            <td style="text-align: center; padding-bottom: 20px;">
+                              <p style="margin: 0 0 10px 0; font-size: 14px; color: #6b7280; font-weight: 600;">Presented by</p>
+                              <p style="margin: 0; font-size: 16px; color: #374151; font-weight: 700;">Google Developer Groups On Campus, Penn State</p>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="text-align: center; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+                              <p style="margin: 0; font-size: 12px; color: #9ca3af;">
+                                © 2026 Solution Challenge. All rights reserved.
+                              </p>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                    
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </body>
+        </html>
+      `,
+    });
+
+    if (error) {
+      console.error("Resend error:", error);
+      return { success: false, error: error.message };
+    }
+
+    console.log("Password reset confirmation email sent:", data?.id);
+    return { success: true };
+  } catch (error) {
+    console.error("Send password reset confirmation email error:", error);
+    return { success: false, error: "Failed to send email" };
+  }
+}

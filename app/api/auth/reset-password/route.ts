@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyOTP, deleteOTP } from "@/lib/otp";
 import { db } from "@/lib/db";
 import bcrypt from "bcryptjs";
+import { sendPasswordResetConfirmationEmail } from "@/lib/email";
 
 export async function POST(request: NextRequest) {
   try {
@@ -62,6 +63,14 @@ export async function POST(request: NextRequest) {
 
     // Delete OTP after successful password reset
     deleteOTP(email);
+
+    // Send confirmation email (don't fail if email fails)
+    try {
+      await sendPasswordResetConfirmationEmail(email, user.name || "User");
+    } catch (emailError) {
+      console.error("Failed to send confirmation email:", emailError);
+      // Continue anyway - password was reset successfully
+    }
 
     return NextResponse.json({
       success: true,

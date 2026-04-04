@@ -3,6 +3,31 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { sendTicketEmail } from "@/lib/email";
 
+// Rate limiting for ticket resend
+const resendRateLimitMap = new Map<string, number[]>();
+const RESEND_RATE_LIMIT_WINDOW = 60 * 60 * 1000; // 1 hour
+const MAX_RESENDS_PER_HOUR = 3; // Max 3 resends per hour per user
+
+function isResendRateLimited(userId: string): boolean {
+  const now = Date.now();
+  const requests = resendRateLimitMap.get(userId) || [];
+  
+  const recentRequests = requests.filter(
+    (timestamp) => now - timestamp < RESEND_RATE_LIMIT_WINDOW
+  );
+  
+  resendRateLimitMap.set(userId, recentRequests);
+  
+  if (recentRequests.length >= MAX_RESENDS_PER_HOUR) {
+    return true;
+  }
+  
+  recentRequests.push(now);
+  resendRateLimitMap.set(userId, recentRequests);
+  
+  return false;
+}
+
 /**
  * Resend ticket email to user
  */
@@ -11,6 +36,14 @@ export async function POST(request: NextRequest) {
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
+
+    // Check rate limit
+    if (isResendRateLimited(session.user.id)) {
+      return NextResponse.json(
+        { error: "Too many resend requests. Maximum 3 per hour." },
+        { status: 429 }
+      );
     }
 
     const body = await request.json();

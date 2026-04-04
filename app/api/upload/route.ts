@@ -2,6 +2,31 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { uploadFile, validateFile } from "@/lib/blob";
 
+// Rate limiting for file uploads
+const uploadRateLimitMap = new Map<string, number[]>();
+const UPLOAD_RATE_LIMIT_WINDOW = 60 * 60 * 1000; // 1 hour
+const MAX_UPLOADS_PER_HOUR = 10; // Max 10 uploads per hour per user
+
+function isUploadRateLimited(userId: string): boolean {
+  const now = Date.now();
+  const requests = uploadRateLimitMap.get(userId) || [];
+  
+  const recentRequests = requests.filter(
+    (timestamp) => now - timestamp < UPLOAD_RATE_LIMIT_WINDOW
+  );
+  
+  uploadRateLimitMap.set(userId, recentRequests);
+  
+  if (recentRequests.length >= MAX_UPLOADS_PER_HOUR) {
+    return true;
+  }
+  
+  recentRequests.push(now);
+  uploadRateLimitMap.set(userId, recentRequests);
+  
+  return false;
+}
+
 export async function POST(request: NextRequest) {
   try {
     console.log("Upload API called");
@@ -12,6 +37,14 @@ export async function POST(request: NextRequest) {
     
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Check rate limit
+    if (isUploadRateLimited(session.user.id)) {
+      return NextResponse.json(
+        { error: "Upload limit exceeded. Maximum 10 files per hour." },
+        { status: 429 }
+      );
     }
 
     // Get the file from form data

@@ -7,6 +7,7 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { loginSchema } from "@/lib/schemas/auth";
+import { isAccountLocked, recordFailedLogin, resetLoginAttempts } from "@/lib/login-attempts";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(db),
@@ -46,11 +47,31 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const { email, password } = parsed.data;
 
+        // Check if account is locked
+        const lockStatus = isAccountLocked(email);
+        if (lockStatus.locked) {
+          console.warn(`Login attempt for locked account: ${email}`);
+          return null; // Return null to show generic error
+        }
+
         const user = await db.user.findUnique({ where: { email } });
-        if (!user || !user.password) return null;
+        if (!user || !user.password) {
+          // Record failed attempt even if user doesn't exist (prevent enumeration)
+          recordFailedLogin(email);
+          return null;
+        }
 
         const valid = await bcrypt.compare(password, user.password);
-        if (!valid) return null;
+        if (!valid) {
+          const result = recordFailedLogin(email);
+          if (result.locked) {
+            console.warn(`Account locked after failed attempts: ${email}`);
+          }
+          return null;
+        }
+
+        // Successful login - reset attempts
+        resetLoginAttempts(email);
 
         return {
           id: user.id,

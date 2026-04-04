@@ -5,12 +5,68 @@ import { Resend } from "resend";
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 const FROM_EMAIL = process.env.EMAIL_FROM || "Solution Challenge <noreply@gdgpsu.dev>";
 
+// Rate limiting for OTP requests
+const otpRateLimitMap = new Map<string, number[]>();
+const OTP_RATE_LIMIT_WINDOW = 10 * 60 * 1000; // 10 minutes
+const MAX_OTP_REQUESTS = 3; // Max 3 OTP requests per 10 minutes per email
+
+function isOTPRateLimited(email: string): boolean {
+  const now = Date.now();
+  const requests = otpRateLimitMap.get(email.toLowerCase()) || [];
+  
+  // Filter out requests outside the time window
+  const recentRequests = requests.filter(
+    (timestamp) => now - timestamp < OTP_RATE_LIMIT_WINDOW
+  );
+  
+  // Update the map
+  otpRateLimitMap.set(email.toLowerCase(), recentRequests);
+  
+  // Check if limit exceeded
+  if (recentRequests.length >= MAX_OTP_REQUESTS) {
+    return true;
+  }
+  
+  // Add current request
+  recentRequests.push(now);
+  otpRateLimitMap.set(email.toLowerCase(), recentRequests);
+  
+  return false;
+}
+
+// Cleanup old entries every 15 minutes
+if (typeof window === "undefined") {
+  setInterval(() => {
+    const now = Date.now();
+    for (const [email, timestamps] of otpRateLimitMap.entries()) {
+      const recentRequests = timestamps.filter(
+        (timestamp) => now - timestamp < OTP_RATE_LIMIT_WINDOW
+      );
+      if (recentRequests.length === 0) {
+        otpRateLimitMap.delete(email);
+      } else {
+        otpRateLimitMap.set(email, recentRequests);
+      }
+    }
+  }, 15 * 60 * 1000);
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { email, context } = await request.json();
 
     if (!email || typeof email !== "string") {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
+    }
+
+    // Check rate limit
+    if (isOTPRateLimited(email)) {
+      return NextResponse.json(
+        { 
+          error: "Too many OTP requests. Please wait 10 minutes before trying again." 
+        },
+        { status: 429 }
+      );
     }
 
     // For password reset, check if user exists first
