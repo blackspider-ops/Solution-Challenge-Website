@@ -389,8 +389,13 @@ export function SubmissionForm({ existing, trackName }: SubmissionFormProps) {
                 <li>Revert your project to draft status</li>
                 <li>Remove it from the judging queue</li>
                 <li>Allow you to make changes</li>
-                <li>You can resubmit anytime</li>
+                <li>You can resubmit anytime before the deadline</li>
               </ul>
+              <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 mt-3">
+                <p className="text-sm font-medium text-amber-700">
+                  ⚠️ Important: If not resubmitted by judging time (April 12, 12:00 PM), your project will be skipped and count as an auto-withdrawal.
+                </p>
+              </div>
               <p className="text-sm font-medium text-foreground pt-2">
                 Are you sure you want to withdraw?
               </p>

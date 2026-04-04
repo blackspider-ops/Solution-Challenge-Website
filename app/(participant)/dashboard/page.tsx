@@ -98,7 +98,7 @@ export default async function DashboardPage() {
       )}
 
       {/* Volunteer Registration CTA */}
-      {!volunteerRegistration && 
+      {(!volunteerRegistration || !volunteerRegistration.completed) && 
        volunteerFormSections.length > 0 && 
        session.user.role !== "admin" && 
        session.user.role !== "volunteer" && (

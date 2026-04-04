@@ -1,7 +1,17 @@
 import { requireAdmin } from "@/lib/admin-guard";
 import { db } from "@/lib/db";
 import { Badge } from "@/components/ui/badge";
-import { Upload, Github, Globe, Video } from "lucide-react";
+import { Upload, Github, Globe, Video, ExternalLink } from "lucide-react";
+import Link from "next/link";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 type SubmissionRow = {
   id: string;
@@ -84,6 +94,7 @@ export default async function SubmissionsPage() {
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Links</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Updated</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -151,6 +162,91 @@ export default async function SubmissionsPage() {
                   </td>
                   <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
                     {new Date(sub.updatedAt).toLocaleDateString()}
+                  </td>
+                  <td className="px-4 py-3">
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="ghost" size="sm" className="gap-1.5">
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          View
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle className="text-xl">{sub.title}</DialogTitle>
+                          <DialogDescription className="flex items-center gap-3 pt-2">
+                            <span className="text-sm">Team: {sub.team.name}</span>
+                            <span className="text-sm">Track: {sub.track.name}</span>
+                            <Badge variant={STATUS_BADGE[sub.status] ?? "secondary"} className="capitalize">
+                              {sub.status}
+                            </Badge>
+                          </DialogDescription>
+                        </DialogHeader>
+                        
+                        <div className="space-y-4 pt-4">
+                          <div>
+                            <h4 className="text-sm font-semibold text-foreground mb-2">Description</h4>
+                            <p className="text-sm text-muted-foreground whitespace-pre-wrap">{sub.description}</p>
+                          </div>
+
+                          <div className="grid sm:grid-cols-3 gap-4 pt-4 border-t border-border">
+                            {sub.repoUrl && (
+                              <div>
+                                <h4 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-1.5">
+                                  <Github className="w-4 h-4" />
+                                  Repository
+                                </h4>
+                                <a
+                                  href={sub.repoUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-sm text-primary hover:underline break-all"
+                                >
+                                  {sub.repoUrl}
+                                </a>
+                              </div>
+                            )}
+                            {sub.demoUrl && (
+                              <div>
+                                <h4 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-1.5">
+                                  <Globe className="w-4 h-4" />
+                                  Live Demo
+                                </h4>
+                                <a
+                                  href={sub.demoUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-sm text-primary hover:underline break-all"
+                                >
+                                  {sub.demoUrl}
+                                </a>
+                              </div>
+                            )}
+                            {sub.videoUrl && (
+                              <div>
+                                <h4 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-1.5">
+                                  <Video className="w-4 h-4" />
+                                  Video Demo
+                                </h4>
+                                <a
+                                  href={sub.videoUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-sm text-primary hover:underline break-all"
+                                >
+                                  {sub.videoUrl}
+                                </a>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="pt-4 border-t border-border text-xs text-muted-foreground">
+                            <p>Created: {new Date(sub.createdAt).toLocaleString()}</p>
+                            <p>Last updated: {new Date(sub.updatedAt).toLocaleString()}</p>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   </td>
                 </tr>
               ))}
