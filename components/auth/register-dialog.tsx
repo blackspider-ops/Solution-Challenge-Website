@@ -262,16 +262,9 @@ export function RegisterDialog({ children }: RegisterDialogProps) {
 
         <p className="text-center text-sm text-muted-foreground">
           Already have an account?{" "}
-          <button
-            type="button"
-            onClick={() => {
-              setOpen(false);
-              router.push("/login");
-            }}
-            className="text-primary hover:underline font-medium"
-          >
-            Sign in
-          </button>
+          <span className="text-primary font-medium">
+            Use the Sign In button in the navigation bar.
+          </span>
         </p>
 
         <p className="text-center text-xs text-muted-foreground">

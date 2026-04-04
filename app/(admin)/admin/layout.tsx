@@ -1,7 +1,7 @@
 import { requireAdmin } from "@/lib/admin-guard";
 import { signOut } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { LogOut, Shield } from "lucide-react";
+import { LogOut, Shield, ArrowLeft } from "lucide-react";
 import { AdminNav } from "@/components/admin/admin-nav-link";
 import Link from "next/link";
 
@@ -36,6 +36,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
         {/* Nav */}
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors mb-3"
+          >
+            <ArrowLeft className="w-4 h-4 shrink-0" />
+            <span>Back to Dashboard</span>
+          </Link>
+          <div className="border-t border-border mb-3" />
           <AdminNav />
         </nav>
 
