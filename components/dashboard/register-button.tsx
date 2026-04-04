@@ -131,14 +131,6 @@ export function RegisterButton() {
                 {isPending ? "Generating Ticket..." : "Complete Registration"}
               </Button>
             </div>
-
-            {/* Info */}
-            <div className="rounded-lg bg-blue-500/5 border border-blue-500/20 p-3">
-              <p className="text-xs text-blue-700">
-                <strong>Note:</strong> Your QR code ticket will be generated using your logged-in email and name. 
-                You'll receive it via email and can add it to Apple Wallet, Google Wallet, or Samsung Wallet.
-              </p>
-            </div>
           </div>
         </DialogContent>
       </Dialog>

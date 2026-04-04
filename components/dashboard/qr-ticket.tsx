@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { CheckCircle, Clock, Download, Wallet, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface QRTicketProps {
   qrToken: string;
@@ -50,22 +51,23 @@ export function QRTicket({ qrToken, name, email, status, checkedIn, checkedInAt 
 
   function handleEmailTicket() {
     // Trigger email resend
-    fetch("/api/ticket/resend", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          alert("Ticket sent to your email!");
-        } else {
-          alert("Failed to send email. Please try again.");
-        }
-      })
-      .catch(() => {
-        alert("Failed to send email. Please try again.");
-      });
+    toast.promise(
+      fetch("/api/ticket/resend", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      }).then((res) => res.json()),
+      {
+        loading: "Sending ticket to your email...",
+        success: (data) => {
+          if (data.success) {
+            return "Ticket sent to your email!";
+          }
+          throw new Error(data.error || "Failed to send email");
+        },
+        error: "Failed to send email. Please try again.",
+      }
+    );
   }
 
   return (

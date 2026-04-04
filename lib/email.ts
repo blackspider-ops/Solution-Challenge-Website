@@ -83,7 +83,18 @@ function generateTicketEmailHTML(name: string, email: string, qrToken: string): 
                     <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
                       <tr>
                         <td align="center">
-                          <a href="${ticketUrl}" style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">View Ticket Online</a>
+                          <table cellpadding="0" cellspacing="0">
+                            <tr>
+                              <td align="center" style="padding-bottom: 10px;">
+                                <a href="${ticketUrl}" style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">View Ticket Online</a>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td align="center">
+                                <a href="${BASE_URL}/api/wallet/pass?token=${qrToken}" style="display: inline-block; padding: 14px 32px; background-color: #000000; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">📱 Add to Wallet</a>
+                              </td>
+                            </tr>
+                          </table>
                         </td>
                       </tr>
                     </table>

@@ -1,8 +1,6 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { signOut } from "@/lib/auth";
-import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
+import { SignOutButton } from "@/components/dashboard/sign-out-button";
 import { DashboardNav } from "@/components/dashboard/nav-link";
 import Link from "next/link";
 import { db } from "@/lib/db";
@@ -62,22 +60,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             </div>
           </div>
 
-          <form
-            action={async () => {
-              "use server";
-              await signOut({ redirectTo: "/" });
-            }}
-          >
-            <Button
-              type="submit"
-              variant="ghost"
-              size="sm"
-              className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
-            >
-              <LogOut className="w-4 h-4" />
-              Sign out
-            </Button>
-          </form>
+          <SignOutButton />
         </div>
       </aside>
 

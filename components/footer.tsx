@@ -19,7 +19,7 @@ const footerLinks = {
   ],
   support: [
     { label: "FAQ",            href: "#faq" },
-    { label: "Contact Us",     href: "mailto:gdg@psu.edu?subject=Solution%20Challenge%20General%20Inquiry" },
+    { label: "Contact Us",     href: "#contact" },
     { label: "Sponsors",       href: "#sponsors" },
     { label: "Code of Conduct",href: "#" },
   ],

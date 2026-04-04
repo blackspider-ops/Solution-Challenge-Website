@@ -137,7 +137,7 @@ export function FAQSection() {
               className="bg-gradient-to-r from-primary to-primary/90 text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-xl hover:scale-105 transition-all duration-300 group rounded-xl px-6"
               asChild
             >
-              <a href="mailto:gdg@psu.edu?subject=Solution%20Challenge%20General%20Inquiry">
+              <a href="#contact">
                 <Mail className="mr-2 w-4 h-4" />
                 Contact Us
               </a>

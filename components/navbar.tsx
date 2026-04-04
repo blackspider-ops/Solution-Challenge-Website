@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Menu, X, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { RegisterDialog } from "@/components/auth/register-dialog"
+import { useSession } from "next-auth/react"
 
 const navLinks = [
   { href: "#home", label: "Home" },
@@ -34,6 +35,7 @@ function GDGLogo({ className }: { className?: string }) {
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const { data: session, status } = useSession()
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20)
@@ -86,18 +88,31 @@ export function Navbar() {
           </div>
 
           {/* CTA */}
-          <div className="hidden md:flex items-center gap-2">
-            <Link href="/login">
-              <Button variant="ghost" className="rounded-xl px-4 text-muted-foreground hover:text-foreground">
-                Sign in
-              </Button>
-            </Link>
-            <RegisterDialog>
-              <Button className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:scale-105 transition-all duration-300 group rounded-xl px-6">
-                Register Now
-                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-              </Button>
-            </RegisterDialog>
+          <div className="hidden md:flex items-center gap-2" suppressHydrationWarning>
+            {status === "loading" ? (
+              <div className="h-10 w-32 bg-muted animate-pulse rounded-xl" />
+            ) : session ? (
+              <Link href="/dashboard">
+                <Button className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:scale-105 transition-all duration-300 group rounded-xl px-6">
+                  Dashboard
+                  <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                </Button>
+              </Link>
+            ) : (
+              <>
+                <Link href="/login">
+                  <Button variant="ghost" className="rounded-xl px-4 text-muted-foreground hover:text-foreground">
+                    Sign in
+                  </Button>
+                </Link>
+                <RegisterDialog>
+                  <Button className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:scale-105 transition-all duration-300 group rounded-xl px-6">
+                    Register Now
+                    <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                  </Button>
+                </RegisterDialog>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -144,16 +159,29 @@ export function Navbar() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.25 }}
               >
-                <div className="flex flex-col gap-2 mt-4">
-                  <Link href="/login" onClick={() => setIsOpen(false)}>
-                    <Button variant="outline" className="w-full rounded-xl">Sign in</Button>
-                  </Link>
-                  <RegisterDialog>
-                    <Button className="w-full bg-gradient-to-r from-primary to-primary/90 text-primary-foreground py-6 rounded-xl shadow-lg shadow-primary/25">
-                      Register Now
-                      <ArrowRight className="ml-2 w-4 h-4" />
-                    </Button>
-                  </RegisterDialog>
+                <div className="flex flex-col gap-2 mt-4" suppressHydrationWarning>
+                  {status === "loading" ? (
+                    <div className="h-12 bg-muted animate-pulse rounded-xl" />
+                  ) : session ? (
+                    <Link href="/dashboard" onClick={() => setIsOpen(false)}>
+                      <Button className="w-full bg-gradient-to-r from-primary to-primary/90 text-primary-foreground py-6 rounded-xl shadow-lg shadow-primary/25">
+                        Dashboard
+                        <ArrowRight className="ml-2 w-4 h-4" />
+                      </Button>
+                    </Link>
+                  ) : (
+                    <>
+                      <Link href="/login" onClick={() => setIsOpen(false)}>
+                        <Button variant="outline" className="w-full rounded-xl">Sign in</Button>
+                      </Link>
+                      <RegisterDialog>
+                        <Button className="w-full bg-gradient-to-r from-primary to-primary/90 text-primary-foreground py-6 rounded-xl shadow-lg shadow-primary/25">
+                          Register Now
+                          <ArrowRight className="ml-2 w-4 h-4" />
+                        </Button>
+                      </RegisterDialog>
+                    </>
+                  )}
                 </div>
               </motion.div>
             </div>
