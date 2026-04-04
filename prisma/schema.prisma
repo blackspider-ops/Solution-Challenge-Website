@@ -101,6 +101,7 @@ model User {
   announcements Announcement[]
   checkInsPerformed CheckIn[]  @relation("CheckInPerformedBy")
   formResponse  FormResponse?
+  volunteerRegistration VolunteerRegistration?
 }
 
 /// Created when a user registers for the event.
@@ -329,4 +330,26 @@ model FormAnswer {
   question FormQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@unique([responseId, questionId]) // one answer per question per response
+}
+
+// ─── Volunteer Registration ────────────────────────────────────────────────
+
+/// Volunteer registration form submission
+model VolunteerRegistration {
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  name                  String
+  pronouns              String?
+  psuEmail              String
+  major                 String
+  academicYear          String
+  availableTimeslots    String   // JSON array of selected timeslots
+  volunteerPreferences  String   // JSON array of selected preferences
+  communicationMethods  String   // JSON array of selected methods
+  commitmentConfirmed   Boolean  @default(false)
+  mediaConsent          Boolean  @default(false)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

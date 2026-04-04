@@ -44,11 +44,11 @@ export function AnnouncementManager({ announcements }: { announcements: Announce
 
   const form = useForm<AnnouncementInput>({
     resolver: zodResolver(announcementSchema),
-    defaultValues: { title: "", body: "", published: false, audience: "all" },
+    defaultValues: { title: "", body: "", published: false, audience: "registered" },
   });
 
   function openCreate() {
-    form.reset({ title: "", body: "", published: false, audience: "all" });
+    form.reset({ title: "", body: "", published: false, audience: "registered" });
     setMode("create");
   }
 
@@ -220,8 +220,8 @@ export function AnnouncementManager({ announcements }: { announcements: Announce
                 {...form.register("audience")}
                 className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
               >
-                <option value="all">All Registered Users</option>
-                <option value="registered">Registered Participants Only</option>
+                <option value="registered">Registered Participants (default)</option>
+                <option value="all">All (Participants + Volunteers + Admins)</option>
                 <option value="volunteers">Volunteers Only</option>
               </select>
               <p className="text-xs text-muted-foreground">

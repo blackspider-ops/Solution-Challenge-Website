@@ -1,18 +1,20 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
-import { CheckCircle, Clock, Users, Upload, QrCode, AlertCircle, Megaphone, Pin, ArrowRight, CalendarDays } from "lucide-react";
+import { CheckCircle, Clock, Users, Upload, QrCode, AlertCircle, Megaphone, Pin, ArrowRight, CalendarDays, UserCheck } from "lucide-react";
 import Link from "next/link";
 import { RegisterButton } from "@/components/dashboard/register-button";
 import { getPublishedAnnouncements } from "@/lib/actions/announcement";
 import { getMyFormResponse } from "@/lib/actions/form-builder";
+import { getMyVolunteerRegistration, getVolunteerPreFillData } from "@/lib/actions/volunteer";
+import { VolunteerRegistrationDialog } from "@/components/dashboard/volunteer-registration-form";
 import { SCHEDULE } from "@/lib/event-config";
 
 export default async function DashboardPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
-  const [registration, teamMembership, announcements, formSections, formResponse] = await Promise.all([
+  const [registration, teamMembership, announcements, formSections, formResponse, volunteerRegistration, volunteerPreFillData] = await Promise.all([
     db.registration.findUnique({
       where: { userId: session.user.id },
       include: { ticket: { include: { checkIn: true } } },
@@ -41,6 +43,8 @@ export default async function DashboardPage() {
       },
     }),
     getMyFormResponse(),
+    getMyVolunteerRegistration(),
+    getVolunteerPreFillData(),
   ]);
 
   const team = teamMembership?.team ?? null;
@@ -78,6 +82,52 @@ export default async function DashboardPage() {
             userName={session.user.name || undefined}
             userEmail={session.user.email || undefined}
           />
+        </div>
+      )}
+
+      {/* Volunteer Registration CTA */}
+      {!volunteerRegistration && (
+        <div className="rounded-2xl border-2 border-dashed border-blue-500/30 bg-blue-500/5 p-8 text-center">
+          <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center mx-auto mb-4">
+            <UserCheck className="w-6 h-6 text-blue-600" />
+          </div>
+          <h2 className="text-lg font-semibold text-foreground mb-2">
+            Interested in Volunteering?
+          </h2>
+          <p className="text-muted-foreground text-sm mb-6 max-w-sm mx-auto">
+            Help make Solution Challenge 2026 a success! Register as a volunteer to support the event.
+          </p>
+          <VolunteerRegistrationDialog
+            preFillData={volunteerPreFillData || undefined}
+            userEmail={session.user.email || undefined}
+          >
+            <button className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:scale-105">
+              <UserCheck className="w-4 h-4" />
+              Register as Volunteer
+            </button>
+          </VolunteerRegistrationDialog>
+        </div>
+      )}
+
+      {/* Volunteer Status Card */}
+      {volunteerRegistration && (
+        <div className="rounded-2xl border border-blue-500/30 bg-blue-500/5 p-6">
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0">
+              <UserCheck className="w-5 h-5 text-blue-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="font-semibold text-foreground">Volunteer Registration</h3>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-700 border border-blue-500/20 font-medium">
+                  Registered
+                </span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Thank you for volunteering! {registration ? "Access the volunteer panel from the sidebar." : "Complete event registration to access the volunteer panel."}
+              </p>
+            </div>
+          </div>
         </div>
       )}
 

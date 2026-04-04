@@ -54,9 +54,22 @@ function NavLinkItem({ href, icon: Icon, children, badge, highlight }: NavLinkPr
 }
 
 /** Renders the full dashboard nav — owns navItems internally, no server→client prop passing */
-export function DashboardNav({ announcementCount, userRole }: { announcementCount: number; userRole?: string }) {
+export function DashboardNav({ 
+  announcementCount, 
+  userRole,
+  hasVolunteerRegistration,
+  hasEventRegistration,
+}: { 
+  announcementCount: number; 
+  userRole?: string;
+  hasVolunteerRegistration?: boolean;
+  hasEventRegistration?: boolean;
+}) {
   const isAdmin = userRole === "admin";
   const isVolunteer = userRole === "volunteer" || userRole === "admin";
+  
+  // Volunteer panel access requires BOTH volunteer registration AND event registration
+  const canAccessVolunteerPanel = (isVolunteer || hasVolunteerRegistration) && hasEventRegistration;
 
   return (
     <>
@@ -73,7 +86,7 @@ export function DashboardNav({ announcementCount, userRole }: { announcementCoun
         </NavLinkItem>
       ))}
       
-      {isVolunteer && (
+      {canAccessVolunteerPanel && (
         <>
           <div className="my-2 border-t border-border" />
           <Link

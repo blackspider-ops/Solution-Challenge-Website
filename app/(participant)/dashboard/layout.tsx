@@ -12,8 +12,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const session = await auth();
   if (!session) redirect("/login");
 
-  const [announcementCount] = await Promise.all([
+  const [announcementCount, volunteerRegistration, registration] = await Promise.all([
     db.announcement.count({ where: { published: true } }),
+    db.volunteerRegistration.findUnique({ where: { userId: session.user.id } }),
+    db.registration.findUnique({ where: { userId: session.user.id } }),
   ]);
 
   const initials = session.user?.name
@@ -36,7 +38,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
       {/* Nav */}
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-        <DashboardNav announcementCount={announcementCount} userRole={session.user?.role} />
+        <DashboardNav 
+          announcementCount={announcementCount} 
+          userRole={session.user?.role}
+          hasVolunteerRegistration={!!volunteerRegistration}
+          hasEventRegistration={!!registration}
+        />
       </nav>
 
       {/* User footer */}

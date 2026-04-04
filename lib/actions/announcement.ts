@@ -48,7 +48,7 @@ export async function sendAnnouncementAsEmail(
 
     // Get emails based on audience
     if (announcement.audience === "all") {
-      // Get all registered users
+      // Get ALL registered users (participants, volunteers, admins)
       const registrations = await db.registration.findMany({
         where: { status: "confirmed" },
         include: { user: { select: { email: true } } },
@@ -65,12 +65,11 @@ export async function sendAnnouncementAsEmail(
       });
       emails = registrations.map((r) => r.user.email);
     } else if (announcement.audience === "volunteers") {
-      // Get only volunteers
-      const volunteers = await db.user.findMany({
-        where: { role: "volunteer" },
-        select: { email: true },
+      // Get users who have submitted volunteer registration
+      const volunteerRegs = await db.volunteerRegistration.findMany({
+        include: { user: { select: { email: true } } },
       });
-      emails = volunteers.map((v) => v.email);
+      emails = volunteerRegs.map((v) => v.user.email);
     }
 
     if (emails.length === 0) {
