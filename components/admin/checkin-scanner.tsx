@@ -110,16 +110,15 @@ function CameraScanner({ onScan, active }: CameraScannerProps) {
               
               // Continue scanning after a pause
               await new Promise(resolve => setTimeout(resolve, 2500));
-              return decode();
             }
           } catch {
             // No QR found in this frame — keep trying
           }
           
-          // Continue scanning immediately if no QR found or error
+          // Continue scanning
           if (scanningRef.current && streamRef.current?.active) {
             await new Promise(resolve => setTimeout(resolve, 150));
-            return decode();
+            decode();
           }
         };
         

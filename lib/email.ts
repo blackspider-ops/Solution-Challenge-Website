@@ -62,7 +62,7 @@ function generateTicketEmailHTML(name: string, email: string, qrToken: string): 
                           <p style="margin: 0; font-size: 14px; color: #1e3a8a; line-height: 1.8;">
                             <strong>Date:</strong> April 11-12, 2026<br>
                             <strong>Time:</strong> April 11, 7:00 PM – April 12, 12:00 PM (Noon)<br>
-                            <strong>Location:</strong> ECoRE Building, University Park, PA<br>
+                            <strong>Location:</strong> <a href="https://www.google.com/maps?q=40.79299139676293,-77.87067405918272" style="color: #1e3a8a; text-decoration: underline;">ECoRE Building, University Park, PA</a><br>
                             <strong>Organizer:</strong> Google Developer Groups at Penn State
                           </p>
                         </td>

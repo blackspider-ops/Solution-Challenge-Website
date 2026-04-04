@@ -103,8 +103,15 @@ export function HeroSection() {
           </span>
           <span className="flex items-center gap-1.5 bg-card border border-border rounded-full px-3 sm:px-4 py-1.5 whitespace-nowrap">
             <MapPin className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-primary shrink-0" />
-            <span className="hidden sm:inline">ECoRE Building, University Park, PA</span>
-            <span className="sm:hidden">ECoRE Building, PSU</span>
+            <a 
+              href="https://www.google.com/maps?q=40.79299139676293,-77.87067405918272" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="hover:text-primary transition-colors"
+            >
+              <span className="hidden sm:inline">ECoRE Building, University Park, PA</span>
+              <span className="sm:hidden">ECoRE Building, PSU</span>
+            </a>
           </span>
         </motion.div>
 
