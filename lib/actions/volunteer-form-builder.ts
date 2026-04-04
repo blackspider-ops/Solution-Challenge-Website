@@ -239,9 +239,16 @@ export async function submitVolunteerFormResponse() {
       return { error: "No response found" };
     }
 
+    // Update registration as completed
     await db.volunteerRegistration.update({
       where: { id: response.id },
       data: { completed: true },
+    });
+
+    // Update user role to volunteer if they're currently a participant
+    await db.user.update({
+      where: { id: session.user.id },
+      data: { role: "volunteer" },
     });
 
     revalidatePath("/dashboard");

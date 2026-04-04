@@ -98,7 +98,10 @@ export default async function DashboardPage() {
       )}
 
       {/* Volunteer Registration CTA */}
-      {!volunteerRegistration && volunteerFormSections.length > 0 && (
+      {!volunteerRegistration && 
+       volunteerFormSections.length > 0 && 
+       session.user.role !== "admin" && 
+       session.user.role !== "volunteer" && (
         <div className="rounded-2xl border-2 border-dashed border-blue-500/30 bg-blue-500/5 p-8 text-center">
           <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center mx-auto mb-4">
             <UserCheck className="w-6 h-6 text-blue-600" />
@@ -124,7 +127,7 @@ export default async function DashboardPage() {
       )}
 
       {/* Volunteer Status Card */}
-      {volunteerRegistration && volunteerRegistration.completed && (
+      {(volunteerRegistration && volunteerRegistration.completed || session.user.role === "volunteer" || session.user.role === "admin") && (
         <div className="rounded-2xl border border-blue-500/30 bg-blue-500/5 p-6">
           <div className="flex items-start gap-4">
             <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0">
@@ -138,7 +141,7 @@ export default async function DashboardPage() {
                 </span>
               </div>
               <p className="text-sm text-muted-foreground">
-                Thank you for volunteering! {registration ? "Access the volunteer panel from the sidebar." : "Complete event registration to access the volunteer panel."}
+                Thank you for volunteering! {registration || session.user.role === "admin" || session.user.role === "volunteer" ? "Access the volunteer panel from the sidebar." : "Complete event registration to access the volunteer panel."}
               </p>
             </div>
           </div>

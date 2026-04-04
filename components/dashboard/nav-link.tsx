@@ -68,8 +68,14 @@ export function DashboardNav({
   const isAdmin = userRole === "admin";
   const isVolunteer = userRole === "volunteer" || userRole === "admin";
   
-  // Volunteer panel access requires BOTH volunteer registration AND event registration
-  const canAccessVolunteerPanel = (isVolunteer || hasVolunteerRegistration) && hasEventRegistration;
+  // Volunteer panel access:
+  // - Admins: always have access (no registration required)
+  // - Volunteer role: always have access (no registration required)
+  // - Others: need both volunteer registration AND event registration
+  const canAccessVolunteerPanel = 
+    isAdmin || 
+    isVolunteer || 
+    (hasVolunteerRegistration && hasEventRegistration);
 
   return (
     <>
