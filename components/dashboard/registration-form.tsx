@@ -12,6 +12,7 @@ import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { saveFormResponse, submitFormResponse, getMyFormResponse } from "@/lib/actions/form-builder";
+import { saveVolunteerFormResponse, submitVolunteerFormResponse } from "@/lib/actions/volunteer-form-builder";
 import { Loader2, CheckCircle2 } from "lucide-react";
 
 type Section = {
@@ -40,20 +41,25 @@ export function RegistrationForm({
   userName,
   userEmail,
   onComplete,
+  isVolunteerForm = false,
 }: {
   sections: Section[];
   existingResponse?: any;
   userName?: string;
   userEmail?: string;
   onComplete?: () => void;
+  isVolunteerForm?: boolean;
 }) {
   const [isPending, startTransition] = useTransition();
   const [showSaved, setShowSaved] = useState(false);
   
   // Load saved section from localStorage or start at 0
+  const storageKey = isVolunteerForm ? "volunteer-form-section" : "registration-form-section";
+  const answersKey = isVolunteerForm ? "volunteer-form-answers" : "registration-form-answers";
+  
   const [currentSection, setCurrentSection] = useState(() => {
     if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("registration-form-section");
+      const saved = localStorage.getItem(storageKey);
       return saved ? parseInt(saved, 10) : 0;
     }
     return 0;
@@ -64,7 +70,7 @@ export function RegistrationForm({
     
     // First, try to load from localStorage (draft answers)
     if (typeof window !== "undefined") {
-      const savedAnswers = localStorage.getItem("registration-form-answers");
+      const savedAnswers = localStorage.getItem(answersKey);
       if (savedAnswers) {
         try {
           const parsed = JSON.parse(savedAnswers);
@@ -144,7 +150,7 @@ export function RegistrationForm({
     
     // Save to localStorage immediately
     if (typeof window !== "undefined") {
-      localStorage.setItem("registration-form-answers", JSON.stringify(newAnswers));
+      localStorage.setItem(answersKey, JSON.stringify(newAnswers));
     }
     
     // Show saved indicator briefly
@@ -174,7 +180,7 @@ export function RegistrationForm({
       setCurrentSection(nextSection);
       // Save current section to localStorage
       if (typeof window !== "undefined") {
-        localStorage.setItem("registration-form-section", nextSection.toString());
+        localStorage.setItem(storageKey, nextSection.toString());
       }
     }
   }
@@ -185,7 +191,7 @@ export function RegistrationForm({
       setCurrentSection(prevSection);
       // Save current section to localStorage
       if (typeof window !== "undefined") {
-        localStorage.setItem("registration-form-section", prevSection.toString());
+        localStorage.setItem(storageKey, prevSection.toString());
       }
     }
   }
@@ -196,7 +202,9 @@ export function RegistrationForm({
     startTransition(async () => {
       try {
         // Save all answers to database for the first time
-        const saveResult = await saveFormResponse(answers);
+        const saveResult = isVolunteerForm 
+          ? await saveVolunteerFormResponse(answers)
+          : await saveFormResponse(answers);
         
         if ("error" in saveResult) {
           toast.error(saveResult.error);
@@ -204,16 +212,18 @@ export function RegistrationForm({
         }
 
         // Mark as completed
-        const submitResult = await submitFormResponse();
+        const submitResult = isVolunteerForm
+          ? await submitVolunteerFormResponse()
+          : await submitFormResponse();
         
         if ("error" in submitResult) {
           toast.error(submitResult.error);
         } else {
-          toast.success("Registration form submitted successfully!");
+          toast.success(isVolunteerForm ? "Volunteer registration submitted successfully!" : "Registration form submitted successfully!");
           // Clear localStorage after successful submission
           if (typeof window !== "undefined") {
-            localStorage.removeItem("registration-form-section");
-            localStorage.removeItem("registration-form-answers");
+            localStorage.removeItem(storageKey);
+            localStorage.removeItem(answersKey);
           }
           // Notify parent component
           if (onComplete) {

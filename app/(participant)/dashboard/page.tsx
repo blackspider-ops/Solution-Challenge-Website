@@ -7,6 +7,7 @@ import { RegisterButton } from "@/components/dashboard/register-button";
 import { getPublishedAnnouncements } from "@/lib/actions/announcement";
 import { getMyFormResponse } from "@/lib/actions/form-builder";
 import { getMyVolunteerRegistration, getVolunteerPreFillData } from "@/lib/actions/volunteer";
+import { getMyVolunteerFormResponse } from "@/lib/actions/volunteer-form-builder";
 import { VolunteerRegistrationDialog } from "@/components/dashboard/volunteer-registration-form";
 import { SCHEDULE } from "@/lib/event-config";
 
@@ -14,7 +15,7 @@ export default async function DashboardPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
-  const [registration, teamMembership, announcements, formSections, formResponse, volunteerRegistration, volunteerPreFillData] = await Promise.all([
+  const [registration, teamMembership, announcements, formSections, formResponse, volunteerRegistration, volunteerPreFillData, volunteerFormSections, volunteerFormResponse] = await Promise.all([
     db.registration.findUnique({
       where: { userId: session.user.id },
       include: { ticket: { include: { checkIn: true } } },
@@ -45,6 +46,17 @@ export default async function DashboardPage() {
     getMyFormResponse(),
     getMyVolunteerRegistration(),
     getVolunteerPreFillData(),
+    db.volunteerFormSection.findMany({
+      where: { active: true },
+      orderBy: { order: "asc" },
+      include: {
+        questions: {
+          where: { active: true },
+          orderBy: { order: "asc" },
+        },
+      },
+    }),
+    getMyVolunteerFormResponse(),
   ]);
 
   const team = teamMembership?.team ?? null;
@@ -86,7 +98,7 @@ export default async function DashboardPage() {
       )}
 
       {/* Volunteer Registration CTA */}
-      {!volunteerRegistration && (
+      {!volunteerRegistration && volunteerFormSections.length > 0 && (
         <div className="rounded-2xl border-2 border-dashed border-blue-500/30 bg-blue-500/5 p-8 text-center">
           <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center mx-auto mb-4">
             <UserCheck className="w-6 h-6 text-blue-600" />
@@ -98,6 +110,8 @@ export default async function DashboardPage() {
             Help make Solution Challenge 2026 a success! Register as a volunteer to support the event.
           </p>
           <VolunteerRegistrationDialog
+            sections={volunteerFormSections}
+            existingResponse={volunteerFormResponse}
             preFillData={volunteerPreFillData || undefined}
             userEmail={session.user.email || undefined}
           >
@@ -110,7 +124,7 @@ export default async function DashboardPage() {
       )}
 
       {/* Volunteer Status Card */}
-      {volunteerRegistration && (
+      {volunteerRegistration && volunteerRegistration.completed && (
         <div className="rounded-2xl border border-blue-500/30 bg-blue-500/5 p-6">
           <div className="flex items-start gap-4">
             <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0">

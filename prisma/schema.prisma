@@ -334,22 +334,63 @@ model FormAnswer {
 
 // ─── Volunteer Registration ────────────────────────────────────────────────
 
+/// Volunteer form builder - sections
+model VolunteerFormSection {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  order       Int      @default(0)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  questions VolunteerFormQuestion[]
+}
+
+/// Volunteer form builder - questions
+model VolunteerFormQuestion {
+  id              String       @id @default(cuid())
+  sectionId       String
+  type            QuestionType
+  label           String
+  description     String?
+  placeholder     String?
+  required        Boolean      @default(false)
+  options         String?      // JSON array for select/radio/checkbox options
+  order           Int          @default(0)
+  active          Boolean      @default(true)
+  conditionalOn   String?      // questionId that controls visibility
+  conditionalValue String?     // value that triggers visibility
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  section VolunteerFormSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  answers VolunteerFormAnswer[]
+}
+
 /// Volunteer registration form submission
 model VolunteerRegistration {
-  id                    String   @id @default(cuid())
-  userId                String   @unique
-  name                  String
-  pronouns              String?
-  psuEmail              String
-  major                 String
-  academicYear          String
-  availableTimeslots    String   // JSON array of selected timeslots
-  volunteerPreferences  String   // JSON array of selected preferences
-  communicationMethods  String   // JSON array of selected methods
-  commitmentConfirmed   Boolean  @default(false)
-  mediaConsent          Boolean  @default(false)
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  completed Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user    User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answers VolunteerFormAnswer[]
+}
+
+/// Answer to a volunteer form question
+model VolunteerFormAnswer {
+  id             String   @id @default(cuid())
+  registrationId String
+  questionId     String
+  value          String   // JSON for complex values (arrays, file metadata)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  registration VolunteerRegistration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  question     VolunteerFormQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([registrationId, questionId]) // one answer per question per registration
 }

@@ -14,6 +14,7 @@ const adminNavItems = [
   { href: "/admin/registrations",      label: "Registrations", icon: Users },
   { href: "/admin/registration-form",  label: "Form Builder",  icon: FileEdit },
   { href: "/admin/volunteers",         label: "Volunteers",    icon: UserCheck },
+  { href: "/admin/volunteer-form",     label: "Volunteer Form", icon: FileEdit },
   { href: "/admin/teams",              label: "Teams",         icon: Users },
   { href: "/admin/submissions",        label: "Submissions",   icon: Upload },
   { href: "/admin/tracks",             label: "Tracks",        icon: Layers },
