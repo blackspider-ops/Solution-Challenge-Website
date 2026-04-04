@@ -18,8 +18,8 @@ export default async function VolunteerCheckInPage() {
       <header className="border-b border-border bg-card px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-xs">SC</span>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center">
+              <img src="https://www.gdgpsu.dev/api/media?path=1762291432641-c8uv057d7gi.png" alt="GDG PSU" className="w-full h-full object-contain" />
             </div>
           </Link>
           <div className="flex items-center gap-2">

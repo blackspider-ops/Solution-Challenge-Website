@@ -19,8 +19,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         {/* Logo */}
         <div className="p-6 border-b border-border">
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-sm">
-              <span className="text-primary-foreground font-bold text-xs">SC</span>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center shadow-sm">
+              <img src="https://www.gdgpsu.dev/api/media?path=1762291432641-c8uv057d7gi.png" alt="GDG PSU" className="w-full h-full object-contain" />
             </div>
             <div>
               <span className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors">
