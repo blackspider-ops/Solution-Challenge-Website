@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Github, Loader2, Eye, EyeOff } from "lucide-react";
 import { signIn, useSession } from "next-auth/react";
+import { RegisterDialog } from "./register-dialog";
 
 interface LoginDialogProps {
   children: React.ReactNode;
@@ -233,9 +234,14 @@ export function LoginDialog({ children }: LoginDialogProps) {
 
         <p className="text-center text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
-          <span className="text-primary font-medium">
-            Use the Register button in the navigation bar.
-          </span>
+          <RegisterDialog>
+            <button
+              type="button"
+              className="text-primary hover:underline font-medium"
+            >
+              Sign up
+            </button>
+          </RegisterDialog>
         </p>
       </DialogContent>
     </Dialog>
