@@ -2,11 +2,7 @@
 
 import { useState, useTransition, useRef, useEffect, useCallback } from "react";
 import { checkInParticipant, type CheckInResult } from "@/lib/actions/checkin";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { CheckCircle, XCircle, QrCode, Camera, AlertTriangle, Keyboard } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { CheckCircle, XCircle, AlertTriangle, Camera } from "lucide-react";
 import { toast } from "sonner";
 
 // ─── Result display ────────────────────────────────────────────────────────
@@ -172,11 +168,8 @@ function CameraScanner({ onScan, active }: CameraScannerProps) {
 // ─── Main scanner component ────────────────────────────────────────────────
 
 export function CheckInScanner() {
-  const [token, setToken] = useState("");
   const [result, setResult] = useState<CheckInResult | null>(null);
   const [isPending, startTransition] = useTransition();
-  const [inputMode, setInputMode] = useState<"manual" | "camera">("manual");
-  const inputRef = useRef<HTMLInputElement>(null);
 
   function processToken(raw: string) {
     const trimmed = raw.trim();
@@ -186,18 +179,11 @@ export function CheckInScanner() {
       try {
         const res = await checkInParticipant(trimmed);
         setResult(res);
-        setToken("");
-        setTimeout(() => inputRef.current?.focus(), 100);
       } catch {
         setResult({ status: "invalid" });
         toast.error("Network error — please try again");
       }
     });
-  }
-
-  function handleManualSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    processToken(token);
   }
 
   function handleCameraScan(scanned: string) {
@@ -207,93 +193,32 @@ export function CheckInScanner() {
   }
 
   return (
-    <div className="max-w-lg space-y-4">
-      {/* Mode toggle */}
-      <div className="flex rounded-xl border border-border bg-muted/50 p-1 gap-1">
-        <button
-          onClick={() => setInputMode("manual")}
-          className={cn(
-            "flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-all",
-            inputMode === "manual"
-              ? "bg-card shadow-sm text-foreground"
-              : "text-muted-foreground hover:text-foreground"
-          )}
-        >
-          <Keyboard className="w-4 h-4" />
-          Manual input
-        </button>
-        <button
-          onClick={() => setInputMode("camera")}
-          className={cn(
-            "flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-all",
-            inputMode === "camera"
-              ? "bg-card shadow-sm text-foreground"
-              : "text-muted-foreground hover:text-foreground"
-          )}
-        >
-          <Camera className="w-4 h-4" />
-          Camera scan
-        </button>
-      </div>
-
+    <div className="space-y-4">
       {/* Scanner card */}
       <div className="rounded-2xl border border-border bg-card p-6 space-y-5">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-            {inputMode === "camera" ? (
-              <Camera className="w-5 h-5 text-primary" />
-            ) : (
-              <QrCode className="w-5 h-5 text-primary" />
-            )}
+            <Camera className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <p className="font-semibold text-foreground">
-              {inputMode === "camera" ? "Camera Scanner" : "Manual Check-in"}
-            </p>
+            <p className="font-semibold text-foreground">Camera Scanner</p>
             <p className="text-xs text-muted-foreground">
-              {inputMode === "camera"
-                ? "Point camera at participant's QR code"
-                : "Paste or type the QR token from the participant's ticket"}
+              Point camera at participant's QR code
             </p>
           </div>
         </div>
 
-        {inputMode === "manual" ? (
-          <form onSubmit={handleManualSubmit} className="space-y-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="token">QR Token</Label>
-              <Input
-                id="token"
-                ref={inputRef}
-                value={token}
-                onChange={(e) => { setToken(e.target.value); setResult(null); }}
-                placeholder="Paste token here..."
-                className="font-mono"
-                autoFocus
-                disabled={isPending}
-              />
-            </div>
-            <Button
-              type="submit"
-              disabled={isPending || !token.trim()}
-              className="w-full bg-gradient-to-r from-primary to-primary/90 text-primary-foreground shadow-lg shadow-primary/25"
-            >
-              {isPending ? "Checking in..." : "Check In"}
-            </Button>
-          </form>
-        ) : (
-          <div className="space-y-3">
-            <CameraScanner
-              onScan={handleCameraScan}
-              active={inputMode === "camera"}
-            />
-            {isPending && (
-              <p className="text-xs text-center text-muted-foreground animate-pulse">
-                Processing...
-              </p>
-            )}
-          </div>
-        )}
+        <div className="space-y-3">
+          <CameraScanner
+            onScan={handleCameraScan}
+            active={true}
+          />
+          {isPending && (
+            <p className="text-xs text-center text-muted-foreground animate-pulse">
+              Processing...
+            </p>
+          )}
+        </div>
 
         {/* Result */}
         {result && <ResultCard result={result} />}

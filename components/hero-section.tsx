@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { RegisterDialog } from "@/components/auth/register-dialog"
 import { useSession } from "next-auth/react"
 import Link from "next/link"
+import { useEffect, useState } from "react"
 
 /** GDG PSU logo */
 function GoogleLogo({ className }: { className?: string }) {
@@ -20,6 +21,15 @@ function GoogleLogo({ className }: { className?: string }) {
 
 export function HeroSection() {
   const { data: session, status } = useSession()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Reduce motion on mobile
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+  const animationDuration = isMobile ? 0.3 : 0.6
 
   return (
     <section
@@ -38,7 +48,7 @@ export function HeroSection() {
         <motion.div
           initial={{ opacity: 0, y: 20, scale: 0.9 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: animationDuration, ease: [0.22, 1, 0.36, 1] }}
           className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-gradient-to-r from-primary/10 to-chart-2/10 border border-primary/20 mb-10 backdrop-blur-sm shadow-lg shadow-primary/5"
         >
           <GoogleLogo className="w-5 h-5 shrink-0" />
@@ -51,7 +61,7 @@ export function HeroSection() {
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: animationDuration, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
           className="text-5xl sm:text-6xl lg:text-8xl font-bold text-foreground mb-6 tracking-tight"
         >
           <span className="block text-balance">Solution</span>
@@ -66,7 +76,7 @@ export function HeroSection() {
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: animationDuration, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
           className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 leading-relaxed text-pretty"
         >
           A thrilling two-day hackathon where you build technology solutions for the world&apos;s
@@ -78,7 +88,7 @@ export function HeroSection() {
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.28, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: animationDuration, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
           className="flex flex-wrap items-center justify-center gap-3 mb-12 text-sm text-muted-foreground"
         >
           <span className="flex items-center gap-1.5 bg-card border border-border rounded-full px-4 py-1.5">
@@ -99,11 +109,11 @@ export function HeroSection() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: animationDuration, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
           className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-5"
           suppressHydrationWarning
         >
-          {status === "loading" ? (
+          {!mounted || status === "loading" ? (
             <div className="h-14 w-48 bg-muted animate-pulse rounded-xl" />
           ) : session ? (
             <Link href="/dashboard">
@@ -138,7 +148,7 @@ export function HeroSection() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: animationDuration, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
           className="mt-16 flex items-center justify-center gap-3 text-sm text-muted-foreground"
         >
           <span>Presented by</span>
@@ -152,7 +162,7 @@ export function HeroSection() {
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: animationDuration, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
           className="mt-16 relative"
         >
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent rounded-3xl" />

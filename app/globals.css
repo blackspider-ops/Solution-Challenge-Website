@@ -3,14 +3,18 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Reduce animations on mobile for better performance */
-@media (max-width: 768px) {
-  * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
+/* Prevent layout shift and flashing */
+html {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+/* Smooth scrolling but respect motion preferences */
+html {
+  scroll-behavior: smooth;
 }
 
 /* Respect user's motion preferences */
@@ -23,6 +27,17 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Prevent flash of unstyled content */
+body {
+  opacity: 1;
+  transition: opacity 0.1s ease-in;
+}
+
+/* Prevent layout shift from scrollbar */
+html {
+  overflow-y: scroll;
 }
 
 :root {
