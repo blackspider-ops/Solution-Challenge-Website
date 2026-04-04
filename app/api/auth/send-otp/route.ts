@@ -13,6 +13,35 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
+    // For password reset, check if user exists first
+    if (context === "password-reset") {
+      const { db } = await import("@/lib/db");
+      const user = await db.user.findUnique({
+        where: { email: email.toLowerCase() },
+      });
+
+      if (!user) {
+        return NextResponse.json(
+          { 
+            error: "No account found with this email. Please sign up first.",
+            notRegistered: true 
+          },
+          { status: 404 }
+        );
+      }
+
+      // Check if user signed up with OAuth (no password)
+      if (!user.password) {
+        return NextResponse.json(
+          { 
+            error: "This account uses social login (Google/GitHub/Microsoft). Please sign in using that method instead.",
+            oauthAccount: true
+          },
+          { status: 400 }
+        );
+      }
+    }
+
     // Generate OTP
     const otp = generateOTP();
     storeOTP(email, otp);

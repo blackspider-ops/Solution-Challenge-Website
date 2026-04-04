@@ -104,8 +104,16 @@ export function LoginDialog({ children }: LoginDialogProps) {
         body: JSON.stringify({ email: formData.email, context: "password-reset" }),
       });
 
+      const data = await otpResponse.json();
+
       if (!otpResponse.ok) {
-        const data = await otpResponse.json();
+        // If user is not registered, show error with sign up option
+        if (data.notRegistered) {
+          setError(data.error || "Account not found");
+          setIsLoading(false);
+          return;
+        }
+        
         setError(data.error || "Failed to send verification code");
         setIsLoading(false);
         return;
@@ -466,6 +474,25 @@ export function LoginDialog({ children }: LoginDialogProps) {
             >
               Back to sign in
             </Button>
+
+            <p className="text-center text-sm text-muted-foreground">
+              Don&apos;t have an account?{" "}
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  setTimeout(() => {
+                    const registerTrigger = document.querySelector('[data-register-trigger]') as HTMLElement;
+                    if (registerTrigger) {
+                      registerTrigger.click();
+                    }
+                  }, 100);
+                }}
+                className="text-primary hover:underline font-medium"
+              >
+                Sign up
+              </button>
+            </p>
           </form>
         )}
 
