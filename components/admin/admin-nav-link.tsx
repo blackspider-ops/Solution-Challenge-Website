@@ -9,18 +9,17 @@ import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const adminNavItems = [
-  { href: "/admin",                    label: "Overview",      icon: LayoutDashboard },
-  { href: "/admin/users",              label: "Users",         icon: Users },
-  { href: "/admin/registrations",      label: "Registrations", icon: Users },
-  { href: "/admin/registration-form",  label: "Form Builder",  icon: FileEdit },
-  { href: "/admin/volunteers",         label: "Volunteers",    icon: UserCheck },
-  { href: "/admin/volunteer-form",     label: "Volunteer Form", icon: FileEdit },
-  { href: "/admin/teams",              label: "Teams",         icon: Users },
-  { href: "/admin/submissions",        label: "Submissions",   icon: Upload },
-  { href: "/admin/tracks",             label: "Tracks",        icon: Layers },
-  { href: "/admin/content",            label: "Content",       icon: Settings },
-  { href: "/admin/checkin",            label: "Check-in",      icon: QrCode },
-  { href: "/admin/announcements",      label: "Announcements", icon: Megaphone },
+  { href: "/admin",                    label: "Overview",          icon: LayoutDashboard },
+  { href: "/admin/users",              label: "Users",             icon: Users },
+  { href: "/admin/registrations",      label: "Registrations",     icon: Users },
+  { href: "/admin/registration-form",  label: "Registration Form", icon: FileEdit },
+  { href: "/admin/volunteers",         label: "Volunteers",        icon: UserCheck },
+  { href: "/admin/teams",              label: "Teams",             icon: Users },
+  { href: "/admin/submissions",        label: "Submissions",       icon: Upload },
+  { href: "/admin/tracks",             label: "Tracks",            icon: Layers },
+  { href: "/admin/content",            label: "Content",           icon: Settings },
+  { href: "/admin/checkin",            label: "Check-in",          icon: QrCode },
+  { href: "/admin/announcements",      label: "Announcements",     icon: Megaphone },
 ];
 
 interface AdminNavLinkProps {
