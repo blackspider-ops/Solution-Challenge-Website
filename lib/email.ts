@@ -248,3 +248,111 @@ export async function sendAnnouncementEmail(
     return { success: false, error: "Failed to send emails" };
   }
 }
+
+/**
+ * Send form submission notification to admin
+ */
+export async function sendFormSubmissionNotification(
+  userName: string,
+  userEmail: string,
+  submittedAt: Date
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    if (!resend || !process.env.RESEND_API_KEY) {
+      console.warn("RESEND_API_KEY not set - skipping email");
+      return { success: false, error: "Email service not configured" };
+    }
+
+    const adminEmail = "gdg@psu.edu";
+    const dashboardUrl = `${BASE_URL}/admin/registration-form`;
+
+    const htmlBody = `
+      <!DOCTYPE html>
+      <html lang="en">
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>New Registration Form Submission</title>
+        </head>
+        <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f3f4f6;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f3f4f6; padding: 40px 20px;">
+            <tr>
+              <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                  
+                  <!-- Header -->
+                  <tr>
+                    <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;">
+                      <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: bold;">📝 New Registration Submission</h1>
+                    </td>
+                  </tr>
+                  
+                  <!-- Content -->
+                  <tr>
+                    <td style="padding: 40px 30px;">
+                      <p style="margin: 0 0 20px 0; font-size: 16px; color: #111827;">
+                        A new registration form has been submitted.
+                      </p>
+                      
+                      <table width="100%" cellpadding="0" cellspacing="0" style="margin: 20px 0; background-color: #f9fafb; border-radius: 8px;">
+                        <tr>
+                          <td style="padding: 20px;">
+                            <p style="margin: 0 0 10px 0; font-size: 14px; color: #6b7280;"><strong>Participant:</strong></p>
+                            <p style="margin: 0 0 15px 0; font-size: 16px; color: #111827;">${userName}</p>
+                            
+                            <p style="margin: 0 0 10px 0; font-size: 14px; color: #6b7280;"><strong>Email:</strong></p>
+                            <p style="margin: 0 0 15px 0; font-size: 16px; color: #111827;">${userEmail}</p>
+                            
+                            <p style="margin: 0 0 10px 0; font-size: 14px; color: #6b7280;"><strong>Submitted:</strong></p>
+                            <p style="margin: 0; font-size: 16px; color: #111827;">${submittedAt.toLocaleString()}</p>
+                          </td>
+                        </tr>
+                      </table>
+                      
+                      <!-- CTA Button -->
+                      <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
+                        <tr>
+                          <td align="center">
+                            <a href="${dashboardUrl}" style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">View in Admin Dashboard</a>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  
+                  <!-- Footer -->
+                  <tr>
+                    <td style="padding: 30px; background-color: #f9fafb; text-align: center; border-top: 1px solid #e5e7eb;">
+                      <p style="margin: 0; font-size: 12px; color: #9ca3af;">
+                        Solution Challenge 2026 - Admin Notification
+                      </p>
+                    </td>
+                  </tr>
+                  
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+      </html>
+    `;
+
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: adminEmail,
+      subject: `New Registration: ${userName}`,
+      html: htmlBody,
+    });
+
+    if (error) {
+      console.error("Resend error:", error);
+      return { success: false, error: error.message };
+    }
+
+    console.log("Form submission notification sent:", data?.id);
+    return { success: true };
+  } catch (error) {
+    console.error("Send form notification error:", error);
+    return { success: false, error: "Failed to send notification" };
+  }
+}

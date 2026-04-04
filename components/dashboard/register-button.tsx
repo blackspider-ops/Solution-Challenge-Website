@@ -1,33 +1,43 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { registerForEvent } from "@/lib/actions/registration";
+import { getMyFormResponse } from "@/lib/actions/form-builder";
 import { toast } from "sonner";
-import { ExternalLink, CheckCircle } from "lucide-react";
+import { CheckCircle, FileText } from "lucide-react";
+import { RegistrationForm } from "./registration-form";
+import { db } from "@/lib/db";
 
-const EXTERNAL_FORM_URL = "https://forms.office.com/r/EhW4bfqHFR?origin=lprLink";
-
-export function RegisterButton() {
+export function RegisterButton({ 
+  sections, 
+  existingResponse,
+  userName,
+  userEmail,
+}: { 
+  sections: any[]; 
+  existingResponse: any;
+  userName?: string;
+  userEmail?: string;
+}) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [showDialog, setShowDialog] = useState(false);
-  const [formCompleted, setFormCompleted] = useState(false);
+  const [formCompleted, setFormCompleted] = useState(existingResponse?.completed || false);
+
+  useEffect(() => {
+    setFormCompleted(existingResponse?.completed || false);
+  }, [existingResponse]);
 
   function handleInitialClick() {
     setShowDialog(true);
-    setFormCompleted(false);
-  }
-
-  function openExternalForm() {
-    window.open(EXTERNAL_FORM_URL, "_blank");
   }
 
   function handleFinalRegister() {
     if (!formCompleted) {
-      toast.error("Please complete the external form first");
+      toast.error("Please complete the registration form first");
       return;
     }
 
@@ -54,16 +64,16 @@ export function RegisterButton() {
       </Button>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Complete Registration</DialogTitle>
             <DialogDescription>
-              To register for Solution Challenge, please complete the external form first.
+              Fill out the registration form and generate your event ticket.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
-            {/* Step 1: External Form */}
+            {/* Step 1: Registration Form */}
             <div className="rounded-lg border p-4 space-y-3">
               <div className="flex items-start gap-3">
                 <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
@@ -76,61 +86,59 @@ export function RegisterButton() {
                   )}
                 </div>
                 <div className="flex-1">
-                  <p className="font-medium text-sm">Complete External Form</p>
+                  <p className="font-medium text-sm">Complete Registration Form</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Fill out the required information in the Microsoft Form
+                    Fill out all required information
                   </p>
                 </div>
               </div>
 
-              <Button
-                onClick={openExternalForm}
-                variant="outline"
-                className="w-full gap-2"
-                disabled={formCompleted}
-              >
-                <ExternalLink className="w-4 h-4" />
-                Open Form
-              </Button>
-
               {!formCompleted && (
-                <Button
-                  onClick={() => setFormCompleted(true)}
-                  variant="ghost"
-                  size="sm"
-                  className="w-full text-xs"
-                >
-                  I've completed the form
-                </Button>
+                <RegistrationForm 
+                  sections={sections} 
+                  existingResponse={existingResponse}
+                  userName={userName}
+                  userEmail={userEmail}
+                  onComplete={() => {
+                    setFormCompleted(true);
+                    router.refresh();
+                  }}
+                />
+              )}
+
+              {formCompleted && (
+                <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                  <p className="text-sm text-emerald-700 font-medium">
+                    ✓ Form completed successfully
+                  </p>
+                </div>
               )}
             </div>
 
             {/* Step 2: Generate Ticket */}
-            <div className={`rounded-lg border p-4 space-y-3 ${
-              !formCompleted ? "opacity-50" : ""
-            }`}>
-              <div className="flex items-start gap-3">
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
-                  formCompleted ? "bg-primary" : "bg-muted"
-                }`}>
-                  <span className="text-xs font-bold text-white">2</span>
+            {formCompleted && (
+              <div className="rounded-lg border p-4 space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 bg-primary">
+                    <span className="text-xs font-bold text-white">2</span>
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-sm">Generate Your Ticket</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      We'll create your QR code ticket and email it to you
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className="font-medium text-sm">Generate Your Ticket</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    We'll create your QR code ticket and email it to you
-                  </p>
-                </div>
-              </div>
 
-              <Button
-                onClick={handleFinalRegister}
-                disabled={!formCompleted || isPending}
-                className="w-full bg-gradient-to-r from-primary to-primary/90"
-              >
-                {isPending ? "Generating Ticket..." : "Complete Registration"}
-              </Button>
-            </div>
+                <Button
+                  onClick={handleFinalRegister}
+                  disabled={isPending}
+                  className="w-full bg-gradient-to-r from-primary to-primary/90"
+                >
+                  {isPending ? "Generating Ticket..." : "Complete Registration"}
+                </Button>
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>

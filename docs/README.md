@@ -1,267 +1,197 @@
-# Solution Challenge - GDG Penn State
+# Solution Challenge Website Documentation
 
-A comprehensive hackathon management platform built for the Google Developer Groups Solution Challenge at Penn State University.
+Complete documentation for the Solution Challenge 2026 event website.
 
-## 🚀 Features
+## 📚 Documentation Files
 
-### For Participants
-- **Event Registration** - Simple registration with QR code ticket generation
-- **Team Management** - Create or join teams (up to 4 members) with invite codes
-- **Project Submission** - Submit projects with repo, demo, and video URLs
-- **Announcements** - View real-time announcements from organizers
-- **Track Selection** - Choose from 6 UN SDG-aligned challenge tracks
+### Essential Guides
 
-### For Admins
-- **Registration Management** - View, search, and manage all registrations
-- **QR Check-in** - Scan QR codes via camera or manual entry
-- **Team Overview** - Monitor all teams and their members
-- **Submission Review** - View and evaluate project submissions
-- **Announcement System** - Post updates visible to all participants
-- **Track Visibility Control** - Show/hide track detail pages
+1. **[README.md](README.md)** (this file)
+   - Overview and quick links
+   - Getting started guide
 
-### For Volunteers
-- **Check-in Access** - Perform participant check-ins at event entrance
+2. **[DEPLOYMENT.md](DEPLOYMENT.md)** ⭐ **Start here for deployment**
+   - Complete Vercel deployment guide
+   - Neon PostgreSQL setup
+   - Vercel Blob configuration
+   - Environment variables
+   - OAuth setup
+   - Troubleshooting
 
-## 🛠️ Tech Stack
+3. **[FEATURES.md](FEATURES.md)**
+   - All implemented features
+   - How each feature works
+   - Configuration details
 
-- **Framework**: Next.js 16 (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS v4 + shadcn/ui
-- **Database**: Prisma ORM (SQLite dev / PostgreSQL prod)
-- **Authentication**: Auth.js v5 (NextAuth)
-- **Forms**: react-hook-form + Zod validation
-- **Animations**: Framer Motion
-- **QR Codes**: qrcode + @zxing/browser
+4. **[FORM_BUILDER.md](FORM_BUILDER.md)**
+   - Registration form system
+   - Admin panel usage
+   - Question types
+   - Conditional logic
+   - Response management
 
-## 📋 Prerequisites
+### Technical Documentation
 
-- Node.js 18+ and npm
-- PostgreSQL database (for production)
-- Google OAuth credentials (optional)
-- GitHub OAuth credentials (optional)
+5. **[MIGRATION_COMPARISON.md](MIGRATION_COMPARISON.md)**
+   - SQLite vs PostgreSQL comparison
+   - Migration verification
+   - Database schema details
 
-## 🏃 Quick Start
+6. **[AUTOFILL_FEATURE.md](AUTOFILL_FEATURE.md)**
+   - Name/email autofill implementation
+   - Technical details
 
-### 1. Clone and Install
+## 🚀 Quick Start
+
+### Local Development
 
 ```bash
-git clone <your-repo-url>
-cd solution-challenge-website
+# Install dependencies
 npm install
-```
 
-### 2. Environment Setup
+# Setup database
+npx prisma generate
+npx prisma migrate dev
+npm run db:seed-form
 
-Create a `.env` file (use `.env.example` as template):
-
-```bash
-cp .env.example .env
-```
-
-Edit `.env` with your values:
-
-```env
-DATABASE_URL="file:./dev.db"
-AUTH_SECRET="your-secret-here"
-NEXTAUTH_URL="http://localhost:3000"
-```
-
-Generate `AUTH_SECRET`:
-```bash
-openssl rand -base64 32
-```
-
-### 3. Database Setup
-
-```bash
-# Generate Prisma client
-npm run db:generate
-
-# Push schema to database
-npm run db:push
-
-# Seed initial data (admin account, tracks, FAQs, sponsors)
-npm run db:seed
-```
-
-### 4. Run Development Server
-
-```bash
+# Start dev server
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000)
+Visit: http://localhost:3000
 
-### 5. Login as Admin
+### Deploy to Production
 
-- Email: `rva5573@psu.edu`
-- Password: `RajAwinashe@17`
+See **[DEPLOYMENT.md](DEPLOYMENT.md)** for complete guide.
 
-**⚠️ Change this password immediately in production!**
+Quick steps:
+1. Create Neon database in Vercel
+2. Create Vercel Blob storage
+3. Add environment variables
+4. Run migrations
+5. Push to GitHub (auto-deploys)
 
-## 📦 Available Scripts
+## 🎯 Key Features
 
-```bash
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run start        # Start production server
-npm run lint         # Run ESLint
-npm run db:generate  # Generate Prisma client
-npm run db:migrate   # Run database migrations
-npm run db:push      # Push schema changes to database
-npm run db:seed      # Seed database with initial data
-npm run db:studio    # Open Prisma Studio (database GUI)
-```
+✅ **Registration Form** - 17 questions, 5 sections, localStorage persistence  
+✅ **File Uploads** - Resume uploads to Vercel Blob  
+✅ **QR Tickets** - Generation and email delivery  
+✅ **OAuth Login** - Google + GitHub  
+✅ **Admin Panel** - Form builder, response viewer, CSV export  
+✅ **Email System** - Automated notifications via Resend  
+✅ **Team Formation** - Up to 4 members per team  
+✅ **Project Submission** - Track-based submissions  
+✅ **Check-in System** - QR code scanning  
 
-## 🚀 Deployment
+## 🔧 Tech Stack
 
-See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions to Vercel with PostgreSQL.
-
-### Quick Deploy to Vercel
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/your-username/solution-challenge-website)
-
-1. Click the button above
-2. Add environment variables (see DEPLOYMENT.md)
-3. Deploy
-4. Run database migrations
-5. Change admin password
+- **Framework**: Next.js 16 (App Router, Turbopack)
+- **Database**: Neon PostgreSQL (prod), SQLite (dev)
+- **File Storage**: Vercel Blob
+- **Auth**: NextAuth.js v5
+- **Email**: Resend
+- **Styling**: Tailwind CSS + shadcn/ui
+- **ORM**: Prisma 7
 
 ## 📁 Project Structure
 
 ```
-├── app/                      # Next.js App Router pages
-│   ├── (auth)/              # Login, register pages
-│   ├── (participant)/       # Participant dashboard
-│   ├── (admin)/             # Admin dashboard
-│   ├── (volunteer)/         # Volunteer check-in
-│   └── api/                 # API routes (Auth.js)
-├── components/              # React components
-│   ├── ui/                  # shadcn/ui primitives
-│   ├── admin/               # Admin-specific components
-│   └── dashboard/           # Participant dashboard components
-├── lib/                     # Utilities and configurations
-│   ├── actions/             # Server actions
-│   ├── schemas/             # Zod validation schemas
-│   ├── auth.ts              # Auth.js configuration
-│   ├── db.ts                # Prisma client
-│   ├── event-config.ts      # Event dates and timeline
-│   └── tracks-data.ts       # Track definitions
-├── prisma/                  # Database schema and migrations
-│   ├── schema.prisma        # Prisma schema
-│   └── seed.ts              # Database seed script
-└── public/                  # Static assets
+├── app/                    # Next.js app directory
+│   ├── (admin)/           # Admin routes
+│   ├── (participant)/     # Participant routes
+│   ├── (auth)/            # Auth routes
+│   └── api/               # API routes
+├── components/            # React components
+│   ├── admin/            # Admin components
+│   ├── dashboard/        # Participant components
+│   └── ui/               # shadcn/ui components
+├── lib/                   # Utilities
+│   ├── actions/          # Server actions
+│   ├── auth.ts           # Auth configuration
+│   ├── db.ts             # Database client
+│   ├── email.ts          # Email utilities
+│   └── blob.ts           # File upload utilities
+├── prisma/               # Database
+│   ├── schema.prisma     # Database schema
+│   ├── migrations/       # Migration history
+│   └── seed-form.ts      # Form seeder
+└── docs/                 # Documentation
 ```
 
-## 🔐 Authentication
+## 📝 Environment Variables
 
-The platform supports three authentication methods:
-
-1. **Email/Password** - Traditional credentials
-2. **Google OAuth** - Sign in with Google
-3. **GitHub OAuth** - Sign in with GitHub
-
-### Setting Up OAuth
-
-See [DEPLOYMENT.md](./DEPLOYMENT.md) for OAuth configuration instructions.
-
-## 🎨 Customization
-
-### Update Event Details
-
-Edit `lib/event-config.ts`:
-```typescript
-export const EVENT_START = new Date("2026-04-11T19:00:00-04:00");
-export const EVENT_END = new Date("2026-04-12T12:00:00-04:00");
-```
-
-### Update Track Prompts
-
-Edit `lib/tracks-data.ts` and update the `promptContent` field for each track.
-
-### Replace Logos
-
-Update these components with your custom logo:
-- `components/navbar.tsx` - `GDGLogo()` function
-- `components/hero-section.tsx` - `GoogleLogo()` function  
-- `components/footer.tsx` - `GoogleG()` function
-
-### Update Sponsors
-
-Sponsors are managed in the database. Use Prisma Studio or seed file:
-```bash
-npm run db:studio
-```
-
-## 📊 Database Models
-
-Key models:
-- `User` - Participants, volunteers, admins
-- `Registration` - Event registrations
-- `Ticket` - QR code tickets
-- `CheckIn` - Check-in records
-- `Team` - Participant teams
-- `Track` - Challenge tracks
-- `Submission` - Project submissions
-- `Announcement` - Admin announcements
-- `Sponsor` - Event sponsors
-
-## 🐛 Troubleshooting
-
-### Database Connection Issues
+Required for production:
 
 ```bash
-# Reset database
-rm prisma/dev.db
-npm run db:push
-npm run db:seed
+# Database (auto-set by Vercel)
+DATABASE_URL=${POSTGRES_PRISMA_URL}
+
+# File Storage (auto-set by Vercel)
+BLOB_READ_WRITE_TOKEN=your-token
+
+# Auth
+NEXTAUTH_URL=https://solutionchallenge.gdgpsu.dev
+NEXTAUTH_SECRET=your-secret
+
+# Email
+RESEND_API_KEY=your_resend_api_key_here
+EMAIL_FROM=Solution Challenge <noreply@gdgpsu.dev>
+
+# OAuth
+GOOGLE_CLIENT_ID=your_google_client_id_here
+GOOGLE_CLIENT_SECRET=your_google_client_secret_here
+GITHUB_CLIENT_ID=your_github_client_id_here
+GITHUB_CLIENT_SECRET=your_github_client_secret_here
 ```
 
-### Build Errors
+## 🐛 Common Issues
 
-```bash
-# Clear Next.js cache
-rm -rf .next
-npm run build
-```
+### Build Fails
+- Ensure `postinstall: "prisma generate"` in package.json
+- Check all environment variables are set
 
-### Prisma Issues
+### Database Connection Fails
+- Verify `DATABASE_URL` is set to `${POSTGRES_PRISMA_URL}`
+- Check Neon database is created
 
-```bash
-# Regenerate Prisma client
-npm run db:generate
-```
+### File Upload Fails
+- Verify Vercel Blob storage is created
+- Check `BLOB_READ_WRITE_TOKEN` is set
 
-## 📝 Recent Fixes
+### OAuth Fails
+- Update redirect URIs to include production URL
+- Verify `NEXTAUTH_SECRET` is set
 
-See [FIXES_APPLIED.md](./FIXES_APPLIED.md) for a detailed list of recent bug fixes and improvements.
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed troubleshooting.
 
-## 🤝 Contributing
+## 📊 Database Schema
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+**18 Tables:**
+- Auth: Account, Session, VerificationToken, User
+- Event: Registration, Ticket, CheckIn
+- Competition: Track, Team, TeamMember, Submission
+- Content: Announcement, Sponsor, FAQ, TimelineEvent
+- Forms: FormSection, FormQuestion, FormResponse, FormAnswer
 
-## 📄 License
+See [MIGRATION_COMPARISON.md](MIGRATION_COMPARISON.md) for details.
 
-This project is licensed under the MIT License.
+## 🎉 Ready to Deploy?
 
-## 📧 Contact
+Follow the **[DEPLOYMENT.md](DEPLOYMENT.md)** guide!
 
-Google Developer Groups at Penn State
-- Email: gdg@psu.edu
-- Website: [Your website]
-- Twitter: [@gdgpennstate](https://twitter.com/gdgpennstate)
+## 📞 Support
 
-## 🙏 Acknowledgments
+For issues:
+1. Check the documentation files
+2. Review Vercel deployment logs
+3. Check Prisma schema for database structure
+4. Review error messages in browser console
 
-- Built with [Next.js](https://nextjs.org)
-- UI components from [shadcn/ui](https://ui.shadcn.com)
-- Animations by [Framer Motion](https://www.framer.com/motion)
-- Hosted on [Vercel](https://vercel.com)
+## 🔗 Useful Links
 
----
-
-Made with ❤️ by GDG Penn State
+- **Production**: https://solutionchallenge.gdgpsu.dev
+- **Vercel Dashboard**: https://vercel.com/dashboard
+- **Neon Dashboard**: https://console.neon.tech
+- **Resend Dashboard**: https://resend.com/emails
+- **Google OAuth**: https://console.cloud.google.com/apis/credentials
+- **GitHub OAuth**: https://github.com/settings/developers

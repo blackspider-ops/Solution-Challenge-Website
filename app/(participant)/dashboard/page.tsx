@@ -5,13 +5,14 @@ import { CheckCircle, Clock, Users, Upload, QrCode, AlertCircle, Megaphone, Pin,
 import Link from "next/link";
 import { RegisterButton } from "@/components/dashboard/register-button";
 import { getPublishedAnnouncements } from "@/lib/actions/announcement";
+import { getMyFormResponse } from "@/lib/actions/form-builder";
 import { SCHEDULE } from "@/lib/event-config";
 
 export default async function DashboardPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
-  const [registration, teamMembership, announcements] = await Promise.all([
+  const [registration, teamMembership, announcements, formSections, formResponse] = await Promise.all([
     db.registration.findUnique({
       where: { userId: session.user.id },
       include: { ticket: { include: { checkIn: true } } },
@@ -29,6 +30,17 @@ export default async function DashboardPage() {
       },
     }),
     getPublishedAnnouncements(5),
+    db.formSection.findMany({
+      where: { active: true },
+      orderBy: { order: "asc" },
+      include: {
+        questions: {
+          where: { active: true },
+          orderBy: { order: "asc" },
+        },
+      },
+    }),
+    getMyFormResponse(),
   ]);
 
   const team = teamMembership?.team ?? null;
@@ -60,7 +72,12 @@ export default async function DashboardPage() {
           <p className="text-muted-foreground text-sm mb-6 max-w-sm mx-auto">
             Register to get your QR ticket and unlock team formation and project submission.
           </p>
-          <RegisterButton />
+          <RegisterButton 
+            sections={formSections} 
+            existingResponse={formResponse}
+            userName={session.user.name || undefined}
+            userEmail={session.user.email || undefined}
+          />
         </div>
       )}
 

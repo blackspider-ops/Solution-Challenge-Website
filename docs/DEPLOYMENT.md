@@ -1,198 +1,272 @@
-# Deployment Guide - Solution Challenge Website
+# Deployment Guide - Vercel with Neon + Blob
+
+Complete guide to deploy Solution Challenge website to production.
 
 ## Prerequisites
 
-- Vercel account (free tier works)
-- PostgreSQL database (Vercel Postgres, Supabase, or Neon recommended)
-- Google OAuth credentials (optional)
-- GitHub OAuth credentials (optional)
+- Vercel account
+- GitHub repository
+- Domain: solutionchallenge.gdgpsu.dev
 
-## Step 1: Database Setup
+## Step 1: Create Vercel Storage
 
-### Option A: Vercel Postgres (Recommended)
+### 1.1 Neon PostgreSQL Database
 
-1. Go to your Vercel dashboard
-2. Navigate to Storage → Create Database → Postgres
-3. Copy the `DATABASE_URL` connection string
+1. Go to Vercel Dashboard → Your Project → Storage
+2. Click "Create Database"
+3. Select "Neon" (Serverless Postgres)
+4. Choose region: US East (closest to Penn State)
+5. Click "Create"
 
-### Option B: Supabase
+**Auto-configured variables:**
+- `POSTGRES_URL`
+- `POSTGRES_PRISMA_URL` ← Use this one
+- `POSTGRES_URL_NON_POOLING`
 
-1. Create a new project at [supabase.com](https://supabase.com)
-2. Go to Project Settings → Database
-3. Copy the connection string (use "Connection pooling" for production)
+### 1.2 Vercel Blob Storage
 
-### Option C: Neon
+1. In Storage tab, click "Create Database"
+2. Select "Blob" (File Storage)
+3. Choose "Private" (for resume uploads)
+4. Click "Create"
 
-1. Create a new project at [neon.tech](https://neon.tech)
-2. Copy the connection string from the dashboard
+**Auto-configured variable:**
+- `BLOB_READ_WRITE_TOKEN`
 
-## Step 2: Environment Variables
+## Step 2: Add Environment Variables
 
-Set these in your Vercel project settings (Settings → Environment Variables):
+Go to: **Settings → Environment Variables**
 
-```bash
-# Database (REQUIRED)
-DATABASE_URL="postgresql://user:password@host:5432/dbname"
-
-# Auth.js (REQUIRED)
-AUTH_SECRET="generate-with-openssl-rand-base64-32"
-NEXTAUTH_URL="https://your-domain.vercel.app"
-
-# OAuth Providers (OPTIONAL - for Google/GitHub login)
-GOOGLE_CLIENT_ID="your-google-client-id"
-GOOGLE_CLIENT_SECRET="your-google-client-secret"
-GITHUB_CLIENT_ID="your-github-client-id"
-GITHUB_CLIENT_SECRET="your-github-client-secret"
-
-# Social Media Links (OPTIONAL)
-NEXT_PUBLIC_TWITTER_URL="https://twitter.com/gdgpennstate"
-NEXT_PUBLIC_GITHUB_URL="https://github.com/gdgpennstate"
-NEXT_PUBLIC_LINKEDIN_URL="https://linkedin.com/company/gdgpennstate"
-NEXT_PUBLIC_YOUTUBE_URL="https://youtube.com/@gdgpennstate"
-```
-
-### Generate AUTH_SECRET
-
-Run this command locally:
-```bash
-openssl rand -base64 32
-```
-
-## Step 3: Deploy to Vercel
-
-### Via Vercel CLI (Recommended)
-
-1. Install Vercel CLI:
-```bash
-npm i -g vercel
-```
-
-2. Login to Vercel:
-```bash
-vercel login
-```
-
-3. Deploy:
-```bash
-vercel
-```
-
-4. Follow the prompts to link your project
-
-### Via GitHub Integration
-
-1. Push your code to GitHub
-2. Go to [vercel.com/new](https://vercel.com/new)
-3. Import your repository
-4. Add environment variables
-5. Deploy
-
-## Step 4: Database Migration
-
-After first deployment, run migrations:
-
-1. Go to your Vercel project dashboard
-2. Navigate to Settings → Functions
-3. Or use Vercel CLI:
+Add these (select all environments: Production, Preview, Development):
 
 ```bash
-vercel env pull .env.local
-npm run db:push
-npm run db:seed
+# Database (use Neon's POSTGRES_PRISMA_URL)
+DATABASE_URL=${POSTGRES_PRISMA_URL}
+
+# Auth
+NEXTAUTH_URL=https://solutionchallenge.gdgpsu.dev
+NEXTAUTH_SECRET=Hbn/rTdeMhmff0xl0/pai6/uacQKQHw7tv+jtHzOenQ=
+
+# Email
+RESEND_API_KEY=your_resend_api_key_here
+EMAIL_FROM=Solution Challenge <noreply@gdgpsu.dev>
+
+# OAuth - Google
+GOOGLE_CLIENT_ID=your_google_client_id_here
+GOOGLE_CLIENT_SECRET=your_google_client_secret_here
+
+# OAuth - GitHub
+GITHUB_CLIENT_ID=your_github_client_id_here
+GITHUB_CLIENT_SECRET=your_github_client_secret_here
 ```
 
-## Step 5: Post-Deployment Setup
+## Step 3: Run Database Migrations
 
-### 1. Test Admin Login
+```bash
+# Link to Vercel project
+npx vercel link
 
-- Email: `rva5573@psu.edu`
-- Password: `RajAwinashe@17`
+# Pull environment variables
+npx vercel env pull .env.local
 
-**IMPORTANT**: Change this password immediately in production!
+# Run migrations on Neon
+DATABASE_URL=$(grep POSTGRES_PRISMA_URL .env.local | cut -d '=' -f2- | tr -d '"') \
+npx prisma migrate deploy
 
-### 2. Update Social Links
+# Seed form data
+DATABASE_URL=$(grep POSTGRES_PRISMA_URL .env.local | cut -d '=' -f2- | tr -d '"') \
+npx tsx prisma/seed-form.ts
+```
 
-Set your actual social media URLs in environment variables or update the defaults in `components/footer.tsx`
+**Expected output:**
+- ✓ Migrations applied
+- ✓ 5 sections created
+- ✓ 17 questions created
 
-### 3. Add Your Logo
+## Step 4: Update OAuth Redirect URIs
 
-Replace the Google logo with your custom logo:
-- Update `components/navbar.tsx` (GDGLogo component)
-- Update `components/hero-section.tsx` (GoogleLogo component)
-- Update `components/footer.tsx` (GoogleG component)
+### Google OAuth
 
-### 4. Configure OAuth (Optional)
+1. Go to: https://console.cloud.google.com/apis/credentials
+2. Select OAuth client: `160347604539-gktlm7drgj5p851ntgj6rsld7tt33l3d`
+3. Add to **Authorized redirect URIs**:
+   ```
+   https://solutionchallenge.gdgpsu.dev/api/auth/callback/google
+   ```
+4. Save
 
-#### Google OAuth:
-1. Go to [Google Cloud Console](https://console.cloud.google.com)
-2. Create a new project
-3. Enable Google+ API
-4. Create OAuth 2.0 credentials
-5. Add authorized redirect URI: `https://your-domain.vercel.app/api/auth/callback/google`
+### GitHub OAuth
 
-#### GitHub OAuth:
-1. Go to GitHub Settings → Developer settings → OAuth Apps
-2. Create a new OAuth App
-3. Set callback URL: `https://your-domain.vercel.app/api/auth/callback/github`
+1. Go to: https://github.com/settings/developers
+2. Select your OAuth App
+3. Update **Authorization callback URL**:
+   ```
+   https://solutionchallenge.gdgpsu.dev/api/auth/callback/github
+   ```
+4. Save
 
-## Step 6: Custom Domain (Optional)
+## Step 5: Verify Email Domain
 
-1. Go to Vercel project → Settings → Domains
-2. Add your custom domain
-3. Update DNS records as instructed
-4. Update `NEXTAUTH_URL` environment variable
+1. Go to: https://resend.com/domains
+2. Click "Add Domain"
+3. Enter: `gdgpsu.dev`
+4. Add DNS records to your domain provider:
+   - TXT record (verification)
+   - MX records (email delivery)
+   - DKIM records (authentication)
+5. Wait for verification (5-10 minutes)
+
+## Step 6: Deploy
+
+### Option A: Auto-Deploy (Recommended)
+
+```bash
+git add .
+git commit -m "Production ready: Neon + Blob + Form Builder"
+git push origin main
+```
+
+Vercel automatically deploys on push!
+
+### Option B: Manual Deploy
+
+```bash
+npx vercel --prod
+```
+
+## Step 7: Post-Deployment Testing
+
+### Test Checklist
+
+- [ ] Homepage loads: https://solutionchallenge.gdgpsu.dev
+- [ ] Google OAuth login works
+- [ ] GitHub OAuth login works
+- [ ] Registration form loads (all 5 sections)
+- [ ] Resume upload works
+- [ ] Form submission succeeds
+- [ ] Email ticket received
+- [ ] Admin panel accessible: /admin/registration-form
+- [ ] Form responses visible
+- [ ] CSV export works
 
 ## Troubleshooting
 
 ### Build Fails
 
-- Check that `DATABASE_URL` is set correctly
-- Ensure Prisma can connect to your database
-- Check build logs for specific errors
+**Error:** "Cannot find module '@prisma/client'"
 
-### Auth Not Working
+**Fix:** Ensure `package.json` has:
+```json
+{
+  "scripts": {
+    "postinstall": "prisma generate"
+  }
+}
+```
 
-- Verify `AUTH_SECRET` is set
+### Database Connection Fails
+
+**Error:** "Can't reach database server"
+
+**Fix:**
+- Check `DATABASE_URL` is set in Vercel
+- Should be: `${POSTGRES_PRISMA_URL}`
+- Verify Neon database is created
+
+### File Upload Fails
+
+**Error:** "Failed to upload file"
+
+**Fix:**
+- Check Vercel Blob storage is created
+- Verify `BLOB_READ_WRITE_TOKEN` is set
+- Ensure blob is set to "Private"
+
+### OAuth Fails
+
+**Error:** "Redirect URI mismatch"
+
+**Fix:**
+- Update redirect URIs in Google/GitHub
 - Check `NEXTAUTH_URL` matches your domain
-- Ensure OAuth redirect URIs are correct
+- Verify `NEXTAUTH_SECRET` is set
 
-### Database Connection Issues
+### Emails Not Sending
 
-- Verify connection string format
-- Check database is accessible from Vercel's region
-- Use connection pooling for PostgreSQL
+**Error:** "Domain not verified"
 
-## Maintenance
+**Fix:**
+- Verify domain in Resend dashboard
+- Check DNS records are added correctly
+- Wait for DNS propagation (up to 24 hours)
 
-### Update Database Schema
+## Monitoring
 
-```bash
-# Make changes to prisma/schema.prisma
-npm run db:push
-```
+### Vercel Dashboard
+- Deployment logs
+- Function execution times
+- Error tracking
 
-### Re-seed Database
+### Neon Dashboard
+- Database usage (0.5GB limit)
+- Connection count
+- Query performance
 
-```bash
-npm run db:seed
-```
+### Resend Dashboard
+- Email delivery rate
+- Bounce rate
+- Spam reports
 
-### View Database
+## Database Limits
 
-```bash
-npm run db:studio
-```
+**Neon Free Tier:**
+- 0.5GB storage (plenty for ~10,000 participants)
+- 100 hours compute/month
+- Auto-scales to zero when idle
+
+**Vercel Blob Free Tier:**
+- 500MB storage
+- 5GB bandwidth/month
+- Good for ~100 resume uploads
 
 ## Security Checklist
 
-- [ ] Change default admin password
-- [ ] Set strong `AUTH_SECRET`
-- [ ] Use environment variables for all secrets
-- [ ] Enable HTTPS only (Vercel does this automatically)
-- [ ] Review OAuth redirect URIs
-- [ ] Set up database backups
-- [ ] Monitor error logs
+- [x] `NEXTAUTH_SECRET` is random and secure
+- [x] OAuth secrets not committed to Git
+- [x] Database connection string is secret
+- [x] Blob storage is private
+- [x] Email domain verified
+- [x] HTTPS enabled (automatic on Vercel)
 
-## Support
+## What's Deployed
 
-For issues, contact: gdg@psu.edu
+✅ **Database**: Neon PostgreSQL with 18 tables  
+✅ **File Storage**: Vercel Blob for resumes  
+✅ **Form System**: 17 questions, localStorage persistence  
+✅ **Authentication**: Google + GitHub OAuth  
+✅ **Email**: Ticket delivery + admin notifications  
+✅ **Admin Panel**: Form builder + response viewer  
+✅ **QR Tickets**: Generation + email delivery  
+
+## Rollback Plan
+
+If something goes wrong:
+
+1. **Revert deployment** in Vercel dashboard
+2. **Or rollback Git commit**:
+   ```bash
+   git revert HEAD
+   git push
+   ```
+3. Check logs to identify issue
+4. Fix and redeploy
+
+## Success!
+
+Your site is live at: **https://solutionchallenge.gdgpsu.dev** 🎉
+
+Next steps:
+- Test all features
+- Monitor error logs
+- Share with team
+- Prepare for event launch
