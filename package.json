@@ -13,6 +13,7 @@
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "db:seed-form": "tsx prisma/seed-form.ts",
+    "db:seed-volunteer": "tsx prisma/seed-volunteer-form.ts",
     "db:studio": "prisma studio",
     "db:encrypt-passwords": "tsx scripts/encrypt-existing-passwords.ts"
   },
