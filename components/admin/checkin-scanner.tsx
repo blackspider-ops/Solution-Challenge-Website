@@ -90,7 +90,8 @@ function CameraScanner({ onScan, active }: CameraScannerProps) {
         scanningRef.current = true;
 
         // Continuously decode frames with proper loop
-        const decode = async (): Promise<void> => {
+        const decode = async () => {
+          // Check if we should continue scanning
           if (!scanningRef.current || !videoRef.current || !readerRef.current || !streamRef.current?.active) {
             return;
           }
@@ -106,19 +107,18 @@ function CameraScanner({ onScan, active }: CameraScannerProps) {
                 lastScanRef.current = scannedText;
                 lastScanTimeRef.current = now;
                 onScan(scannedText);
+                
+                // Wait before next scan
+                await new Promise(resolve => setTimeout(resolve, 2500));
               }
-              
-              // Continue scanning after a pause
-              await new Promise(resolve => setTimeout(resolve, 2500));
             }
           } catch {
-            // No QR found in this frame — keep trying
+            // No QR found in this frame — continue
           }
           
-          // Continue scanning
+          // Schedule next decode
           if (scanningRef.current && streamRef.current?.active) {
-            await new Promise(resolve => setTimeout(resolve, 150));
-            decode();
+            setTimeout(() => decode(), 150);
           }
         };
         
