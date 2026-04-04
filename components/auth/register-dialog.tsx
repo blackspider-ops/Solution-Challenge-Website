@@ -62,7 +62,7 @@ export function RegisterDialog({ children }: RegisterDialogProps) {
       const otpResponse = await fetch("/api/auth/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: formData.email }),
+        body: JSON.stringify({ email: formData.email, context: "registration" }),
       });
 
       if (!otpResponse.ok) {
@@ -92,7 +92,7 @@ export function RegisterDialog({ children }: RegisterDialogProps) {
       const otpResponse = await fetch("/api/auth/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: formData.email }),
+        body: JSON.stringify({ email: formData.email, context: "registration" }),
       });
 
       if (!otpResponse.ok) {
