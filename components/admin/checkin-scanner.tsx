@@ -85,6 +85,8 @@ function CameraScanner({ onScan, active }: CameraScannerProps) {
     }
 
     setError(null);
+    setScanning(false);
+    
     try {
       const { BrowserQRCodeReader } = await import("@zxing/browser");
       const reader = new BrowserQRCodeReader();
@@ -97,7 +99,15 @@ function CameraScanner({ onScan, active }: CameraScannerProps) {
 
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        await videoRef.current.play();
+        
+        // Wait for video to be ready
+        try {
+          await videoRef.current.play();
+        } catch (playError) {
+          console.error("Video play error:", playError);
+          throw new Error("Could not start video playback");
+        }
+        
         setScanning(true);
         scanningRef.current = true;
 
@@ -136,12 +146,27 @@ function CameraScanner({ onScan, active }: CameraScannerProps) {
         decode();
       }
     } catch (e) {
+      console.error("Camera error:", e);
       const msg = e instanceof Error ? e.message : "Camera access denied";
-      setError(msg.includes("Permission") || msg.includes("NotAllowed")
-        ? "Camera permission denied. Allow camera access and try again."
-        : "Could not start camera. Try manual input instead.");
+      
+      if (msg.includes("Permission") || msg.includes("NotAllowed") || msg.includes("permission")) {
+        setError("Camera permission denied. Allow camera access and try again.");
+      } else if (msg.includes("NotFound") || msg.includes("not found")) {
+        setError("No camera found. Please ensure your device has a camera.");
+      } else if (msg.includes("NotReadable") || msg.includes("in use")) {
+        setError("Camera is in use by another application. Please close other apps and try again.");
+      } else {
+        setError("Could not start camera. Please try again or use manual input.");
+      }
+      
       setScanning(false);
       scanningRef.current = false;
+      
+      // Clean up any partial initialization
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
+      }
     }
   }, []); // Empty deps - only create once
 
@@ -172,8 +197,18 @@ function CameraScanner({ onScan, active }: CameraScannerProps) {
 
   if (error) {
     return (
-      <div className="rounded-xl bg-destructive/10 border border-destructive/20 p-4 text-sm text-destructive">
-        {error}
+      <div className="rounded-xl bg-destructive/10 border border-destructive/20 p-4">
+        <p className="text-sm text-destructive mb-3">{error}</p>
+        <button
+          onClick={() => {
+            setError(null);
+            stopCamera();
+            setTimeout(() => startCamera(), 100);
+          }}
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
+        >
+          Retry Camera
+        </button>
       </div>
     );
   }
