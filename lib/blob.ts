@@ -1,57 +1,22 @@
 import { put, del } from "@vercel/blob";
 
-/**
- * Upload a file to Vercel Blob storage
- * Returns the URL of the uploaded file
- */
 export async function uploadFile(file: File, folder: string = "resumes"): Promise<string> {
-  try {
-    console.log("Starting file upload:", {
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      folder,
-    });
-
-    const filename = `${folder}/${Date.now()}-${file.name}`;
-    
-    console.log("Uploading to blob with filename:", filename);
-    
-    const blob = await put(filename, file, {
-      access: "public",
-      addRandomSuffix: true,
-    });
-    
-    console.log("Upload successful:", blob.url);
-    
-    return blob.url;
-  } catch (error) {
-    console.error("File upload error details:", {
-      error,
-      message: error instanceof Error ? error.message : "Unknown error",
-      stack: error instanceof Error ? error.stack : undefined,
-    });
-    throw error;
-  }
+  const filename = `${folder}/${Date.now()}-${file.name}`;
+  
+  const blob = await put(filename, file, {
+    access: "public",
+    addRandomSuffix: true,
+  });
+  
+  return blob.url;
 }
 
-/**
- * Delete a file from Vercel Blob storage
- */
 export async function deleteFile(url: string): Promise<void> {
-  try {
-    await del(url);
-  } catch (error) {
-    console.error("File delete error:", error);
-    throw new Error("Failed to delete file");
-  }
+  await del(url);
 }
 
-/**
- * Validate file before upload
- */
 export function validateFile(file: File): { valid: boolean; error?: string } {
-  const maxSize = 5 * 1024 * 1024; // 5MB
+  const maxSize = 5 * 1024 * 1024;
   const allowedTypes = [
     "application/pdf",
     "application/msword",
