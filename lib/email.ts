@@ -79,6 +79,21 @@ function generateTicketEmailHTML(name: string, email: string, qrToken: string): 
                       </ol>
                     </div>
                     
+                    <!-- RSVP Reminder -->
+                    <div style="margin: 30px 0; padding: 20px; background-color: #fef3c7; border-radius: 8px; border: 1px solid #fbbf24;">
+                      <p style="margin: 0 0 10px 0; font-size: 14px; font-weight: bold; color: #92400e;">⚠️ Important: RSVP Required</p>
+                      <p style="margin: 0 0 15px 0; font-size: 14px; color: #92400e; line-height: 1.6;">
+                        Please also RSVP on the official GDG website to confirm your attendance:
+                      </p>
+                      <table width="100%" cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td align="center">
+                            <a href="https://gdg.community.dev/events/details/google-gdg-on-campus-pennsylvania-state-university-state-college-united-states-presents-gdg-penn-state-solution-challenge-hackathon-innovate-for-impact/" style="display: inline-block; padding: 12px 24px; background-color: #f59e0b; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;">RSVP on GDG Website</a>
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+                    
                     <!-- CTA Button -->
                     <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
                       <tr>

@@ -127,6 +127,24 @@ export default async function DashboardPage() {
             </div>
           </Link>
 
+          <a
+            href="https://gdg.community.dev/events/details/google-gdg-on-campus-pennsylvania-state-university-state-college-united-states-presents-gdg-penn-state-solution-challenge-hackathon-innovate-for-impact/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex items-center gap-4 p-5 rounded-2xl border border-amber-500/30 bg-amber-500/5 hover:border-amber-500/50 hover:shadow-lg transition-all"
+          >
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center group-hover:bg-amber-500/20 transition-colors shrink-0">
+              <CheckCircle className="w-5 h-5 text-amber-600" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="font-medium text-foreground">RSVP on GDG Website</p>
+              <p className="text-xs text-muted-foreground">
+                Confirm your attendance
+              </p>
+            </div>
+            <ArrowRight className="w-4 h-4 text-amber-600 shrink-0 group-hover:translate-x-1 transition-transform" />
+          </a>
+
           <Link
             href="/dashboard/team"
             className="group flex items-center gap-4 p-5 rounded-2xl border border-border bg-card hover:border-primary/30 hover:shadow-lg transition-all"

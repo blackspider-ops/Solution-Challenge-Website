@@ -15,8 +15,8 @@ const footerLinks = {
   support: [
     { label: "FAQ",            href: "#faq" },
     { label: "Contact Us",     href: "#contact" },
-    { label: "Code of Conduct", href: "/code-of-conduct" },
     { label: "Sponsors",       href: "#sponsors" },
+    { label: "Code of Conduct", href: "/code-of-conduct" },
   ],
 }
 
