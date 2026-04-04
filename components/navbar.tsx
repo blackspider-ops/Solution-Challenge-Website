@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Menu, X, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { RegisterDialog } from "@/components/auth/register-dialog"
+import { LoginDialog } from "@/components/auth/login-dialog"
 import { useSession } from "next-auth/react"
 
 const navLinks = [
@@ -95,11 +96,11 @@ export function Navbar() {
               </Link>
             ) : (
               <>
-                <Link href="/login">
+                <LoginDialog>
                   <Button variant="ghost" className="rounded-xl px-4 text-muted-foreground hover:text-foreground">
                     Sign in
                   </Button>
-                </Link>
+                </LoginDialog>
                 <RegisterDialog>
                   <Button className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:scale-105 transition-all duration-300 group rounded-xl px-6">
                     Register Now
@@ -166,9 +167,9 @@ export function Navbar() {
                     </Link>
                   ) : (
                     <>
-                      <Link href="/login" onClick={() => setIsOpen(false)}>
+                      <LoginDialog>
                         <Button variant="outline" className="w-full rounded-xl">Sign in</Button>
-                      </Link>
+                      </LoginDialog>
                       <RegisterDialog>
                         <Button className="w-full bg-gradient-to-r from-primary to-primary/90 text-primary-foreground py-6 rounded-xl shadow-lg shadow-primary/25">
                           Register Now
