@@ -10,7 +10,7 @@ const footerLinks = {
     { label: "About",    href: "#" },
     { label: "Timeline", href: "#timeline" },
     { label: "Tracks",   href: "#tracks" },
-    { label: "Rules",    href: "#" },
+    { label: "Rules",    href: "/rules" },
   ],
   support: [
     { label: "FAQ",            href: "#faq" },
