@@ -99,11 +99,8 @@ export function RegistrationForm({
           }
         }
         
-        // Auto-fill Email Address
-        if (
-          question.type === "email" ||
-          question.label.toLowerCase().includes("email")
-        ) {
+        // Auto-fill Email Address (only type=email fields)
+        if (question.type === "email") {
           if (!initial[question.id] && userEmail) {
             initial[question.id] = userEmail;
           }
@@ -199,22 +196,17 @@ export function RegistrationForm({
     startTransition(async () => {
       try {
         // Save all answers to database for the first time
-        console.log("Submitting answers:", answers);
         const saveResult = await saveFormResponse(answers);
-        console.log("Save result:", saveResult);
         
         if ("error" in saveResult) {
-          console.error("Save error:", saveResult.error);
           toast.error(saveResult.error);
           return;
         }
 
         // Mark as completed
         const submitResult = await submitFormResponse();
-        console.log("Submit result:", submitResult);
         
         if ("error" in submitResult) {
-          console.error("Submit error:", submitResult.error);
           toast.error(submitResult.error);
         } else {
           toast.success("Registration form submitted successfully!");
@@ -290,10 +282,8 @@ export function RegistrationForm({
               // Check if this field was autofilled
               const isNameField = question.label.toLowerCase().includes("full name") || 
                                  question.label.toLowerCase() === "name";
-              // Only autofill the main email field, not team members email
-              const isMainEmailField = question.type === "email" || 
-                                      (question.label.toLowerCase().includes("email") && 
-                                       !question.label.toLowerCase().includes("team"));
+              // Only autofill the main email field (type=email), not textarea fields that mention email
+              const isMainEmailField = question.type === "email";
               const isAutofilled = Boolean((isNameField && userName) || (isMainEmailField && userEmail));
               
               return (
