@@ -10,8 +10,8 @@ export function SignOutButton() {
 
   const handleSignOut = async () => {
     await signOut({ redirect: false });
-    router.push("/");
-    router.refresh();
+    // Wait a moment for session to clear
+    await new Promise(resolve => setTimeout(resolve, 100));
     // Force a hard reload to clear all client-side cache
     window.location.href = "/";
   };

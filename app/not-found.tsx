@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { RegisterDialog } from "@/components/auth/register-dialog";
+import { LoginDialog } from "@/components/auth/login-dialog";
 
 export default function NotFound() {
   return (
@@ -94,6 +95,11 @@ export default function NotFound() {
           </div>
         </div>
       </div>
+      
+      {/* Hidden LoginDialog for register dialog to trigger */}
+      <LoginDialog>
+        <button data-login-trigger="" className="hidden" />
+      </LoginDialog>
     </div>
   );
 }
