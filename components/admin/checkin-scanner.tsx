@@ -87,18 +87,21 @@ function CameraScanner({ onScan, active }: CameraScannerProps) {
 
         // Continuously decode frames
         const decode = async () => {
-          if (!videoRef.current || !readerRef.current) return;
+          if (!videoRef.current || !readerRef.current || !streamRef.current?.active) return;
           try {
             const result = await readerRef.current.decodeOnceFromVideoElement(videoRef.current);
             if (result?.getText()) {
               onScan(result.getText());
-              // Brief pause then resume scanning
-              setTimeout(decode, 1500);
+              // Continue scanning after a brief pause
+              setTimeout(decode, 2000);
+            } else {
+              // No QR found, keep scanning immediately
+              setTimeout(decode, 100);
             }
           } catch {
             // No QR found in this frame — keep trying
             if (streamRef.current?.active) {
-              setTimeout(decode, 300);
+              setTimeout(decode, 100);
             }
           }
         };
