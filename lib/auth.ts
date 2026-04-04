@@ -63,6 +63,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
+    async signIn({ user, account, profile }) {
+      // Fix Microsoft OAuth name formatting for @psu.edu emails
+      if (account?.provider === "azure-ad" && user.email?.endsWith("@psu.edu") && user.name) {
+        // Microsoft returns names as "Last, First" - reverse it
+        if (user.name.includes(",")) {
+          const parts = user.name.split(",").map(p => p.trim());
+          if (parts.length === 2) {
+            user.name = `${parts[1]} ${parts[0]}`; // "First Last"
+          }
+        }
+      }
+      return true;
+    },
     async jwt({ token, user, account, trigger }) {
       // On sign-in, attach role to the JWT
       if (user) {
@@ -73,11 +86,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (account && account.provider !== "credentials" && token.sub) {
         const dbUser = await db.user.findUnique({
           where: { id: token.sub },
-          select: { role: true, id: true },
+          select: { role: true, id: true, name: true },
         });
         if (dbUser) {
           token.id = dbUser.id;
           token.role = dbUser.role;
+          // Update token name if it was fixed
+          if (dbUser.name) {
+            token.name = dbUser.name;
+          }
         }
       }
       return token;
@@ -86,6 +103,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (session.user && token) {
         session.user.id = token.id as string;
         session.user.role = (token.role ?? "participant") as "participant" | "volunteer" | "admin";
+        if (token.name) {
+          session.user.name = token.name as string;
+        }
       }
       return session;
     },
