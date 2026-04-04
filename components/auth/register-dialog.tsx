@@ -26,6 +26,9 @@ export function RegisterDialog({ children }: RegisterDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [step, setStep] = useState<"form" | "otp">("form");
+  const [otp, setOtp] = useState("");
+  const [resendCooldown, setResendCooldown] = useState(0);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -33,6 +36,14 @@ export function RegisterDialog({ children }: RegisterDialogProps) {
   });
   const router = useRouter();
   const { data: session } = useSession();
+
+  // Countdown timer for resend cooldown
+  useEffect(() => {
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendCooldown]);
 
   // Prevent dialog from opening if user is already logged in
   useEffect(() => {
@@ -47,6 +58,80 @@ export function RegisterDialog({ children }: RegisterDialogProps) {
     setError("");
 
     try {
+      // Send OTP to email
+      const otpResponse = await fetch("/api/auth/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: formData.email }),
+      });
+
+      if (!otpResponse.ok) {
+        const data = await otpResponse.json();
+        setError(data.error || "Failed to send verification code");
+        setIsLoading(false);
+        return;
+      }
+
+      // Move to OTP step and start cooldown
+      setStep("otp");
+      setResendCooldown(60); // 60 seconds cooldown
+      setIsLoading(false);
+    } catch (err) {
+      setError("Network error. Please try again.");
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendOTP = async () => {
+    if (resendCooldown > 0) return;
+    
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const otpResponse = await fetch("/api/auth/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: formData.email }),
+      });
+
+      if (!otpResponse.ok) {
+        const data = await otpResponse.json();
+        setError(data.error || "Failed to send verification code");
+        setIsLoading(false);
+        return;
+      }
+
+      setResendCooldown(60); // Reset cooldown
+      setOtp(""); // Clear OTP input
+      setIsLoading(false);
+    } catch (err) {
+      setError("Network error. Please try again.");
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyOTP = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
+
+    try {
+      // Verify OTP
+      const verifyResponse = await fetch("/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: formData.email, code: otp }),
+      });
+
+      if (!verifyResponse.ok) {
+        const data = await verifyResponse.json();
+        setError(data.error || "Invalid verification code");
+        setIsLoading(false);
+        return;
+      }
+
+      // Create account
       const response = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -57,7 +142,9 @@ export function RegisterDialog({ children }: RegisterDialogProps) {
 
       if (!response.ok) {
         setError(data.error || "Registration failed");
-        setFormData({ ...formData, password: "" }); // Clear only password
+        setFormData({ ...formData, password: "" });
+        setStep("form");
+        setOtp("");
         setIsLoading(false);
         return;
       }
@@ -75,13 +162,9 @@ export function RegisterDialog({ children }: RegisterDialogProps) {
         return;
       }
 
-      // Success - close dialog, wait a moment for session to update, then redirect
+      // Success
       setOpen(false);
-      
-      // Small delay to allow session to propagate
       await new Promise(resolve => setTimeout(resolve, 100));
-      
-      // Force a hard navigation to ensure session is loaded
       window.location.href = "/";
     } catch (err) {
       setError("Network error. Please try again.");
@@ -111,9 +194,14 @@ export function RegisterDialog({ children }: RegisterDialogProps) {
               <img src="/icon.svg" alt="Solution Challenge" className="w-10 h-10" />
             </div>
           </div>
-          <DialogTitle className="text-center text-2xl">Create account</DialogTitle>
+          <DialogTitle className="text-center text-2xl">
+            {step === "form" ? "Create account" : "Verify your email"}
+          </DialogTitle>
           <DialogDescription className="text-center">
-            Join Solution Challenge 2026
+            {step === "form" 
+              ? "Join Solution Challenge 2026"
+              : `Enter the 6-digit code sent to ${formData.email}`
+            }
           </DialogDescription>
         </DialogHeader>
 
@@ -123,7 +211,8 @@ export function RegisterDialog({ children }: RegisterDialogProps) {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        {step === "form" ? (
+          <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">Full name</Label>
             <Input
@@ -189,22 +278,88 @@ export function RegisterDialog({ children }: RegisterDialogProps) {
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creating account...
+                Sending code...
               </>
             ) : (
-              "Create account"
+              "Continue"
             )}
           </Button>
         </form>
+        ) : (
+          <form onSubmit={handleVerifyOTP} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="otp">Verification Code</Label>
+              <Input
+                id="otp"
+                type="text"
+                placeholder="000000"
+                required
+                maxLength={6}
+                pattern="[0-9]{6}"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                disabled={isLoading}
+                className="text-center text-2xl tracking-widest font-mono"
+              />
+              <p className="text-xs text-center text-muted-foreground">
+                Check your email for the 6-digit code
+              </p>
+            </div>
 
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t border-border" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">or sign up with</span>
-          </div>
-        </div>
+            <Button
+              type="submit"
+              className="w-full bg-gradient-to-r from-primary to-primary/90"
+              disabled={isLoading || otp.length !== 6}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Verifying...
+                </>
+              ) : (
+                "Verify & Create Account"
+              )}
+            </Button>
+
+            <div className="flex items-center justify-between gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                className="flex-1"
+                onClick={() => {
+                  setStep("form");
+                  setOtp("");
+                  setError("");
+                  setResendCooldown(0);
+                }}
+                disabled={isLoading}
+              >
+                Back
+              </Button>
+              
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1"
+                onClick={handleResendOTP}
+                disabled={isLoading || resendCooldown > 0}
+              >
+                {resendCooldown > 0 ? `Resend (${resendCooldown}s)` : "Resend Code"}
+              </Button>
+            </div>
+          </form>
+        )}
+
+        {step === "form" && (
+          <>
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-border" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">or sign up with</span>
+              </div>
+            </div>
 
         <div className="space-y-2">
           <Button
@@ -286,6 +441,8 @@ export function RegisterDialog({ children }: RegisterDialogProps) {
         <p className="text-center text-xs text-muted-foreground">
           Password must be at least 8 characters with one uppercase letter and one number.
         </p>
+        </>
+        )}
       </DialogContent>
     </Dialog>
   );

@@ -34,7 +34,7 @@ export function HeroSection() {
   return (
     <section
       id="home"
-      className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden pt-24 pb-16 px-4"
+      className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden pt-20 pb-12 px-4 sm:pt-24 sm:pb-16"
     >
       {/* Depth overlays */}
       <div className="absolute inset-0 -z-10">
@@ -78,7 +78,7 @@ export function HeroSection() {
           initial={shouldAnimate ? { opacity: 0, y: 20 } : false}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: shouldAnimate ? 0.15 : 0 }}
-          className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto mb-6 sm:mb-8 leading-relaxed px-2"
+          className="text-sm sm:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto mb-6 sm:mb-8 leading-relaxed px-4"
         >
           A thrilling two-day hackathon where you build technology solutions for the world&apos;s
           most pressing challenges. Winners advance to the{" "}
