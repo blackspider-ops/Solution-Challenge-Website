@@ -41,18 +41,13 @@ html {
 
 /* Disable animations on mobile to prevent jitter */
 @media (max-width: 768px) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
+  /* Reduce animation durations but don't disable completely */
+  *:not(.animate-spin):not(.animate-pulse),
+  *:not(.animate-spin):not(.animate-pulse)::before,
+  *:not(.animate-spin):not(.animate-pulse)::after {
+    animation-duration: 0.2s !important;
     animation-delay: 0s !important;
-    transition-duration: 0.15s !important;
-  }
-  
-  /* Keep essential animations */
-  .animate-spin,
-  .animate-pulse {
-    animation-duration: 1s !important;
+    transition-duration: 0.2s !important;
   }
 }
 
@@ -179,7 +174,6 @@ html {
   }
   body {
     @apply bg-background text-foreground;
-    overscroll-behavior: none;
   }
   
   /* Improve mobile touch targets */
@@ -188,12 +182,6 @@ html {
       min-height: 44px;
       min-width: 44px;
     }
-  }
-  
-  /* Prevent horizontal scroll on mobile */
-  html, body {
-    overflow-x: hidden;
-    width: 100%;
   }
   
   /* Improve mobile input focus */
