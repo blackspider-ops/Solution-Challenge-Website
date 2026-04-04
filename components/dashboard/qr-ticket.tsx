@@ -159,11 +159,11 @@ export function QRTicket({ qrToken, name, email, status, checkedIn, checkedInAt 
             <Button
               variant="default"
               size="sm"
-              onClick={handleAddToWallet}
+              onClick={() => window.print()}
               className="w-full gap-2 bg-gradient-to-r from-primary to-primary/90"
             >
-              <Wallet className="w-3.5 h-3.5" />
-              Add to Wallet
+              <Download className="w-3.5 h-3.5" />
+              Print Ticket
             </Button>
           </div>
         )}
