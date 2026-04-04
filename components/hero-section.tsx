@@ -101,18 +101,16 @@ export function HeroSection() {
             <span className="hidden sm:inline">April 11, 7:00 PM – April 12, 12:00 PM (Noon)</span>
             <span className="sm:hidden">Apr 11, 7PM – Apr 12, 12PM</span>
           </span>
-          <span className="flex items-center gap-1.5 bg-card border border-border rounded-full px-3 sm:px-4 py-1.5 whitespace-nowrap">
+          <a 
+            href="https://www.google.com/maps?q=40.79299139676293,-77.87067405918272" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 bg-card border border-border rounded-full px-3 sm:px-4 py-1.5 hover:text-primary transition-colors whitespace-nowrap"
+          >
             <MapPin className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-primary shrink-0" />
-            <a 
-              href="https://www.google.com/maps?q=40.79299139676293,-77.87067405918272" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="hover:text-primary transition-colors"
-            >
-              <span className="hidden sm:inline">ECoRE Building, University Park, PA</span>
-              <span className="sm:hidden">ECoRE Building, PSU</span>
-            </a>
-          </span>
+            <span className="hidden sm:inline">ECoRE Building, University Park, PA</span>
+            <span className="sm:hidden">ECoRE, PSU</span>
+          </a>
         </motion.div>
 
         {/* CTA Buttons */}
