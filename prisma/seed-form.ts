@@ -1,32 +1,16 @@
-import { PrismaClient } from "@prisma/client";
-
-// For PostgreSQL, we need the pg adapter
-const databaseUrl = process.env.DATABASE_URL ?? "";
-
-let prisma: PrismaClient;
-
-if (databaseUrl.startsWith("postgresql://") || databaseUrl.startsWith("postgres://")) {
-  // PostgreSQL
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { PrismaPg } = require("@prisma/adapter-pg");
-  const adapter = new PrismaPg({ connectionString: databaseUrl });
-  prisma = new PrismaClient({ adapter });
-} else {
-  // Fallback to default
-  prisma = new PrismaClient();
-}
+import { db } from "../lib/db";
 
 async function seedForm() {
   console.log("Seeding registration form...");
 
   // Clear existing form data
-  await prisma.formAnswer.deleteMany();
-  await prisma.formResponse.deleteMany();
-  await prisma.formQuestion.deleteMany();
-  await prisma.formSection.deleteMany();
+  await db.formAnswer.deleteMany();
+  await db.formResponse.deleteMany();
+  await db.formQuestion.deleteMany();
+  await db.formSection.deleteMany();
 
   // Section 1: Basic Information
-  const basicInfo = await prisma.formSection.create({
+  const basicInfo = await db.formSection.create({
     data: {
       title: "Basic Information",
       description: "Tell us about yourself",
@@ -35,7 +19,7 @@ async function seedForm() {
     },
   });
 
-  await prisma.formQuestion.createMany({
+  await db.formQuestion.createMany({
     data: [
       {
         sectionId: basicInfo.id,
@@ -86,7 +70,7 @@ async function seedForm() {
   });
 
   // Section 2: Team Formation
-  const teamFormation = await prisma.formSection.create({
+  const teamFormation = await db.formSection.create({
     data: {
       title: "Team Formation",
       description: "Help us understand your experience and preferences",
@@ -95,11 +79,11 @@ async function seedForm() {
     },
   });
 
-  const questions = await prisma.formQuestion.findMany({
+  const questions = await db.formQuestion.findMany({
     where: { sectionId: basicInfo.id },
   });
 
-  await prisma.formQuestion.createMany({
+  await db.formQuestion.createMany({
     data: [
       {
         sectionId: teamFormation.id,
@@ -164,7 +148,7 @@ async function seedForm() {
   });
 
   // Section 3: Food & Dietary
-  const foodDietary = await prisma.formSection.create({
+  const foodDietary = await db.formSection.create({
     data: {
       title: "Food & Dietary",
       description: "Help us accommodate your dietary needs",
@@ -173,7 +157,7 @@ async function seedForm() {
     },
   });
 
-  await prisma.formQuestion.createMany({
+  await db.formQuestion.createMany({
     data: [
       {
         sectionId: foodDietary.id,
@@ -205,7 +189,7 @@ async function seedForm() {
   });
 
   // Section 4: T-Shirt & Membership
-  const tshirtMembership = await prisma.formSection.create({
+  const tshirtMembership = await db.formSection.create({
     data: {
       title: "T-Shirt & Membership",
       description: "Event swag and community membership",
@@ -214,7 +198,7 @@ async function seedForm() {
     },
   });
 
-  await prisma.formQuestion.createMany({
+  await db.formQuestion.createMany({
     data: [
       {
         sectionId: tshirtMembership.id,
@@ -238,7 +222,7 @@ async function seedForm() {
   });
 
   // Section 5: Agreements
-  const agreements = await prisma.formSection.create({
+  const agreements = await db.formSection.create({
     data: {
       title: "Agreements & Accessibility",
       description: "Please review and agree to the following",
@@ -247,7 +231,7 @@ async function seedForm() {
     },
   });
 
-  await prisma.formQuestion.createMany({
+  await db.formQuestion.createMany({
     data: [
       {
         sectionId: agreements.id,
@@ -285,5 +269,5 @@ seedForm()
     process.exit(1);
   })
   .finally(async () => {
-    await prisma.$disconnect();
+    await db.$disconnect();
   });

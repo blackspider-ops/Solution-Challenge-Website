@@ -35,7 +35,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
         {/* Nav */}
         <nav className="flex-1 p-4 space-y-1">
-          <DashboardNav announcementCount={announcementCount} />
+          <DashboardNav announcementCount={announcementCount} userRole={session.user?.role} />
         </nav>
 
         {/* User footer */}

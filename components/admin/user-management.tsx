@@ -226,45 +226,57 @@ export function UserManagement({ users }: { users: UserData[] }) {
 
                       <div className="space-y-3 py-4">
                         <Button
-                          variant={user.role === "admin" ? "default" : "outline"}
-                          className="w-full justify-start gap-2"
+                          variant="outline"
+                          className={`w-full justify-start gap-2 ${
+                            user.role === "admin" 
+                              ? "bg-purple-500 text-white hover:bg-purple-600 border-purple-500" 
+                              : "hover:bg-muted"
+                          }`}
                           onClick={() => handleRoleChange(user.id, user.name || user.email, "admin")}
                           disabled={user.role === "admin"}
                         >
                           <Shield className="w-4 h-4" />
                           <div className="text-left">
                             <p className="font-medium">Admin</p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className={`text-xs ${user.role === "admin" ? "text-purple-100" : "text-muted-foreground"}`}>
                               Full access to admin panel
                             </p>
                           </div>
                         </Button>
 
                         <Button
-                          variant={user.role === "volunteer" ? "default" : "outline"}
-                          className="w-full justify-start gap-2"
+                          variant="outline"
+                          className={`w-full justify-start gap-2 ${
+                            user.role === "volunteer" 
+                              ? "bg-blue-500 text-white hover:bg-blue-600 border-blue-500" 
+                              : "hover:bg-muted"
+                          }`}
                           onClick={() => handleRoleChange(user.id, user.name || user.email, "volunteer")}
                           disabled={user.role === "volunteer"}
                         >
                           <UserCog className="w-4 h-4" />
                           <div className="text-left">
                             <p className="font-medium">Volunteer</p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className={`text-xs ${user.role === "volunteer" ? "text-blue-100" : "text-muted-foreground"}`}>
                               Can check-in participants
                             </p>
                           </div>
                         </Button>
 
                         <Button
-                          variant={user.role === "participant" ? "default" : "outline"}
-                          className="w-full justify-start gap-2"
+                          variant="outline"
+                          className={`w-full justify-start gap-2 ${
+                            user.role === "participant" 
+                              ? "bg-emerald-500 text-white hover:bg-emerald-600 border-emerald-500" 
+                              : "hover:bg-muted"
+                          }`}
                           onClick={() => handleRoleChange(user.id, user.name || user.email, "participant")}
                           disabled={user.role === "participant"}
                         >
                           <User className="w-4 h-4" />
                           <div className="text-left">
                             <p className="font-medium">Participant</p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className={`text-xs ${user.role === "participant" ? "text-emerald-100" : "text-muted-foreground"}`}>
                               Standard user access
                             </p>
                           </div>

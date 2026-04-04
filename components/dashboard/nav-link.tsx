@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, Upload, QrCode, Megaphone } from "lucide-react";
+import { LayoutDashboard, Users, Upload, QrCode, Megaphone, Shield } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -19,9 +19,10 @@ interface NavLinkProps {
   icon: LucideIcon;
   children: React.ReactNode;
   badge?: number;
+  highlight?: boolean;
 }
 
-function NavLinkItem({ href, icon: Icon, children, badge }: NavLinkProps) {
+function NavLinkItem({ href, icon: Icon, children, badge, highlight }: NavLinkProps) {
   const pathname = usePathname();
   const isActive =
     href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(href);
@@ -31,7 +32,9 @@ function NavLinkItem({ href, icon: Icon, children, badge }: NavLinkProps) {
       href={href}
       className={cn(
         "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors",
-        isActive
+        highlight
+          ? "bg-gradient-to-r from-purple-500/10 to-purple-600/10 text-purple-600 hover:from-purple-500/20 hover:to-purple-600/20 border border-purple-500/20"
+          : isActive
           ? "bg-primary/10 text-primary"
           : "text-muted-foreground hover:text-foreground hover:bg-muted"
       )}
@@ -51,7 +54,9 @@ function NavLinkItem({ href, icon: Icon, children, badge }: NavLinkProps) {
 }
 
 /** Renders the full dashboard nav — owns navItems internally, no server→client prop passing */
-export function DashboardNav({ announcementCount }: { announcementCount: number }) {
+export function DashboardNav({ announcementCount, userRole }: { announcementCount: number; userRole?: string }) {
+  const isAdmin = userRole === "admin";
+
   return (
     <>
       {navItems.map((item) => (
@@ -66,6 +71,19 @@ export function DashboardNav({ announcementCount }: { announcementCount: number 
           {item.label}
         </NavLinkItem>
       ))}
+      
+      {isAdmin && (
+        <>
+          <div className="my-2 border-t border-border" />
+          <NavLinkItem
+            href="/admin"
+            icon={Shield}
+            highlight
+          >
+            Admin Panel
+          </NavLinkItem>
+        </>
+      )}
     </>
   );
 }

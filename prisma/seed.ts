@@ -1,16 +1,7 @@
-import { PrismaClient } from "@prisma/client";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
-import path from "path";
+import { db } from "../lib/db";
 import bcrypt from "bcryptjs";
 import { TRACKS } from "../lib/tracks-data";
 import { TIMELINE_STEPS } from "../lib/event-config";
-
-const dbPath = process.env.DATABASE_URL?.startsWith("file:")
-  ? process.env.DATABASE_URL
-  : `file:${path.join(process.cwd(), "prisma", "dev.db")}`;
-
-const adapter = new PrismaBetterSqlite3({ url: dbPath });
-const prisma = new PrismaClient({ adapter });
 
 async function main() {
   console.log("🌱 Seeding database...");
@@ -21,7 +12,7 @@ async function main() {
   const adminPassword = "RajAwinashe@17";
   const hashedPassword = await bcrypt.hash(adminPassword, 12);
 
-  await prisma.user.upsert({
+  await db.user.upsert({
     where: { email: adminEmail },
     update: { role: "admin", password: hashedPassword },
     create: {
@@ -35,7 +26,7 @@ async function main() {
 
   // ── Tracks ───────────────────────────────────────────────────────────────
   for (const track of TRACKS) {
-    await prisma.track.upsert({
+    await db.track.upsert({
       where: { slug: track.slug },
       update: {
         name: track.name,
@@ -106,14 +97,14 @@ async function main() {
     },
   ];
 
-  await prisma.fAQ.deleteMany();
-  await prisma.fAQ.createMany({ data: faqs });
+  await db.fAQ.deleteMany();
+  await db.fAQ.createMany({ data: faqs });
   console.log(`  ✓ ${faqs.length} FAQs`);
 
   // ── Timeline ─────────────────────────────────────────────────────────────
   // Derived from lib/event-config.ts — single source of truth
-  await prisma.timelineEvent.deleteMany();
-  await prisma.timelineEvent.createMany({
+  await db.timelineEvent.deleteMany();
+  await db.timelineEvent.createMany({
     data: TIMELINE_STEPS.map(({ title, date, description, status, order }) => ({
       title, date, description, status, order,
     })),
@@ -127,8 +118,8 @@ async function main() {
     { name: "Utree",                  initial: "U", tier: "silver"   as const, order: 2 },
   ];
 
-  await prisma.sponsor.deleteMany();
-  await prisma.sponsor.createMany({ data: sponsors });
+  await db.sponsor.deleteMany();
+  await db.sponsor.createMany({ data: sponsors });
   console.log(`  ✓ ${sponsors.length} sponsors`);
 
   console.log("✅ Seed complete");
@@ -136,4 +127,4 @@ async function main() {
 
 main()
   .catch((e) => { console.error(e); process.exit(1); })
-  .finally(() => prisma.$disconnect());
+  .finally(() => db.$disconnect());
