@@ -111,17 +111,24 @@ export default async function DashboardPage() {
           <p className="text-muted-foreground text-sm mb-6 max-w-sm mx-auto">
             Help make Solution Challenge 2026 a success! Register as a volunteer to support the event.
           </p>
-          <VolunteerRegistrationDialog
-            sections={volunteerFormSections}
-            existingResponse={volunteerFormResponse}
-            preFillData={volunteerPreFillData || undefined}
-            userEmail={session.user.email || undefined}
-          >
-            <button className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:scale-105">
-              <UserCheck className="w-4 h-4" />
-              Register as Volunteer
-            </button>
-          </VolunteerRegistrationDialog>
+          {volunteerFormSections.length > 0 ? (
+            <VolunteerRegistrationDialog
+              sections={volunteerFormSections}
+              existingResponse={volunteerFormResponse}
+              preFillData={volunteerPreFillData || undefined}
+              userEmail={session.user.email || undefined}
+            >
+              <button className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:scale-105">
+                <UserCheck className="w-4 h-4" />
+                Register as Volunteer
+              </button>
+            </VolunteerRegistrationDialog>
+          ) : (
+            <div className="text-sm text-muted-foreground">
+              <p>Volunteer form sections: {volunteerFormSections.length}</p>
+              <p>Debug: Form not available yet</p>
+            </div>
+          )}
         </div>
       )}
 
