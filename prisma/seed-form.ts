@@ -204,6 +204,7 @@ async function seedForm() {
         sectionId: tshirtMembership.id,
         type: "radio",
         label: "Are you a GDG Penn State member?",
+        description: "You count as an official member if you have joined us through DISCOVER",
         required: true,
         options: JSON.stringify(["Yes", "No"]),
         order: 0,

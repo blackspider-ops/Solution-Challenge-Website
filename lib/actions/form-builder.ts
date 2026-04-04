@@ -194,6 +194,10 @@ export async function saveFormResponse(answers: Record<string, any>) {
     return { data: response };
   } catch (error) {
     console.error("Save form response error:", error);
+    console.error("Error details:", {
+      message: error instanceof Error ? error.message : "Unknown error",
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return { error: "Failed to save response" };
   }
 }
