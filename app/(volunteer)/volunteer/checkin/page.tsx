@@ -128,6 +128,7 @@ export default async function VolunteerCheckInPage() {
                         {new Date(checkIn.checkedInAt).toLocaleTimeString("en-US", {
                           hour: "numeric",
                           minute: "2-digit",
+                          hour12: true,
                         })}
                       </span>
                     </div>

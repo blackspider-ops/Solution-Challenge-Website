@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Clock, Users } from "lucide-react";
 import { RegistrationsSearch } from "@/components/admin/registrations-search";
+import { formatLocalTime } from "@/lib/format-date";
 
 type SearchParams = { q?: string; status?: string; checkin?: string };
 
@@ -112,10 +113,7 @@ export default async function RegistrationsPage({
                   {reg.ticket?.checkIn ? (
                     <span className="flex items-center gap-1 text-emerald-600 text-xs font-medium">
                       <CheckCircle className="w-3.5 h-3.5" />
-                      {new Date(reg.ticket.checkIn.checkedInAt).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                      {formatLocalTime(reg.ticket.checkIn.checkedInAt)}
                     </span>
                   ) : (
                     <span className="flex items-center gap-1 text-muted-foreground text-xs">

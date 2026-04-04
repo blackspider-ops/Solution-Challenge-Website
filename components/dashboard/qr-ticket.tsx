@@ -118,9 +118,10 @@ export function QRTicket({ qrToken, name, email, status, checkedIn, checkedInAt 
               </span>
               {checkedInAt && (
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  {new Date(checkedInAt).toLocaleTimeString([], {
-                    hour: "2-digit",
+                  {new Date(checkedInAt).toLocaleTimeString("en-US", {
+                    hour: "numeric",
                     minute: "2-digit",
+                    hour12: true,
                   })}
                 </p>
               )}
@@ -168,18 +169,10 @@ export function QRTicket({ qrToken, name, email, status, checkedIn, checkedInAt 
         )}
       </div>
 
-      <div className="mt-4 space-y-2">
+      <div className="mt-4">
         <p className="text-xs text-center text-muted-foreground">
           Show this QR code at the event entrance. Screenshot or download it for offline use.
         </p>
-        <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-          <span>Compatible with:</span>
-          <span className="font-medium">Apple Wallet</span>
-          <span>•</span>
-          <span className="font-medium">Google Wallet</span>
-          <span>•</span>
-          <span className="font-medium">Samsung Wallet</span>
-        </div>
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import { useState, useTransition, useRef, useEffect, useCallback } from "react";
 import { checkInParticipant, type CheckInResult } from "@/lib/actions/checkin";
 import { CheckCircle, XCircle, AlertTriangle, Camera } from "lucide-react";
 import { toast } from "sonner";
+import { formatLocalTime } from "@/lib/format-date";
 
 // ─── Result display ────────────────────────────────────────────────────────
 
@@ -16,7 +17,7 @@ function ResultCard({ result }: { result: CheckInResult }) {
           <p className="font-semibold text-emerald-700">Checked in ✓</p>
           <p className="text-sm text-emerald-600">{result.name ?? result.email}</p>
           <p className="text-xs text-emerald-500 mt-0.5">
-            {new Date(result.checkedInAt).toLocaleTimeString()}
+            {formatLocalTime(result.checkedInAt)}
           </p>
         </div>
       </div>
@@ -31,7 +32,7 @@ function ResultCard({ result }: { result: CheckInResult }) {
           <p className="font-semibold text-amber-700">Already checked in</p>
           <p className="text-sm text-amber-600">{result.name ?? result.email}</p>
           <p className="text-xs text-amber-500 mt-0.5">
-            Checked in at {new Date(result.checkedInAt).toLocaleTimeString()}
+            Checked in at {formatLocalTime(result.checkedInAt)}
           </p>
         </div>
       </div>

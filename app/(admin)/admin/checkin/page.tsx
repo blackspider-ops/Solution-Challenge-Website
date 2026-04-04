@@ -1,6 +1,7 @@
 import { CheckInScanner } from "@/components/admin/checkin-scanner";
 import { getCheckInStats, getRecentCheckIns } from "@/lib/actions/checkin";
 import { CheckCircle, Clock, Users } from "lucide-react";
+import { formatLocalTimeWithSeconds } from "@/lib/format-date";
 
 export default async function CheckInPage() {
   const [stats, recent] = await Promise.all([
@@ -104,11 +105,7 @@ export default async function CheckInPage() {
                         </div>
                       </td>
                       <td className="px-4 py-3 text-muted-foreground">
-                        {new Date(ci.checkedInAt).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          second: "2-digit",
-                        })}
+                        {formatLocalTimeWithSeconds(ci.checkedInAt)}
                       </td>
                       <td className="px-4 py-3 text-muted-foreground text-xs">
                         {ci.performer.name ?? ci.performer.email}
