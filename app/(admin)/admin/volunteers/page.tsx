@@ -1,7 +1,9 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getAllVolunteerFormResponses } from "@/lib/actions/volunteer-form-builder";
-import { UserCheck, Mail, Clock } from "lucide-react";
+import { UserCheck, Mail, Clock, FileEdit } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default async function VolunteersPage() {
   const session = await auth();
@@ -21,14 +23,22 @@ export default async function VolunteersPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-          <UserCheck className="w-6 h-6 text-blue-600" />
-          Volunteer Registrations
-        </h1>
-        <p className="text-muted-foreground mt-1">
-          {responses.length} volunteer{responses.length !== 1 ? "s" : ""} registered
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+            <UserCheck className="w-6 h-6 text-blue-600" />
+            Volunteer Registrations
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            {responses.length} volunteer{responses.length !== 1 ? "s" : ""} registered
+          </p>
+        </div>
+        <Link href="/admin/volunteer-form">
+          <Button className="gap-2">
+            <FileEdit className="w-4 h-4" />
+            Edit Volunteer Form
+          </Button>
+        </Link>
       </div>
 
       {responses.length === 0 ? (

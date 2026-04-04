@@ -101,7 +101,8 @@ export default async function DashboardPage() {
       {!volunteerRegistration && 
        volunteerFormSections.length > 0 && 
        session.user.role !== "admin" && 
-       session.user.role !== "volunteer" && (
+       session.user.role !== "volunteer" && 
+       false && ( // Hidden - moved to admin panel
         <div className="rounded-2xl border-2 border-dashed border-blue-500/30 bg-blue-500/5 p-8 text-center">
           <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center mx-auto mb-4">
             <UserCheck className="w-6 h-6 text-blue-600" />
