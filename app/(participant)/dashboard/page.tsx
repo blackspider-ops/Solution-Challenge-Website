@@ -6,16 +6,16 @@ import Link from "next/link";
 import { RegisterButton } from "@/components/dashboard/register-button";
 import { getPublishedAnnouncements } from "@/lib/actions/announcement";
 import { getMyFormResponse } from "@/lib/actions/form-builder";
-import { getMyVolunteerRegistration, getVolunteerPreFillData } from "@/lib/actions/volunteer";
+import { getMyVolunteerRegistration, getVolunteerPreFillData, getEventPreFillData } from "@/lib/actions/volunteer";
 import { getMyVolunteerFormResponse } from "@/lib/actions/volunteer-form-builder";
-import { VolunteerRegistrationDialog } from "@/components/dashboard/volunteer-registration-form";
+import { VolunteerRegisterButton } from "@/components/dashboard/volunteer-register-button";
 import { SCHEDULE } from "@/lib/event-config";
 
 export default async function DashboardPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
-  const [registration, teamMembership, announcements, formSections, formResponse, volunteerRegistration, volunteerPreFillData, volunteerFormSections, volunteerFormResponse] = await Promise.all([
+  const [registration, teamMembership, announcements, formSections, formResponse, volunteerRegistration, volunteerPreFillData, volunteerFormSections, volunteerFormResponse, eventPreFillData] = await Promise.all([
     db.registration.findUnique({
       where: { userId: session.user.id },
       include: { ticket: { include: { checkIn: true } } },
@@ -57,6 +57,7 @@ export default async function DashboardPage() {
       },
     }),
     getMyVolunteerFormResponse(),
+    getEventPreFillData(),
   ]);
 
   const team = teamMembership?.team ?? null;
@@ -91,6 +92,7 @@ export default async function DashboardPage() {
           <RegisterButton 
             sections={formSections} 
             existingResponse={formResponse}
+            preFillData={eventPreFillData || undefined}
             userName={session.user.name || undefined}
             userEmail={session.user.email || undefined}
           />
@@ -111,27 +113,13 @@ export default async function DashboardPage() {
           <p className="text-muted-foreground text-sm mb-6 max-w-sm mx-auto">
             Help make Solution Challenge 2026 a success! Register as a volunteer to support the event.
           </p>
-          {volunteerFormSections && volunteerFormSections.length > 0 ? (
-            <VolunteerRegistrationDialog
-              sections={volunteerFormSections}
-              existingResponse={volunteerFormResponse}
-              preFillData={volunteerPreFillData || undefined}
-              userEmail={session.user.email || undefined}
-            >
-              <button className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:scale-105">
-                <UserCheck className="w-4 h-4" />
-                Register as Volunteer
-              </button>
-            </VolunteerRegistrationDialog>
-          ) : (
-            <button 
-              onClick={() => alert(`Sections count: ${volunteerFormSections?.length || 0}`)}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:scale-105"
-            >
-              <UserCheck className="w-4 h-4" />
-              Debug: Click to see sections count
-            </button>
-          )}
+          <VolunteerRegisterButton
+            sections={volunteerFormSections}
+            existingResponse={volunteerFormResponse}
+            preFillData={volunteerPreFillData || undefined}
+            userName={session.user.name || undefined}
+            userEmail={session.user.email || undefined}
+          />
         </div>
       )}
 

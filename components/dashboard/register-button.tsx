@@ -14,11 +14,13 @@ import { db } from "@/lib/db";
 export function RegisterButton({ 
   sections, 
   existingResponse,
+  preFillData,
   userName,
   userEmail,
 }: { 
   sections: any[]; 
   existingResponse: any;
+  preFillData?: Record<string, any>;
   userName?: string;
   userEmail?: string;
 }) {
@@ -97,6 +99,7 @@ export function RegisterButton({
                 <RegistrationForm 
                   sections={sections} 
                   existingResponse={existingResponse}
+                  preFillData={preFillData}
                   userName={userName}
                   userEmail={userEmail}
                   onComplete={() => {
