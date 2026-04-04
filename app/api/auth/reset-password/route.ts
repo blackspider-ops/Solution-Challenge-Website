@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyOTP } from "@/lib/otp";
+import { verifyOTP, deleteOTP } from "@/lib/otp";
 import { db } from "@/lib/db";
 import bcrypt from "bcryptjs";
 
@@ -59,6 +59,9 @@ export async function POST(request: NextRequest) {
       where: { email: email.toLowerCase() },
       data: { password: hashedPassword },
     });
+
+    // Delete OTP after successful password reset
+    deleteOTP(email);
 
     return NextResponse.json({
       success: true,

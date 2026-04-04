@@ -51,6 +51,42 @@ export function verifyOTP(email: string, code: string): { valid: boolean; error?
 }
 
 /**
+ * Verify OTP without deleting it (for multi-step flows like password reset)
+ */
+export function verifyOTPWithoutDelete(email: string, code: string): { valid: boolean; error?: string } {
+  const stored = otpStore.get(email.toLowerCase());
+  
+  if (!stored) {
+    return { valid: false, error: "No OTP found. Please request a new one." };
+  }
+  
+  if (Date.now() > stored.expiresAt) {
+    otpStore.delete(email.toLowerCase());
+    return { valid: false, error: "OTP expired. Please request a new one." };
+  }
+  
+  if (stored.attempts >= 3) {
+    otpStore.delete(email.toLowerCase());
+    return { valid: false, error: "Too many failed attempts. Please request a new OTP." };
+  }
+  
+  if (stored.code !== code) {
+    stored.attempts++;
+    return { valid: false, error: "Invalid OTP. Please try again." };
+  }
+  
+  // Valid OTP - don't delete, just return success
+  return { valid: true };
+}
+
+/**
+ * Delete OTP for an email (after successful completion)
+ */
+export function deleteOTP(email: string): void {
+  otpStore.delete(email.toLowerCase());
+}
+
+/**
  * Clean up expired OTPs (run periodically)
  */
 export function cleanupExpiredOTPs(): void {

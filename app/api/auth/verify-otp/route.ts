@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyOTP } from "@/lib/otp";
+import { verifyOTPWithoutDelete } from "@/lib/otp";
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Email and code are required" }, { status: 400 });
     }
 
-    const result = verifyOTP(email, code);
+    const result = verifyOTPWithoutDelete(email, code);
 
     if (!result.valid) {
       return NextResponse.json({ error: result.error }, { status: 400 });
