@@ -56,6 +56,18 @@ Seeds the registration form with 17 questions across 5 sections:
 - T-Shirt
 - Agreements
 
+#### Encrypt Existing Passwords
+```bash
+npm run db:encrypt-passwords
+```
+Scans the database for any users with plain text passwords and encrypts them using bcrypt (12 salt rounds). This is a safety script that:
+- Checks all users with passwords
+- Identifies which are already encrypted (bcrypt hashes start with `$2a$`, `$2b$`, or `$2y$`)
+- Encrypts any plain text passwords found
+- Provides a summary of actions taken
+
+**Note:** All new signups automatically encrypt passwords, so this script is only needed for legacy data or manual database imports.
+
 ### Admin Management
 
 #### Create Production Admin

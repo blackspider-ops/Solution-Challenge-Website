@@ -88,7 +88,7 @@ export function RegisterDialog({ children }: RegisterDialogProps) {
     }
   };
 
-  const handleOAuthSignIn = async (provider: "google" | "github") => {
+  const handleOAuthSignIn = async (provider: "google" | "github" | "azure-ad") => {
     setIsLoading(true);
     await signIn(provider, { callbackUrl: "/" });
   };
@@ -241,6 +241,22 @@ export function RegisterDialog({ children }: RegisterDialogProps) {
           >
             <Github className="w-4 h-4" />
             Continue with GitHub
+          </Button>
+
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full gap-2"
+            onClick={() => handleOAuthSignIn("azure-ad")}
+            disabled={isLoading}
+          >
+            <svg className="w-4 h-4" viewBox="0 0 23 23" fill="none">
+              <path d="M0 0h10.377v10.377H0z" fill="#f25022"/>
+              <path d="M12.623 0H23v10.377H12.623z" fill="#00a4ef"/>
+              <path d="M0 12.623h10.377V23H0z" fill="#7fba00"/>
+              <path d="M12.623 12.623H23V23H12.623z" fill="#ffb900"/>
+            </svg>
+            Continue with Microsoft
           </Button>
         </div>
 
