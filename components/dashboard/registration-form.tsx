@@ -38,6 +38,7 @@ type Question = {
 export function RegistrationForm({
   sections,
   existingResponse,
+  preFillData,
   userName,
   userEmail,
   onComplete,
@@ -45,6 +46,7 @@ export function RegistrationForm({
 }: {
   sections: Section[];
   existingResponse?: any;
+  preFillData?: Record<string, any>;
   userName?: string;
   userEmail?: string;
   onComplete?: () => void;
@@ -95,11 +97,10 @@ export function RegistrationForm({
     // Finally, auto-fill name and email from user account if not already answered
     sections.forEach((section) => {
       section.questions.forEach((question) => {
+        const label = question.label.toLowerCase();
+        
         // Auto-fill Full Name
-        if (
-          question.label.toLowerCase().includes("full name") ||
-          question.label.toLowerCase() === "name"
-        ) {
+        if (label.includes("full name") || label === "name") {
           if (!initial[question.id] && userName) {
             initial[question.id] = userName;
           }
@@ -109,6 +110,17 @@ export function RegistrationForm({
         if (question.type === "email") {
           if (!initial[question.id] && userEmail) {
             initial[question.id] = userEmail;
+          }
+        }
+        
+        // Auto-fill from preFillData if available
+        if (preFillData && !initial[question.id]) {
+          if (label.includes("major") && preFillData.major) {
+            initial[question.id] = preFillData.major;
+          } else if ((label.includes("academic year") || label.includes("year")) && preFillData.academicYear) {
+            initial[question.id] = preFillData.academicYear;
+          } else if (label.includes("pronoun") && preFillData.pronouns) {
+            initial[question.id] = preFillData.pronouns;
           }
         }
       });
