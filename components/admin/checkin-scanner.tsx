@@ -70,8 +70,20 @@ function CameraScanner({ onScan, active }: CameraScannerProps) {
   const scanningRef = useRef(false);
   const lastScanRef = useRef<string>("");
   const lastScanTimeRef = useRef<number>(0);
+  const onScanRef = useRef(onScan);
+  const decodeLoopRef = useRef<number | null>(null);
+
+  // Keep onScan ref updated without triggering re-initialization
+  useEffect(() => {
+    onScanRef.current = onScan;
+  }, [onScan]);
 
   const startCamera = useCallback(async () => {
+    // Don't restart if already scanning
+    if (scanningRef.current && streamRef.current?.active) {
+      return;
+    }
+
     setError(null);
     try {
       const { BrowserQRCodeReader } = await import("@zxing/browser");
@@ -90,36 +102,35 @@ function CameraScanner({ onScan, active }: CameraScannerProps) {
         scanningRef.current = true;
 
         // Continuously decode frames with proper loop
-        const decode = async () => {
+        const decode = () => {
           // Check if we should continue scanning
           if (!scanningRef.current || !videoRef.current || !readerRef.current || !streamRef.current?.active) {
             return;
           }
           
-          try {
-            const result = await readerRef.current.decodeOnceFromVideoElement(videoRef.current);
-            if (result?.getText()) {
-              const scannedText = result.getText();
-              const now = Date.now();
-              
-              // Prevent duplicate scans within 3 seconds
-              if (scannedText !== lastScanRef.current || now - lastScanTimeRef.current > 3000) {
-                lastScanRef.current = scannedText;
-                lastScanTimeRef.current = now;
-                onScan(scannedText);
+          readerRef.current.decodeOnceFromVideoElement(videoRef.current)
+            .then((result) => {
+              if (result?.getText()) {
+                const scannedText = result.getText();
+                const now = Date.now();
                 
-                // Wait before next scan
-                await new Promise(resolve => setTimeout(resolve, 2500));
+                // Prevent duplicate scans within 3 seconds
+                if (scannedText !== lastScanRef.current || now - lastScanTimeRef.current > 3000) {
+                  lastScanRef.current = scannedText;
+                  lastScanTimeRef.current = now;
+                  onScanRef.current(scannedText);
+                }
               }
-            }
-          } catch {
-            // No QR found in this frame — continue
-          }
-          
-          // Schedule next decode
-          if (scanningRef.current && streamRef.current?.active) {
-            setTimeout(() => decode(), 150);
-          }
+            })
+            .catch(() => {
+              // No QR found in this frame — continue
+            })
+            .finally(() => {
+              // Schedule next decode
+              if (scanningRef.current && streamRef.current?.active) {
+                decodeLoopRef.current = window.setTimeout(decode, 150);
+              }
+            });
         };
         
         decode();
@@ -132,10 +143,18 @@ function CameraScanner({ onScan, active }: CameraScannerProps) {
       setScanning(false);
       scanningRef.current = false;
     }
-  }, [onScan]);
+  }, []); // Empty deps - only create once
 
   const stopCamera = useCallback(() => {
     scanningRef.current = false;
+    
+    // Clear decode loop
+    if (decodeLoopRef.current) {
+      clearTimeout(decodeLoopRef.current);
+      decodeLoopRef.current = null;
+    }
+    
+    // Stop all tracks
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
     readerRef.current = null;
