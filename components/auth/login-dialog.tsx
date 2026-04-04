@@ -86,7 +86,9 @@ export function LoginDialog({ children }: LoginDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogTrigger asChild data-login-trigger="">
+        {children}
+      </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <div className="flex justify-center mb-4">
@@ -234,14 +236,22 @@ export function LoginDialog({ children }: LoginDialogProps) {
 
         <p className="text-center text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
-          <RegisterDialog>
-            <button
-              type="button"
-              className="text-primary hover:underline font-medium"
-            >
-              Sign up
-            </button>
-          </RegisterDialog>
+          <button
+            type="button"
+            onClick={() => {
+              setOpen(false);
+              // Small delay to allow login dialog to close before opening register
+              setTimeout(() => {
+                const registerTrigger = document.querySelector('[data-register-trigger]') as HTMLElement;
+                if (registerTrigger) {
+                  registerTrigger.click();
+                }
+              }, 100);
+            }}
+            className="text-primary hover:underline font-medium"
+          >
+            Sign up
+          </button>
         </p>
       </DialogContent>
     </Dialog>

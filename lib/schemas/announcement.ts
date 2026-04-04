@@ -13,6 +13,7 @@ export const announcementSchema = z.object({
     .transform((v) => v.trim()),
   published: z.boolean().default(false),
   pinned: z.boolean().default(false),
+  audience: z.enum(["all", "registered", "volunteers"]).default("all"),
 });
 
 export type AnnouncementInput = z.infer<typeof announcementSchema>;

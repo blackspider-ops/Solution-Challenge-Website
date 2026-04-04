@@ -218,6 +218,7 @@ model Announcement {
   body        String
   published   Boolean  @default(false)
   pinned      Boolean  @default(false)
+  audience    String   @default("all") // "all", "registered", "volunteers"
   createdById String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

@@ -1,4 +1,7 @@
+"use client"
+
 import Link from "next/link";
+import { RegisterDialog } from "@/components/auth/register-dialog";
 
 export default function NotFound() {
   return (
@@ -54,12 +57,19 @@ export default function NotFound() {
             </svg>
             Back to Home
           </Link>
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center justify-center px-8 py-3 rounded-xl border-2 border-border bg-background text-foreground font-semibold hover:bg-muted transition-colors"
-          >
-            Go to Dashboard
-          </Link>
+          <RegisterDialog>
+            <button className="inline-flex items-center justify-center px-8 py-3 rounded-xl border-2 border-border bg-background text-foreground font-semibold hover:bg-muted transition-colors">
+              <svg 
+                className="w-5 h-5 mr-2" 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+              </svg>
+              Register for Event
+            </button>
+          </RegisterDialog>
         </div>
 
         {/* Quick Links */}

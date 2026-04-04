@@ -58,12 +58,32 @@ export async function updateUserRole(userId: string, newRole: Role) {
     return { error: "Unauthorized" };
   }
 
-  // Prevent admin from demoting themselves
-  if (userId === session.user.id && newRole !== "admin") {
-    return { error: "You cannot change your own admin role" };
-  }
-
   try {
+    // Get the target user
+    const targetUser = await db.user.findUnique({
+      where: { id: userId },
+      select: { id: true, name: true, email: true, role: true },
+    });
+
+    if (!targetUser) {
+      return { error: "User not found" };
+    }
+
+    // Check if current user is super admin (Tejas Singhal with @psu.edu email)
+    const isSuperAdmin = 
+      session.user.name === "Tejas Singhal" && 
+      session.user.email?.endsWith("@psu.edu");
+
+    // Prevent admin from demoting themselves
+    if (userId === session.user.id && newRole !== "admin") {
+      return { error: "You cannot change your own admin role" };
+    }
+
+    // Prevent non-super-admins from demoting other admins
+    if (targetUser.role === "admin" && newRole !== "admin" && !isSuperAdmin) {
+      return { error: "Only the super admin can change admin roles" };
+    }
+
     const user = await db.user.update({
       where: { id: userId },
       data: { role: newRole },

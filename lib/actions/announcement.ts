@@ -44,16 +44,37 @@ export async function sendAnnouncementAsEmail(
 
     if (!announcement) return { error: "Announcement not found" };
 
-    // Get all registered users' emails
-    const registrations = await db.registration.findMany({
-      where: { status: "confirmed" },
-      include: { user: { select: { email: true } } },
-    });
+    let emails: string[] = [];
 
-    const emails = registrations.map((r) => r.user.email);
+    // Get emails based on audience
+    if (announcement.audience === "all") {
+      // Get all registered users
+      const registrations = await db.registration.findMany({
+        where: { status: "confirmed" },
+        include: { user: { select: { email: true } } },
+      });
+      emails = registrations.map((r) => r.user.email);
+    } else if (announcement.audience === "registered") {
+      // Get only registered participants (not volunteers/admins)
+      const registrations = await db.registration.findMany({
+        where: { 
+          status: "confirmed",
+          user: { role: "participant" }
+        },
+        include: { user: { select: { email: true } } },
+      });
+      emails = registrations.map((r) => r.user.email);
+    } else if (announcement.audience === "volunteers") {
+      // Get only volunteers
+      const volunteers = await db.user.findMany({
+        where: { role: "volunteer" },
+        select: { email: true },
+      });
+      emails = volunteers.map((v) => v.email);
+    }
 
     if (emails.length === 0) {
-      return { error: "No registered participants to email" };
+      return { error: `No ${announcement.audience === "all" ? "registered participants" : announcement.audience} to email` };
     }
 
     // Send email

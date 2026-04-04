@@ -10,6 +10,7 @@ import {
   toggleAnnouncementPublished,
   toggleAnnouncementPinned,
   deleteAnnouncement,
+  sendAnnouncementAsEmail,
 } from "@/lib/actions/announcement";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,7 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { Plus, Eye, EyeOff, Pencil, Trash2, X, Megaphone, Pin } from "lucide-react";
+import { Plus, Eye, EyeOff, Pencil, Trash2, X, Megaphone, Pin, Mail } from "lucide-react";
 
 type Announcement = {
   id: string;
@@ -26,6 +27,7 @@ type Announcement = {
   body: string;
   published: boolean;
   pinned: boolean;
+  audience: string;
   createdAt: Date;
   createdBy: { name: string | null };
 };
@@ -42,16 +44,16 @@ export function AnnouncementManager({ announcements }: { announcements: Announce
 
   const form = useForm<AnnouncementInput>({
     resolver: zodResolver(announcementSchema),
-    defaultValues: { title: "", body: "", published: false },
+    defaultValues: { title: "", body: "", published: false, audience: "all" },
   });
 
   function openCreate() {
-    form.reset({ title: "", body: "", published: false });
+    form.reset({ title: "", body: "", published: false, audience: "all" });
     setMode("create");
   }
 
   function openEdit(a: Announcement) {
-    form.reset({ title: a.title, body: a.body, published: a.published, pinned: a.pinned });
+    form.reset({ title: a.title, body: a.body, published: a.published, pinned: a.pinned, audience: a.audience as "all" | "registered" | "volunteers" });
     setMode({ edit: a });
   }
 
@@ -80,12 +82,48 @@ export function AnnouncementManager({ announcements }: { announcements: Announce
     });
   }
 
-  function handleToggle(id: string) {
+  function handleToggle(id: string, currentlyPublished: boolean) {
     startTransition(async () => {
       try {
         const result = await toggleAnnouncementPublished(id);
         if ("error" in result) { toast.error(result.error); return; }
+        
+        // If we just published it, send email to all registered users
+        if (!currentlyPublished) {
+          toast.promise(
+            sendAnnouncementAsEmail(id),
+            {
+              loading: "Sending email to registered participants...",
+              success: (emailResult) => {
+                if ("error" in emailResult) {
+                  return `Published, but email failed: ${emailResult.error}`;
+                }
+                return `Published and emailed to ${emailResult.data.sent} participants!`;
+              },
+              error: "Published, but email failed",
+            }
+          );
+        } else {
+          toast.success("Announcement unpublished");
+        }
+        
         router.refresh();
+      } catch {
+        toast.error("Network error — please try again");
+      }
+    });
+  }
+
+  function handleSendEmail(id: string, title: string) {
+    if (!confirm(`Send "${title}" to all registered participants?`)) return;
+    startTransition(async () => {
+      try {
+        const result = await sendAnnouncementAsEmail(id);
+        if ("error" in result) { 
+          toast.error(result.error); 
+          return; 
+        }
+        toast.success(`Email sent to ${result.data.sent} participants!`);
       } catch {
         toast.error("Network error — please try again");
       }
@@ -175,6 +213,22 @@ export function AnnouncementManager({ announcements }: { announcements: Announce
               )}
             </div>
 
+            <div className="space-y-1.5">
+              <Label htmlFor="ann-audience">Send to</Label>
+              <select
+                id="ann-audience"
+                {...form.register("audience")}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+              >
+                <option value="all">All Registered Users</option>
+                <option value="registered">Registered Participants Only</option>
+                <option value="volunteers">Volunteers Only</option>
+              </select>
+              <p className="text-xs text-muted-foreground">
+                Choose who will receive this announcement via email
+              </p>
+            </div>
+
             <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer w-fit">
               <input
                 type="checkbox"
@@ -242,6 +296,11 @@ export function AnnouncementManager({ announcements }: { announcements: Announce
                     <Badge variant={a.published ? "default" : "secondary"}>
                       {a.published ? "Published" : "Draft"}
                     </Badge>
+                    {a.audience !== "all" && (
+                      <Badge variant="outline" className="text-xs">
+                        {a.audience === "registered" ? "Participants" : "Volunteers"}
+                      </Badge>
+                    )}
                   </div>
                   <p className="text-sm text-muted-foreground line-clamp-2">{a.body}</p>
                   <p className="text-xs text-muted-foreground mt-2">
@@ -256,6 +315,16 @@ export function AnnouncementManager({ announcements }: { announcements: Announce
 
                 {/* Actions */}
                 <div className="flex items-center gap-1 shrink-0">
+                  {a.published && (
+                    <button
+                      onClick={() => handleSendEmail(a.id, a.title)}
+                      disabled={isPending}
+                      title="Send email to all registered participants"
+                      className="p-2 rounded-lg text-muted-foreground hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                    >
+                      <Mail className="w-4 h-4" />
+                    </button>
+                  )}
                   <button
                     onClick={() => handlePin(a.id)}
                     disabled={isPending}
@@ -269,9 +338,9 @@ export function AnnouncementManager({ announcements }: { announcements: Announce
                     <Pin className="w-4 h-4" />
                   </button>
                   <button
-                    onClick={() => handleToggle(a.id)}
+                    onClick={() => handleToggle(a.id, a.published)}
                     disabled={isPending}
-                    title={a.published ? "Unpublish" : "Publish"}
+                    title={a.published ? "Unpublish" : "Publish and email participants"}
                     className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                   >
                     {a.published ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}

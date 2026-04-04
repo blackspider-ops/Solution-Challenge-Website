@@ -47,12 +47,20 @@ type UserData = {
   }[];
 };
 
-export function UserManagement({ users }: { users: UserData[] }) {
+export function UserManagement({ users, currentUser }: { 
+  users: UserData[];
+  currentUser: { name: string | null; email: string | null };
+}) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [registrationFilter, setRegistrationFilter] = useState<string>("all");
+
+  // Check if current user is super admin
+  const isSuperAdmin = 
+    currentUser.name === "Tejas Singhal" && 
+    currentUser.email?.endsWith("@psu.edu");
 
   function handleRoleChange(userId: string, userName: string, newRole: Role) {
     startTransition(async () => {
@@ -212,7 +220,11 @@ export function UserManagement({ users }: { users: UserData[] }) {
                 <div className="flex items-center gap-2 shrink-0">
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="outline" size="sm" disabled={isPending}>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        disabled={isPending || (user.role === "admin" && !isSuperAdmin)}
+                      >
                         Change Role
                       </Button>
                     </AlertDialogTrigger>
@@ -221,6 +233,11 @@ export function UserManagement({ users }: { users: UserData[] }) {
                         <AlertDialogTitle>Change User Role</AlertDialogTitle>
                         <AlertDialogDescription>
                           Select a new role for {user.name || user.email}
+                          {user.role === "admin" && !isSuperAdmin && (
+                            <span className="block mt-2 text-amber-600">
+                              ⚠️ Only the super admin can change admin roles
+                            </span>
+                          )}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
 
@@ -252,7 +269,7 @@ export function UserManagement({ users }: { users: UserData[] }) {
                               : "hover:bg-muted"
                           }`}
                           onClick={() => handleRoleChange(user.id, user.name || user.email, "volunteer")}
-                          disabled={user.role === "volunteer"}
+                          disabled={user.role === "volunteer" || (user.role === "admin" && !isSuperAdmin)}
                         >
                           <UserCog className="w-4 h-4" />
                           <div className="text-left">
@@ -271,7 +288,7 @@ export function UserManagement({ users }: { users: UserData[] }) {
                               : "hover:bg-muted"
                           }`}
                           onClick={() => handleRoleChange(user.id, user.name || user.email, "participant")}
-                          disabled={user.role === "participant"}
+                          disabled={user.role === "participant" || (user.role === "admin" && !isSuperAdmin)}
                         >
                           <User className="w-4 h-4" />
                           <div className="text-left">

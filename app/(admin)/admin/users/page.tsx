@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Users, UserCheck, UserX, Shield, UserCog } from "lucide-react";
 
 export default async function AdminUsersPage() {
-  await requireAdmin();
+  const session = await requireAdmin();
 
   const [usersResult, statsResult] = await Promise.all([
     getAllUsers(),
@@ -103,7 +103,13 @@ export default async function AdminUsersPage() {
         </p>
       </div>
 
-      <UserManagement users={users} />
+      <UserManagement 
+        users={users} 
+        currentUser={{ 
+          name: session.user?.name || null, 
+          email: session.user?.email || null 
+        }} 
+      />
     </div>
   );
 }
