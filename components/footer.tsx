@@ -15,6 +15,7 @@ const footerLinks = {
   support: [
     { label: "FAQ",            href: "#faq" },
     { label: "Contact Us",     href: "#contact" },
+    { label: "Code of Conduct", href: "/code-of-conduct" },
     { label: "Sponsors",       href: "#sponsors" },
   ],
 }
@@ -245,8 +246,8 @@ export function Footer() {
             © {new Date().getFullYear()} Google Developer Groups at Penn State · Solution Challenge
           </p>
           <div className="flex items-center gap-8">
-            <Link href="#" className="text-sm text-background/50 hover:text-primary transition-colors">Privacy Policy</Link>
-            <Link href="#" className="text-sm text-background/50 hover:text-primary transition-colors">Terms of Service</Link>
+            <Link href="/privacy-policy" className="text-sm text-background/50 hover:text-primary transition-colors">Privacy Policy</Link>
+            <Link href="/terms-of-service" className="text-sm text-background/50 hover:text-primary transition-colors">Terms of Service</Link>
             <a href="mailto:gdg@psu.edu" className="text-sm text-background/50 hover:text-primary transition-colors">gdg@psu.edu</a>
           </div>
         </div>
