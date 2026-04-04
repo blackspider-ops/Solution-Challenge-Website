@@ -6,16 +6,32 @@ import { put, del } from "@vercel/blob";
  */
 export async function uploadFile(file: File, folder: string = "resumes"): Promise<string> {
   try {
+    console.log("Starting file upload:", {
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      folder,
+    });
+
     const filename = `${folder}/${Date.now()}-${file.name}`;
+    
+    console.log("Uploading to blob with filename:", filename);
+    
     const blob = await put(filename, file, {
-      access: "public", // Will be private in production, public for easier testing
+      access: "public",
       addRandomSuffix: true,
     });
     
+    console.log("Upload successful:", blob.url);
+    
     return blob.url;
   } catch (error) {
-    console.error("File upload error:", error);
-    throw new Error("Failed to upload file");
+    console.error("File upload error details:", {
+      error,
+      message: error instanceof Error ? error.message : "Unknown error",
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+    throw error;
   }
 }
 
