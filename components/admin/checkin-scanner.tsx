@@ -85,27 +85,38 @@ function CameraScanner({ onScan, active }: CameraScannerProps) {
         await videoRef.current.play();
         setScanning(true);
 
-        // Continuously decode frames
-        const decode = async () => {
-          if (!videoRef.current || !readerRef.current || !streamRef.current?.active) return;
+        // Continuously decode frames with proper loop
+        let isScanning = true;
+        const decode = async (): Promise<void> => {
+          if (!isScanning || !videoRef.current || !readerRef.current || !streamRef.current?.active) {
+            return;
+          }
+          
           try {
             const result = await readerRef.current.decodeOnceFromVideoElement(videoRef.current);
             if (result?.getText()) {
               onScan(result.getText());
               // Continue scanning after a brief pause
-              setTimeout(decode, 2000);
-            } else {
-              // No QR found, keep scanning immediately
-              setTimeout(decode, 100);
+              await new Promise(resolve => setTimeout(resolve, 2000));
+              return decode();
             }
           } catch {
             // No QR found in this frame — keep trying
-            if (streamRef.current?.active) {
-              setTimeout(decode, 100);
-            }
+          }
+          
+          // Continue scanning immediately if no QR found or error
+          if (streamRef.current?.active) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            return decode();
           }
         };
+        
         decode();
+        
+        // Cleanup function to stop scanning loop
+        return () => {
+          isScanning = false;
+        };
       }
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Camera access denied";

@@ -27,14 +27,10 @@ export function HeroSection() {
     setMounted(true)
   }, [])
 
-  // Reduce motion on mobile
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
-  const animationDuration = isMobile ? 0.3 : 0.6
-
   return (
     <section
       id="home"
-      className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 pb-16"
+      className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden pt-24 pb-16 px-4"
     >
       {/* Depth overlays */}
       <div className="absolute inset-0 -z-10">
@@ -42,18 +38,19 @@ export function HeroSection() {
         <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background/50 to-transparent" />
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
+      <div className="max-w-7xl mx-auto w-full sm:px-6 lg:px-8 text-center relative">
 
         {/* GDG Organizer badge */}
         <motion.div
           initial={{ opacity: 0, y: 20, scale: 0.9 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: animationDuration, ease: [0.22, 1, 0.36, 1] }}
-          className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-gradient-to-r from-primary/10 to-chart-2/10 border border-primary/20 mb-10 backdrop-blur-sm shadow-lg shadow-primary/5"
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          className="inline-flex items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2 sm:py-2.5 rounded-full bg-gradient-to-r from-primary/10 to-chart-2/10 border border-primary/20 mb-6 sm:mb-10 backdrop-blur-sm shadow-lg shadow-primary/5"
         >
-          <GoogleLogo className="w-5 h-5 shrink-0" />
-          <span className="text-sm font-semibold text-foreground">
-            Google Developer Groups On Campus, Penn State
+          <GoogleLogo className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+          <span className="text-xs sm:text-sm font-semibold text-foreground">
+            <span className="hidden sm:inline">Google Developer Groups On Campus, Penn State</span>
+            <span className="sm:hidden">GDG Penn State</span>
           </span>
         </motion.div>
 
@@ -61,11 +58,11 @@ export function HeroSection() {
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: animationDuration, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-          className="text-5xl sm:text-6xl lg:text-8xl font-bold text-foreground mb-6 tracking-tight"
+          transition={{ duration: 0.4, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+          className="text-4xl sm:text-6xl lg:text-8xl font-bold text-foreground mb-4 sm:mb-6 tracking-tight leading-tight"
         >
-          <span className="block text-balance">Solution</span>
-          <span className="block mt-2">
+          <span className="block">Solution</span>
+          <span className="block mt-1 sm:mt-2">
             <span className="bg-gradient-to-r from-primary via-chart-5 to-chart-2 bg-clip-text text-transparent">
               Challenge
             </span>
@@ -76,8 +73,8 @@ export function HeroSection() {
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: animationDuration, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-          className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 leading-relaxed text-pretty"
+          transition={{ duration: 0.4, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+          className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto mb-6 sm:mb-8 leading-relaxed px-2"
         >
           A thrilling two-day hackathon where you build technology solutions for the world&apos;s
           most pressing challenges. Winners advance to the{" "}
@@ -88,20 +85,22 @@ export function HeroSection() {
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: animationDuration, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-          className="flex flex-wrap items-center justify-center gap-3 mb-12 text-sm text-muted-foreground"
+          transition={{ duration: 0.4, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+          className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-2 sm:gap-3 mb-8 sm:mb-12 text-xs sm:text-sm text-muted-foreground"
         >
-          <span className="flex items-center gap-1.5 bg-card border border-border rounded-full px-4 py-1.5">
-            <Calendar className="w-3.5 h-3.5 text-primary" />
+          <span className="flex items-center gap-1.5 bg-card border border-border rounded-full px-3 sm:px-4 py-1.5 whitespace-nowrap">
+            <Calendar className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-primary shrink-0" />
             April 11 – 12, 2026
           </span>
-          <span className="flex items-center gap-1.5 bg-card border border-border rounded-full px-4 py-1.5">
-            <Clock className="w-3.5 h-3.5 text-primary" />
-            April 11, 7:00 PM – April 12, 12:00 PM (Noon)
+          <span className="flex items-center gap-1.5 bg-card border border-border rounded-full px-3 sm:px-4 py-1.5 text-center">
+            <Clock className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-primary shrink-0" />
+            <span className="hidden sm:inline">April 11, 7:00 PM – April 12, 12:00 PM (Noon)</span>
+            <span className="sm:hidden">Apr 11, 7PM – Apr 12, 12PM</span>
           </span>
-          <span className="flex items-center gap-1.5 bg-card border border-border rounded-full px-4 py-1.5">
-            <MapPin className="w-3.5 h-3.5 text-primary" />
-            ECoRE Building, University Park, PA
+          <span className="flex items-center gap-1.5 bg-card border border-border rounded-full px-3 sm:px-4 py-1.5 whitespace-nowrap">
+            <MapPin className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-primary shrink-0" />
+            <span className="hidden sm:inline">ECoRE Building, University Park, PA</span>
+            <span className="sm:hidden">ECoRE Building, PSU</span>
           </span>
         </motion.div>
 
@@ -109,36 +108,36 @@ export function HeroSection() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: animationDuration, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-5"
+          transition={{ duration: 0.4, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
+          className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-5 max-w-md sm:max-w-none mx-auto"
           suppressHydrationWarning
         >
           {!mounted || status === "loading" ? (
-            <div className="h-14 w-48 bg-muted animate-pulse rounded-xl" />
+            <div className="h-12 sm:h-14 w-full sm:w-48 bg-muted animate-pulse rounded-xl" />
           ) : session ? (
-            <Link href="/dashboard">
+            <Link href="/dashboard" className="w-full sm:w-auto">
               <Button
                 size="lg"
-                className="relative bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/40 hover:scale-105 transition-all duration-300 group px-8 py-6 text-base font-semibold rounded-xl"
+                className="w-full sm:w-auto relative bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/40 active:scale-95 sm:hover:scale-105 transition-all duration-300 group px-6 sm:px-8 py-5 sm:py-6 text-sm sm:text-base font-semibold rounded-xl"
               >
                 Go to Dashboard
-                <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+                <ArrowRight className="ml-2 w-4 sm:w-5 h-4 sm:h-5 group-hover:translate-x-1 transition-transform duration-300" />
               </Button>
             </Link>
           ) : (
             <RegisterDialog>
               <Button
                 size="lg"
-                className="relative bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/40 hover:scale-105 transition-all duration-300 group px-8 py-6 text-base font-semibold rounded-xl"
+                className="w-full sm:w-auto relative bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/40 active:scale-95 sm:hover:scale-105 transition-all duration-300 group px-6 sm:px-8 py-5 sm:py-6 text-sm sm:text-base font-semibold rounded-xl"
               >
                 Register Now
-                <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+                <ArrowRight className="ml-2 w-4 sm:w-5 h-4 sm:h-5 group-hover:translate-x-1 transition-transform duration-300" />
               </Button>
             </RegisterDialog>
           )}
           <a
             href="#contact"
-            className="inline-flex items-center gap-2 px-8 py-4 text-base font-medium text-muted-foreground border-2 border-border/60 hover:border-primary/40 hover:bg-primary/5 hover:text-foreground transition-all duration-300 rounded-xl backdrop-blur-sm"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-4 text-sm sm:text-base font-medium text-muted-foreground border-2 border-border/60 hover:border-primary/40 hover:bg-primary/5 hover:text-foreground active:scale-95 transition-all duration-300 rounded-xl backdrop-blur-sm"
           >
             Contact Us
           </a>
@@ -148,13 +147,16 @@ export function HeroSection() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: animationDuration, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-16 flex items-center justify-center gap-3 text-sm text-muted-foreground"
+          transition={{ duration: 0.4, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          className="mt-12 sm:mt-16 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground"
         >
           <span>Presented by</span>
-          <div className="flex items-center gap-2 bg-card border border-border rounded-xl px-4 py-2 shadow-sm">
-            <GoogleLogo className="w-5 h-5" />
-            <span className="font-semibold text-foreground">Google Developer Groups</span>
+          <div className="flex items-center gap-2 bg-card border border-border rounded-xl px-3 sm:px-4 py-2 shadow-sm">
+            <GoogleLogo className="w-4 sm:w-5 h-4 sm:h-5 shrink-0" />
+            <span className="font-semibold text-foreground text-xs sm:text-sm">
+              <span className="hidden sm:inline">Google Developer Groups</span>
+              <span className="sm:hidden">GDG</span>
+            </span>
           </div>
         </motion.div>
 
@@ -162,11 +164,11 @@ export function HeroSection() {
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: animationDuration, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-16 relative"
+          transition={{ duration: 0.4, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          className="mt-12 sm:mt-16 relative"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent rounded-3xl" />
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 p-6 md:p-10 rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm shadow-xl shadow-primary/5">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent rounded-2xl sm:rounded-3xl" />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-8 p-4 sm:p-6 md:p-10 rounded-2xl sm:rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm shadow-xl shadow-primary/5">
             {[
               { value: "17h", label: "Of Hacking" },
               { value: "6", label: "Challenge Tracks" },
@@ -179,22 +181,22 @@ export function HeroSection() {
                 whileHover={{ scale: 1.05 }}
                 transition={{ duration: 0.2 }}
               >
-                <div className="text-4xl sm:text-5xl font-bold text-foreground mb-2">
+                <div className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-1 sm:mb-2">
                   {stat.value}
                 </div>
-                <div className="text-sm text-muted-foreground font-medium">{stat.label}</div>
+                <div className="text-xs sm:text-sm text-muted-foreground font-medium">{stat.label}</div>
               </motion.div>
             ))}
           </div>
         </motion.div>
       </div>
 
-      {/* Scroll Indicator */}
+      {/* Scroll Indicator - Hidden on mobile */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1, delay: 1 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 cursor-pointer"
+        className="hidden sm:block absolute bottom-8 left-1/2 -translate-x-1/2 z-10 cursor-pointer"
         onClick={() => {
           const tracksSection = document.getElementById('tracks');
           if (tracksSection) {

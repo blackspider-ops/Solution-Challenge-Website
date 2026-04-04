@@ -43,25 +43,25 @@ export function Navbar() {
     <motion.nav
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-background/90 backdrop-blur-xl border-b border-border/50 shadow-lg shadow-foreground/5"
+          ? "bg-background/95 backdrop-blur-xl border-b border-border/50 shadow-lg shadow-foreground/5"
           : "bg-transparent"
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+        <div className="flex items-center justify-between h-16 sm:h-20">
           {/* Logo — GDG at Penn State */}
-          <Link href="#home" className="flex items-center gap-3 group">
+          <Link href="#home" className="flex items-center gap-2 sm:gap-3 group min-w-0">
             <motion.div
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.2 }}
-              className="w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-primary/20 shrink-0"
+              className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl overflow-hidden shadow-lg shadow-primary/20 shrink-0"
             >
               <GDGLogo className="w-full h-full" />
             </motion.div>
-            <div className="hidden sm:block">
+            <div className="hidden sm:block min-w-0">
               <p className="font-bold text-sm text-foreground group-hover:text-primary transition-colors leading-tight">
                 Google Developer Groups
               </p>
@@ -115,10 +115,10 @@ export function Navbar() {
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden p-2.5 rounded-xl text-foreground hover:bg-muted transition-colors"
+            className="md:hidden p-2 rounded-xl text-foreground hover:bg-muted transition-colors shrink-0"
             aria-label="Toggle menu"
           >
-            {isOpen ? <X size={24} /> : <Menu size={24} />}
+            {isOpen ? <X size={20} /> : <Menu size={20} />}
           </motion.button>
         </div>
       </div>
@@ -130,10 +130,10 @@ export function Navbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
             className="md:hidden bg-background/98 backdrop-blur-xl border-b border-border overflow-hidden"
           >
-            <div className="px-6 py-6 flex flex-col gap-2">
+            <div className="px-4 py-4 flex flex-col gap-1 max-h-[calc(100vh-4rem)] overflow-y-auto">
               {navLinks.map((link, index) => (
                 <motion.div
                   key={link.href}
@@ -144,7 +144,7 @@ export function Navbar() {
                   <Link
                     href={link.href}
                     onClick={() => setIsOpen(false)}
-                    className="flex items-center text-foreground hover:text-primary transition-colors py-3 px-4 rounded-xl hover:bg-muted font-medium"
+                    className="flex items-center text-foreground hover:text-primary transition-colors py-3 px-4 rounded-xl hover:bg-muted font-medium text-sm"
                   >
                     {link.label}
                   </Link>
@@ -155,12 +155,12 @@ export function Navbar() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.25 }}
               >
-                <div className="flex flex-col gap-2 mt-4" suppressHydrationWarning>
+                <div className="flex flex-col gap-2 mt-3 pt-3 border-t border-border" suppressHydrationWarning>
                   {status === "loading" ? (
                     <div className="h-12 bg-muted animate-pulse rounded-xl" />
                   ) : session ? (
                     <Link href="/dashboard" onClick={() => setIsOpen(false)}>
-                      <Button className="w-full bg-gradient-to-r from-primary to-primary/90 text-primary-foreground py-6 rounded-xl shadow-lg shadow-primary/25">
+                      <Button className="w-full bg-gradient-to-r from-primary to-primary/90 text-primary-foreground h-12 rounded-xl shadow-lg shadow-primary/25">
                         Dashboard
                         <ArrowRight className="ml-2 w-4 h-4" />
                       </Button>
@@ -168,10 +168,10 @@ export function Navbar() {
                   ) : (
                     <>
                       <LoginDialog>
-                        <Button variant="outline" className="w-full rounded-xl">Sign in</Button>
+                        <Button variant="outline" className="w-full h-12 rounded-xl">Sign in</Button>
                       </LoginDialog>
                       <RegisterDialog>
-                        <Button className="w-full bg-gradient-to-r from-primary to-primary/90 text-primary-foreground py-6 rounded-xl shadow-lg shadow-primary/25">
+                        <Button className="w-full bg-gradient-to-r from-primary to-primary/90 text-primary-foreground h-12 rounded-xl shadow-lg shadow-primary/25">
                           Register Now
                           <ArrowRight className="ml-2 w-4 h-4" />
                         </Button>

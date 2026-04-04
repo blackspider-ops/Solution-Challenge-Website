@@ -12,12 +12,6 @@ export const metadata: Metadata = {
   title: 'Solution Challenge | Google Developer Groups at Penn State',
   description: 'A two-day hackathon organized by Google Developer Groups On Campus at Penn State. April 11–12 at the ECoRE Building, University Park, PA. Winners advance to the North America regional round held by Google.',
   generator: 'v0.app',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 5,
-    userScalable: true,
-  },
   icons: {
     icon: [
       {
@@ -45,6 +39,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" />
         <meta name="theme-color" content="#8b5cf6" />
       </head>
       <body className="font-sans antialiased min-h-screen" suppressHydrationWarning>

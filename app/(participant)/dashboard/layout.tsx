@@ -76,24 +76,24 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div className="min-h-screen bg-background">
       {/* Mobile Header */}
-      <div className="lg:hidden sticky top-0 z-40 flex items-center gap-4 px-4 py-3 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="lg:hidden sticky top-0 z-40 flex items-center gap-3 px-4 h-16 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="lg:hidden">
+            <Button variant="ghost" size="icon" className="lg:hidden shrink-0">
               <Menu className="w-5 h-5" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-64 p-0">
+          <SheetContent side="left" className="w-72 p-0">
             <div className="flex flex-col h-full">
               <SidebarContent />
             </div>
           </SheetContent>
         </Sheet>
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-lg flex items-center justify-center">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0">
             <img src="https://www.gdgpsu.dev/api/media?path=1762291432641-c8uv057d7gi.png" alt="GDG PSU" className="w-full h-full object-contain" />
           </div>
-          <span className="font-semibold text-sm">Dashboard</span>
+          <span className="font-semibold text-sm truncate">Dashboard</span>
         </div>
       </div>
 
@@ -104,7 +104,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 overflow-auto">
+        <main className="flex-1 min-w-0">
           <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">{children}</div>
         </main>
       </div>
