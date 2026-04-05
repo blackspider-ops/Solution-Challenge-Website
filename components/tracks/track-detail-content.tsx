@@ -135,10 +135,10 @@ export function TrackDetailContent({ track, staticData, isAdmin, isPreview }: Pr
         {/* CTA */}
         <div className="flex flex-col sm:flex-row gap-4">
           <Link
-            href="/register"
+            href="/dashboard"
             className={`inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-semibold text-white bg-gradient-to-r ${staticData.gradient} shadow-lg hover:scale-105 transition-all duration-300`}
           >
-            Register for this track
+            Go to Dashboard
           </Link>
           <Link
             href="/#tracks"

@@ -6,6 +6,43 @@ import { requireAdmin } from "@/lib/admin-guard";
 
 // ─── Track Management ────────────────────────────────────────────────────────
 
+export async function createTrack(data: {
+  slug: string;
+  name: string;
+  description: string;
+  fullDescription: string;
+  promptContent: string;
+  icon: string;
+  gradient: string;
+}) {
+  try {
+    await requireAdmin();
+
+    // Get the highest order number
+    const maxOrder = await db.track.findFirst({
+      orderBy: { order: "desc" },
+      select: { order: true },
+    });
+
+    await db.track.create({
+      data: {
+        ...data,
+        order: (maxOrder?.order ?? 0) + 1,
+        visible: true,
+      },
+    });
+
+    revalidatePath("/admin/tracks");
+    revalidatePath("/");
+    revalidatePath("/tracks/[slug]", "page");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Create track error:", error);
+    return { error: "Failed to create track" };
+  }
+}
+
 export async function updateTrack(
   id: string,
   data: {
@@ -33,6 +70,25 @@ export async function updateTrack(
   } catch (error) {
     console.error("Update track error:", error);
     return { error: "Failed to update track" };
+  }
+}
+
+export async function deleteTrack(id: string) {
+  try {
+    await requireAdmin();
+
+    await db.track.delete({
+      where: { id },
+    });
+
+    revalidatePath("/admin/tracks");
+    revalidatePath("/");
+    revalidatePath("/tracks/[slug]", "page");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Delete track error:", error);
+    return { error: "Failed to delete track" };
   }
 }
 
