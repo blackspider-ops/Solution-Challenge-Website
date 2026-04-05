@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from '@/components/ui/sonner'
 import { Providers } from '@/components/providers'
+import { MobilePreloader } from '@/components/mobile-preloader'
 import './globals.css'
 
 const _geist = Geist({ subsets: ["latin"] });
@@ -43,6 +44,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#8b5cf6" />
       </head>
       <body className="font-sans antialiased min-h-screen" suppressHydrationWarning>
+        <MobilePreloader />
         <Providers>
           {children}
         </Providers>

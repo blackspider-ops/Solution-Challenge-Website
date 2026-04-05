@@ -42,6 +42,11 @@ html {
   *:hover {
     transition: opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease !important;
   }
+  
+  /* Prevent layout shift during load */
+  body {
+    overflow-x: hidden;
+  }
 }
 
 :root {
