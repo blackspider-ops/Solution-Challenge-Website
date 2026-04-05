@@ -29,27 +29,18 @@ html {
   }
 }
 
-/* Prevent flash of unstyled content */
-body {
-  opacity: 1;
-}
-
-/* Prevent layout shift from scrollbar */
-html {
-  overflow-y: scroll;
-}
-
-/* Disable animations on mobile to prevent jitter and flickering */
+/* Disable scroll animations on mobile to prevent flickering */
 @media (max-width: 768px) {
-  /* Disable all Framer Motion animations on mobile */
-  [data-projection-id] {
+  /* Force all elements to be visible and in final position */
+  * {
     opacity: 1 !important;
     transform: none !important;
+    animation: none !important;
   }
   
-  /* Keep regular CSS transitions fast */
-  *:not(.animate-spin):not(.animate-pulse) {
-    transition-duration: 0.2s !important;
+  /* Allow only simple transitions */
+  *:hover {
+    transition: opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease !important;
   }
 }
 
