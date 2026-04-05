@@ -21,10 +21,10 @@ export function TracksSection() {
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
         <motion.div
-          initial={isMobile ? { opacity: 0 } : { opacity: 0, y: 20 }}
-          whileInView={isMobile ? { opacity: 1 } : { opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: isMobile ? 0.2 : 0.6, ease: "easeOut" }}
+          initial={isMobile ? {} : { opacity: 0, y: 20 }}
+          whileInView={isMobile ? {} : { opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
           className="text-center mb-20"
         >
           <span className="inline-block text-sm font-semibold text-primary uppercase tracking-wider mb-4">
@@ -49,12 +49,12 @@ export function TracksSection() {
             return (
               <motion.div
                 key={track.slug}
-                initial={isMobile ? { opacity: 0 } : { opacity: 0, y: 20 }}
-                whileInView={isMobile ? { opacity: 1 } : { opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
+                initial={isMobile ? {} : { opacity: 0, y: 20 }}
+                whileInView={isMobile ? {} : { opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
                 transition={{ 
-                  duration: isMobile ? 0.2 : 0.5, 
-                  delay: isMobile ? 0 : index * 0.08, 
+                  duration: 0.4, 
+                  delay: isMobile ? 0 : index * 0.05, 
                   ease: "easeOut" 
                 }}
               >

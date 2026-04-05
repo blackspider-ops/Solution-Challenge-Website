@@ -39,28 +39,17 @@ html {
   overflow-y: scroll;
 }
 
-/* Disable animations on mobile to prevent jitter */
+/* Disable animations on mobile to prevent jitter and flickering */
 @media (max-width: 768px) {
-  /* Reduce animation durations but don't disable completely */
-  *:not(.animate-spin):not(.animate-pulse),
-  *:not(.animate-spin):not(.animate-pulse)::before,
-  *:not(.animate-spin):not(.animate-pulse)::after {
-    animation-duration: 0.2s !important;
-    animation-delay: 0s !important;
+  /* Disable all Framer Motion animations on mobile */
+  [data-projection-id] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  
+  /* Keep regular CSS transitions fast */
+  *:not(.animate-spin):not(.animate-pulse) {
     transition-duration: 0.2s !important;
-  }
-  
-  /* Force GPU acceleration for smoother animations on mobile */
-  [data-framer-motion] {
-    will-change: auto !important;
-    transform: translateZ(0);
-    backface-visibility: hidden;
-    perspective: 1000px;
-  }
-  
-  /* Simplify transforms on mobile */
-  [data-framer-motion]:not(:hover) {
-    transform: translateZ(0) !important;
   }
 }
 
