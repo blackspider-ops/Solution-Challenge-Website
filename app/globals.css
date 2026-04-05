@@ -49,6 +49,19 @@ html {
     animation-delay: 0s !important;
     transition-duration: 0.2s !important;
   }
+  
+  /* Force GPU acceleration for smoother animations on mobile */
+  [data-framer-motion] {
+    will-change: auto !important;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+  
+  /* Simplify transforms on mobile */
+  [data-framer-motion]:not(:hover) {
+    transform: translateZ(0) !important;
+  }
 }
 
 :root {

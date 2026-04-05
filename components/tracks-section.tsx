@@ -5,12 +5,15 @@ import { Heart, Leaf, GraduationCap, ShieldCheck, Accessibility, Zap, ArrowUpRig
 import Link from "next/link"
 import { TRACKS } from "@/lib/tracks-data"
 import type { LucideIcon } from "lucide-react"
+import { useIsMobile } from "@/lib/use-reduced-motion"
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Heart, Leaf, GraduationCap, ShieldCheck, Accessibility, Zap,
 }
 
 export function TracksSection() {
+  const isMobile = useIsMobile();
+
   return (
     <section id="tracks" className="py-32 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       <div className="absolute inset-0 -z-10 bg-gradient-to-b from-muted/50 via-muted/30 to-background" />
@@ -18,20 +21,15 @@ export function TracksSection() {
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          initial={isMobile ? { opacity: 0 } : { opacity: 0, y: 20 }}
+          whileInView={isMobile ? { opacity: 1 } : { opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: isMobile ? 0.2 : 0.6, ease: "easeOut" }}
           className="text-center mb-20"
         >
-          <motion.span
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            className="inline-block text-sm font-semibold text-primary uppercase tracking-wider mb-4"
-          >
+          <span className="inline-block text-sm font-semibold text-primary uppercase tracking-wider mb-4">
             Challenge Categories
-          </motion.span>
+          </span>
           <h2 className="text-4xl sm:text-5xl font-bold text-foreground mb-6 tracking-tight">
             Choose Your{" "}
             <span className="bg-gradient-to-r from-primary to-chart-2 bg-clip-text text-transparent">
@@ -51,15 +49,19 @@ export function TracksSection() {
             return (
               <motion.div
                 key={track.slug}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                initial={isMobile ? { opacity: 0 } : { opacity: 0, y: 20 }}
+                whileInView={isMobile ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ 
+                  duration: isMobile ? 0.2 : 0.5, 
+                  delay: isMobile ? 0 : index * 0.08, 
+                  ease: "easeOut" 
+                }}
               >
                 {/* Card links to the detail page — the page itself enforces visibility */}
                 <Link href={`/tracks/${track.slug}`} className="block h-full">
                   <motion.div
-                    whileHover={{ y: -8, scale: 1.02 }}
+                    whileHover={isMobile ? {} : { y: -8, scale: 1.02 }}
                     transition={{ duration: 0.3 }}
                     className="group relative h-full bg-card border-2 border-border rounded-3xl p-8 cursor-pointer hover:border-transparent hover:shadow-2xl transition-all duration-500 overflow-hidden"
                   >
