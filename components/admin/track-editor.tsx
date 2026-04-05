@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Edit2, Save, X, Trash2, Plus, GripVertical } from "lucide-react";
+import { Edit2, Save, X, Trash2, Plus, GripVertical, Heart, Leaf, GraduationCap, ShieldCheck, Accessibility, Zap, Users, Globe, Lightbulb, Code, Rocket, Brain, Smartphone, Database, Cloud, Lock, Wifi, Target, TrendingUp, Award, Briefcase, BookOpen, Music, Camera, MessageCircle, ShoppingCart, Truck, Home, Utensils, Dumbbell, Palette, Gamepad, Plane, DollarSign, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -45,6 +45,31 @@ const ICON_OPTIONS = [
   { value: "Globe", label: "Globe (Global)" },
   { value: "Lightbulb", label: "Lightbulb (Innovation)" },
   { value: "Code", label: "Code (Technology)" },
+  { value: "Rocket", label: "Rocket (Launch/Startup)" },
+  { value: "Brain", label: "Brain (AI/Intelligence)" },
+  { value: "Smartphone", label: "Smartphone (Mobile)" },
+  { value: "Database", label: "Database (Data)" },
+  { value: "Cloud", label: "Cloud (Cloud Computing)" },
+  { value: "Lock", label: "Lock (Security/Privacy)" },
+  { value: "Wifi", label: "Wifi (Connectivity)" },
+  { value: "Target", label: "Target (Goals/Focus)" },
+  { value: "TrendingUp", label: "Trending Up (Growth)" },
+  { value: "Award", label: "Award (Achievement)" },
+  { value: "Briefcase", label: "Briefcase (Business)" },
+  { value: "BookOpen", label: "Book Open (Learning)" },
+  { value: "Music", label: "Music (Arts/Entertainment)" },
+  { value: "Camera", label: "Camera (Media/Content)" },
+  { value: "MessageCircle", label: "Message (Communication)" },
+  { value: "ShoppingCart", label: "Shopping Cart (E-commerce)" },
+  { value: "Truck", label: "Truck (Logistics)" },
+  { value: "Home", label: "Home (Housing/Living)" },
+  { value: "Utensils", label: "Utensils (Food)" },
+  { value: "Dumbbell", label: "Dumbbell (Fitness)" },
+  { value: "Palette", label: "Palette (Design/Creativity)" },
+  { value: "Gamepad", label: "Gamepad (Gaming)" },
+  { value: "Plane", label: "Plane (Travel)" },
+  { value: "DollarSign", label: "Dollar Sign (Finance)" },
+  { value: "Activity", label: "Activity (Analytics)" },
 ];
 
 const GRADIENT_OPTIONS = [

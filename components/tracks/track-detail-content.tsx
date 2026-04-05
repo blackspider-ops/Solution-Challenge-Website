@@ -1,11 +1,18 @@
+"use client";
+
 import Link from "next/link";
-import { ArrowLeft, Lock, Eye } from "lucide-react";
-import { Heart, Leaf, GraduationCap, ShieldCheck, Accessibility, Zap } from "lucide-react";
+import { ArrowLeft, Lock, Eye, Heart, Leaf, GraduationCap, ShieldCheck, Accessibility, Zap, Users, Globe, Lightbulb, Code, Rocket, Brain, Smartphone, Database, Cloud, Wifi, Target, TrendingUp, Award, Briefcase, BookOpen, Music, Camera, MessageCircle, ShoppingCart, Truck, Home, Utensils, Dumbbell, Palette, Gamepad, Plane, DollarSign, Activity } from "lucide-react";
 import type { TrackData } from "@/lib/tracks-data";
 import type { LucideIcon } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const ICON_MAP: Record<string, LucideIcon> = {
-  Heart, Leaf, GraduationCap, ShieldCheck, Accessibility, Zap,
+  Heart, Leaf, GraduationCap, ShieldCheck, Accessibility, Zap, Users, Globe, Lightbulb, Code,
+  Rocket, Brain, Smartphone, Database, Cloud, Lock, Wifi, Target, TrendingUp, Award,
+  Briefcase, BookOpen, Music, Camera, MessageCircle, ShoppingCart, Truck, Home, Utensils,
+  Dumbbell, Palette, Gamepad, Plane, DollarSign, Activity,
 };
 
 interface Props {
@@ -24,6 +31,16 @@ interface Props {
 
 export function TrackDetailContent({ track, staticData, isAdmin, isPreview }: Props) {
   const Icon = ICON_MAP[staticData.icon] ?? Zap;
+  const { data: session } = useSession();
+  const router = useRouter();
+
+  function handleSubmitClick() {
+    if (!session) {
+      toast.error("Please log in to submit a project");
+      return;
+    }
+    router.push("/dashboard/submission");
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -134,12 +151,12 @@ export function TrackDetailContent({ track, staticData, isAdmin, isPreview }: Pr
 
         {/* CTA */}
         <div className="flex flex-col sm:flex-row gap-4">
-          <Link
-            href="/dashboard"
+          <button
+            onClick={handleSubmitClick}
             className={`inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-semibold text-white bg-gradient-to-r ${staticData.gradient} shadow-lg hover:scale-105 transition-all duration-300`}
           >
-            Go to Dashboard
-          </Link>
+            Submit for this track
+          </button>
           <Link
             href="/#tracks"
             className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-medium text-muted-foreground border-2 border-border hover:border-foreground/30 hover:text-foreground transition-all duration-300"
