@@ -7,11 +7,29 @@ const FROM_EMAIL = process.env.EMAIL_FROM || "Solution Challenge <noreply@yourdo
 const BASE_URL = process.env.NEXTAUTH_URL || "http://localhost:3000";
 
 /**
+ * Escape HTML to prevent XSS in email templates
+ */
+function escapeHtml(text: string): string {
+  const map: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  return text.replace(/[&<>"']/g, (m) => map[m]);
+}
+
+/**
  * Generate QR code ticket email HTML
  */
 function generateTicketEmailHTML(name: string, email: string, qrToken: string): string {
   const qrImageUrl = `${BASE_URL}/api/qr/${qrToken}`;
   const ticketUrl = `${BASE_URL}/dashboard/ticket`;
+  
+  // Escape user input to prevent XSS
+  const safeName = escapeHtml(name);
+  const safeEmail = escapeHtml(email);
 
   return `
     <!DOCTYPE html>
@@ -38,7 +56,7 @@ function generateTicketEmailHTML(name: string, email: string, qrToken: string): 
                 <!-- Content -->
                 <tr>
                   <td style="padding: 40px 30px;">
-                    <p style="margin: 0 0 20px 0; font-size: 18px; color: #111827; font-weight: 600;">Hi ${name},</p>
+                    <p style="margin: 0 0 20px 0; font-size: 18px; color: #111827; font-weight: 600;">Hi ${safeName},</p>
                     
                     <p style="margin: 0 0 20px 0; font-size: 16px; color: #4b5563; line-height: 1.6;">
                       You're all set for Solution Challenge 2026! Here's your QR code ticket. Save this email or screenshot the QR code below.
@@ -120,7 +138,7 @@ function generateTicketEmailHTML(name: string, email: string, qrToken: string): 
                       <a href="mailto:gdg@psu.edu" style="color: #9ca3af; text-decoration: none;">gdg@psu.edu</a>
                     </p>
                     <p style="margin: 10px 0 0 0; font-size: 11px; color: #9ca3af;">
-                      This ticket is non-transferable and valid only for ${email}
+                      This ticket is non-transferable and valid only for ${safeEmail}
                     </p>
                   </td>
                 </tr>
@@ -182,9 +200,12 @@ export async function sendAnnouncementEmail(
       return { success: false, error: "Email service not configured" };
     }
 
+    // Escape title to prevent XSS
+    const safeTitle = escapeHtml(title);
+
     // Convert body text to HTML with proper formatting
-    // Replace URLs with clickable links
-    let formattedBody = body
+    // First escape HTML, then replace URLs with clickable links
+    let formattedBody = escapeHtml(body)
       .replace(/https?:\/\/[^\s]+/g, (url) => `<a href="${url}" style="color: #667eea; text-decoration: underline;">${url}</a>`)
       // Replace line breaks with <br>
       .replace(/\n/g, '<br>');
@@ -207,7 +228,7 @@ export async function sendAnnouncementEmail(
                   <tr>
                     <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 30px; text-align: center;">
                       <img src="https://www.gdgpsu.dev/api/media?path=1762291432641-c8uv057d7gi.png" alt="GDG PSU" style="width: 60px; height: 60px; margin-bottom: 20px;" />
-                      <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: bold;">${title}</h1>
+                      <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: bold;">${safeTitle}</h1>
                     </td>
                   </tr>
                   
@@ -243,7 +264,7 @@ export async function sendAnnouncementEmail(
       emails.map((email) => ({
         from: FROM_EMAIL,
         to: email,
-        subject: `[Solution Challenge] ${title}`,
+        subject: `[Solution Challenge] ${safeTitle}`,
         html: htmlBody,
       }))
     );
@@ -277,6 +298,10 @@ export async function sendFormSubmissionNotification(
 
     const adminEmail = "gdg@psu.edu";
     const dashboardUrl = `${BASE_URL}/admin/registration-form`;
+    
+    // Escape user input
+    const safeName = escapeHtml(userName);
+    const safeEmail = escapeHtml(userEmail);
 
     const htmlBody = `
       <!DOCTYPE html>
@@ -310,10 +335,10 @@ export async function sendFormSubmissionNotification(
                         <tr>
                           <td style="padding: 20px;">
                             <p style="margin: 0 0 10px 0; font-size: 14px; color: #6b7280;"><strong>Participant:</strong></p>
-                            <p style="margin: 0 0 15px 0; font-size: 16px; color: #111827;">${userName}</p>
+                            <p style="margin: 0 0 15px 0; font-size: 16px; color: #111827;">${safeName}</p>
                             
                             <p style="margin: 0 0 10px 0; font-size: 14px; color: #6b7280;"><strong>Email:</strong></p>
-                            <p style="margin: 0 0 15px 0; font-size: 16px; color: #111827;">${userEmail}</p>
+                            <p style="margin: 0 0 15px 0; font-size: 16px; color: #111827;">${safeEmail}</p>
                             
                             <p style="margin: 0 0 10px 0; font-size: 14px; color: #6b7280;"><strong>Submitted:</strong></p>
                             <p style="margin: 0; font-size: 16px; color: #111827;">${submittedAt.toLocaleString()}</p>
@@ -352,7 +377,7 @@ export async function sendFormSubmissionNotification(
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: adminEmail,
-      subject: `New Registration: ${userName}`,
+      subject: `New Registration: ${safeName}`,
       html: htmlBody,
     });
 
@@ -381,6 +406,9 @@ export async function sendPasswordResetConfirmationEmail(
       console.warn("RESEND_API_KEY not set - skipping email");
       return { success: false, error: "Email service not configured" };
     }
+    
+    // Escape user input
+    const safeName = escapeHtml(name);
 
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
@@ -410,7 +438,7 @@ export async function sendPasswordResetConfirmationEmail(
                     <!-- Content -->
                     <tr>
                       <td style="padding: 40px;">
-                        <p style="margin: 0 0 20px 0; font-size: 18px; color: #111827; font-weight: 600;">Hi ${name},</p>
+                        <p style="margin: 0 0 20px 0; font-size: 18px; color: #111827; font-weight: 600;">Hi ${safeName},</p>
                         
                         <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 24px; color: #374151;">
                           Your password for Solution Challenge 2026 has been successfully reset.

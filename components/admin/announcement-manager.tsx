@@ -53,7 +53,7 @@ export function AnnouncementManager({ announcements }: { announcements: Announce
   }
 
   function openEdit(a: Announcement) {
-    form.reset({ title: a.title, body: a.body, published: a.published, pinned: a.pinned, audience: a.audience as "all" | "registered" | "volunteers" | "admins" });
+    form.reset({ title: a.title, body: a.body, published: a.published, pinned: a.pinned, audience: a.audience as "all" | "registered" | "volunteers" | "admins" | "waitlisted" });
     setMode({ edit: a });
   }
 
@@ -224,6 +224,7 @@ export function AnnouncementManager({ announcements }: { announcements: Announce
                 <option value="all">All (Participants + Volunteers + Admins)</option>
                 <option value="volunteers">Volunteers Only</option>
                 <option value="admins">Admins Only</option>
+                <option value="waitlisted">Waitlisted Only</option>
               </select>
               <p className="text-xs text-muted-foreground">
                 Choose who will receive this announcement via email
@@ -299,7 +300,7 @@ export function AnnouncementManager({ announcements }: { announcements: Announce
                     </Badge>
                     {a.audience !== "all" && (
                       <Badge variant="outline" className="text-xs">
-                        {a.audience === "registered" ? "Participants" : a.audience === "volunteers" ? "Volunteers" : a.audience === "admins" ? "Admins" : a.audience}
+                        {a.audience === "registered" ? "Participants" : a.audience === "volunteers" ? "Volunteers" : a.audience === "admins" ? "Admins" : a.audience === "waitlisted" ? "Waitlisted" : a.audience}
                       </Badge>
                     )}
                   </div>

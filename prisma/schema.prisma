@@ -107,14 +107,26 @@ model User {
 /// Created when a user registers for the event.
 /// One user → one registration.
 model Registration {
-  id        String             @id @default(cuid())
-  userId    String             @unique
-  status    RegistrationStatus @default(pending)
-  createdAt DateTime           @default(now())
-  updatedAt DateTime           @updatedAt
+  id              String             @id @default(cuid())
+  userId          String             @unique
+  status          RegistrationStatus @default(pending)
+  waitlistPosition Int?              // Position in waitlist queue (null if not waitlisted)
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
 
   user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   ticket Ticket?
+}
+
+/// Event capacity and settings
+model EventSettings {
+  id                String   @id @default("singleton")
+  maxCapacity       Int      @default(100)
+  registrationOpen  Boolean  @default(true)
+  updatedAt         DateTime @updatedAt
+  updatedBy         String?
+
+  @@map("event_settings")
 }
 
 /// A QR-code ticket issued when a registration is confirmed.
@@ -219,7 +231,7 @@ model Announcement {
   body        String
   published   Boolean  @default(false)
   pinned      Boolean  @default(false)
-  audience    String   @default("all") // "all", "registered", "volunteers", "admins"
+  audience    String   @default("all") // "all", "registered", "volunteers", "admins", "waitlisted"
   createdById String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

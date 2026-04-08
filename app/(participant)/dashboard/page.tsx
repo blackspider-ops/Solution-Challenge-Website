@@ -145,14 +145,33 @@ export default async function DashboardPage() {
         </div>
       )}
 
+      {/* Waitlist notification */}
+      {registration && registration.status === "waitlisted" && (
+        <div className="rounded-2xl border-2 border-amber-500/30 bg-amber-500/5 p-8 text-center">
+          <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center mx-auto mb-4">
+            <Clock className="w-6 h-6 text-amber-600" />
+          </div>
+          <h2 className="text-lg font-semibold text-foreground mb-2">
+            You&apos;re on the Waitlist
+          </h2>
+          <p className="text-muted-foreground text-sm mb-4 max-w-sm mx-auto">
+            The event has reached full capacity. You&apos;re currently at position{" "}
+            <span className="font-bold text-amber-600">#{registration.waitlistPosition}</span> on the waitlist.
+          </p>
+          <p className="text-xs text-muted-foreground max-w-md mx-auto">
+            If a spot opens up, we&apos;ll email you immediately with your QR code ticket. Keep an eye on your inbox!
+          </p>
+        </div>
+      )}
+
       {/* Status cards */}
-      {registration && (
+      {registration && registration.status === "confirmed" && (
         <div className="grid sm:grid-cols-3 gap-4">
           <StatusCard
             icon={<CheckCircle className="w-5 h-5 text-emerald-500" />}
             label="Registration"
             value={registration.status}
-            badge={registration.status === "confirmed" ? "confirmed" : "pending"}
+            badge="confirmed"
           />
           <StatusCard
             icon={<Users className="w-5 h-5 text-blue-500" />}
@@ -172,7 +191,7 @@ export default async function DashboardPage() {
       )}
 
       {/* Quick actions */}
-      {registration && (
+      {registration && registration.status === "confirmed" && (
         <div className="grid sm:grid-cols-2 gap-4">
           <Link
             href="/dashboard/ticket"
@@ -231,7 +250,7 @@ export default async function DashboardPage() {
       )}
 
       {/* Event schedule quick-reference */}
-      {registration && (
+      {registration && registration.status === "confirmed" && (
         <div className="rounded-2xl border border-border bg-card p-5">
           <div className="flex items-center gap-2 mb-4">
             <CalendarDays className="w-4 h-4 text-muted-foreground" />

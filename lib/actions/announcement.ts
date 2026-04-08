@@ -168,6 +168,13 @@ export async function sendAnnouncementAsEmail(
         select: { email: true },
       });
       emails = admins.map((a) => a.email);
+    } else if (announcement.audience === "waitlisted") {
+      // Get only users on the waitlist
+      const waitlisted = await db.registration.findMany({
+        where: { status: "waitlisted" },
+        include: { user: { select: { email: true } } },
+      });
+      emails = waitlisted.map((w) => w.user.email);
     }
 
     if (emails.length === 0) {
