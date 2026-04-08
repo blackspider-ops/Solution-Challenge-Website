@@ -4,12 +4,7 @@ import { WaitlistManager } from "@/components/admin/waitlist-manager";
 import { getEventSettings, getWaitlistStats } from "@/lib/actions/event-settings";
 
 export default async function WaitlistPage() {
-  const session = await requireAdmin();
-
-  // Check if current user is super admin
-  const isSuperAdmin = 
-    session.user?.name === "Tejas Singhal" && 
-    session.user?.email?.endsWith("@psu.edu");
+  await requireAdmin();
 
   const [settings, stats, waitlistUsers] = await Promise.all([
     getEventSettings(),
@@ -42,8 +37,6 @@ export default async function WaitlistPage() {
         confirmedCount={stats.confirmed}
         waitlistedCount={stats.waitlisted}
         waitlistUsers={waitlistUsers}
-        emailsEnabled={settings.emailsEnabled}
-        isSuperAdmin={isSuperAdmin}
       />
     </div>
   );

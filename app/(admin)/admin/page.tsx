@@ -5,13 +5,21 @@ import {
   UserCheck, ArrowRight, Clock,
 } from "lucide-react";
 import Link from "next/link";
+import { getEventSettings } from "@/lib/actions/event-settings";
+import { EmailToggle } from "@/components/admin/email-toggle";
 
 export default async function AdminOverviewPage() {
-  await requireAdmin();
+  const session = await requireAdmin();
+
+  // Check if current user is super admin
+  const isSuperAdmin = 
+    session.user?.name === "Tejas Singhal" && 
+    session.user?.email?.endsWith("@psu.edu");
 
   const [
     totalUsers,
-    totalRegistrations,
+    confirmedRegistrations,
+    waitlistedRegistrations,
     checkedIn,
     totalTeams,
     submittedProjects,
@@ -19,9 +27,11 @@ export default async function AdminOverviewPage() {
     publishedAnnouncements,
     recentRegistrations,
     recentSubmissions,
+    eventSettings,
   ] = await Promise.all([
     db.user.count({ where: { role: "participant" } }),
-    db.registration.count(),
+    db.registration.count({ where: { status: "confirmed" } }),
+    db.registration.count({ where: { status: "waitlisted" } }),
     db.checkIn.count(),
     db.team.count(),
     db.submission.count({ where: { status: "submitted" } }),
@@ -41,10 +51,12 @@ export default async function AdminOverviewPage() {
         track: { select: { name: true } },
       },
     }),
+    getEventSettings(),
   ]);
 
-  const checkInPct = totalRegistrations > 0
-    ? Math.round((checkedIn / totalRegistrations) * 100)
+  const totalRegistrations = confirmedRegistrations + waitlistedRegistrations;
+  const checkInPct = confirmedRegistrations > 0
+    ? Math.round((checkedIn / confirmedRegistrations) * 100)
     : 0;
 
   const stats = [
@@ -102,6 +114,26 @@ export default async function AdminOverviewPage() {
         <p className="text-muted-foreground mt-1">Solution Challenge 2026 — event at a glance.</p>
       </div>
 
+      {/* Super Admin Email Control */}
+      {isSuperAdmin && (
+        <EmailToggle emailsEnabled={eventSettings.emailsEnabled} maxCapacity={eventSettings.maxCapacity} />
+      )}
+
+      {/* Email Status Warning for Regular Admins */}
+      {!eventSettings.emailsEnabled && !isSuperAdmin && (
+        <div className="rounded-xl border border-red-500/30 bg-red-500/5 p-4">
+          <div className="flex items-start gap-3">
+            <span className="text-lg">⚠️</span>
+            <div>
+              <p className="text-sm font-medium text-red-700 mb-1">Emails Disabled</p>
+              <p className="text-xs text-red-600">
+                All email notifications are currently disabled by the super admin. No emails will be sent until re-enabled.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Stat cards */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         {stats.map((stat) => (
@@ -124,12 +156,12 @@ export default async function AdminOverviewPage() {
       </div>
 
       {/* Check-in progress */}
-      {totalRegistrations > 0 && (
+      {confirmedRegistrations > 0 && (
         <div className="rounded-2xl border border-border bg-card p-5">
           <div className="flex items-center justify-between mb-3">
             <p className="text-sm font-medium text-foreground">Check-in progress</p>
             <p className="text-sm text-muted-foreground">
-              {checkedIn} / {totalRegistrations} ({checkInPct}%)
+              {checkedIn} / {confirmedRegistrations} ({checkInPct}%)
             </p>
           </div>
           <div className="h-2.5 bg-muted rounded-full overflow-hidden">
