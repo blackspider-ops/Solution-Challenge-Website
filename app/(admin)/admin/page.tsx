@@ -29,7 +29,7 @@ export default async function AdminOverviewPage() {
     recentSubmissions,
     eventSettings,
   ] = await Promise.all([
-    db.user.count({ where: { role: "participant" } }),
+    db.user.count(), // Count ALL users, not just participants
     db.registration.count({ where: { status: "confirmed" } }),
     db.registration.count({ where: { status: "waitlisted" } }),
     db.checkIn.count(),
@@ -61,13 +61,13 @@ export default async function AdminOverviewPage() {
 
   const stats = [
     {
-      label: "Participants",
+      label: "Total Users",
       value: totalUsers,
       sub: `${totalRegistrations} registered`,
       icon: Users,
       color: "text-blue-500",
       bg: "bg-blue-500/10",
-      href: "/admin/registrations",
+      href: "/admin/users",
     },
     {
       label: "Checked In",

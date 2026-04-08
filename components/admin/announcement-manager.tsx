@@ -47,7 +47,7 @@ type Mode = "idle" | "create" | { edit: Announcement };
 type ConfirmDialog = 
   | { type: "none" }
   | { type: "delete"; id: string; title: string }
-  | { type: "email"; id: string; title: string; audience: string };
+  | { type: "email"; id: string; title: string; audience: string; alreadySentCount: number };
 
 export function AnnouncementManager({ announcements }: { announcements: Announcement[] }) {
   const router = useRouter();
@@ -130,11 +130,20 @@ export function AnnouncementManager({ announcements }: { announcements: Announce
     });
   }
 
-  function handleSendEmail(id: string, title: string, audience: string) {
-    setConfirmDialog({ type: "email", id, title, audience });
+  async function handleSendEmail(id: string, title: string, audience: string) {
+    // Check how many users already received this announcement
+    try {
+      const response = await fetch(`/api/announcements/${id}/sent-count`);
+      const data = await response.json();
+      const alreadySentCount = data.count || 0;
+      
+      setConfirmDialog({ type: "email", id, title, audience, alreadySentCount });
+    } catch {
+      setConfirmDialog({ type: "email", id, title, audience, alreadySentCount: 0 });
+    }
   }
 
-  function confirmSendEmail() {
+  function confirmSendEmail(forceResend: boolean = false) {
     if (confirmDialog.type !== "email") return;
     
     const { id, audience } = confirmDialog;
@@ -149,12 +158,13 @@ export function AnnouncementManager({ announcements }: { announcements: Announce
     
     startTransition(async () => {
       try {
-        const result = await sendAnnouncementAsEmail(id);
+        const result = await sendAnnouncementAsEmail(id, forceResend);
         if ("error" in result) { 
           toast.error(result.error); 
           return; 
         }
         toast.success(`Email sent to ${result.data.sent} ${audienceLabel}!`);
+        router.refresh();
       } catch {
         toast.error("Network error — please try again");
       }
@@ -429,16 +439,33 @@ export function AnnouncementManager({ announcements }: { announcements: Announce
             <AlertDialogTitle>Send Announcement Email</AlertDialogTitle>
             <AlertDialogDescription>
               {confirmDialog.type === "email" && (
-                <>
-                  Send <span className="font-semibold text-foreground">"{confirmDialog.title}"</span> to{" "}
-                  <span className="font-semibold text-foreground">{getAudienceLabel(confirmDialog.audience)}</span>?
-                </>
+                <div className="space-y-2">
+                  <p>
+                    Send <span className="font-semibold text-foreground">"{confirmDialog.title}"</span> to{" "}
+                    <span className="font-semibold text-foreground">{getAudienceLabel(confirmDialog.audience)}</span>?
+                  </p>
+                  {confirmDialog.alreadySentCount > 0 && (
+                    <p className="text-amber-600 text-sm">
+                      ⚠️ {confirmDialog.alreadySentCount} {confirmDialog.alreadySentCount === 1 ? "user has" : "users have"} already received this announcement and will be skipped.
+                    </p>
+                  )}
+                </div>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmSendEmail}>Send Email</AlertDialogAction>
+            {confirmDialog.type === "email" && confirmDialog.alreadySentCount > 0 && (
+              <AlertDialogAction 
+                onClick={() => confirmSendEmail(true)}
+                className="bg-amber-600 hover:bg-amber-700"
+              >
+                Resend to All
+              </AlertDialogAction>
+            )}
+            <AlertDialogAction onClick={() => confirmSendEmail(false)}>
+              {confirmDialog.type === "email" && confirmDialog.alreadySentCount > 0 ? "Send to New Only" : "Send Email"}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
