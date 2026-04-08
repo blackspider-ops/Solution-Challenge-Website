@@ -3,14 +3,13 @@ import { sendWelcomeAnnouncementToNewUsers } from "@/lib/actions/announcement";
 
 /**
  * Cron job to auto-send welcome announcements to newly registered users
- * This should be called every 2 hours by Vercel Cron or external service
+ * This runs once per day at 9:00 AM UTC by Vercel Cron
  * 
- * To set up in Vercel:
- * Add to vercel.json:
+ * Configured in vercel.json:
  * {
  *   "crons": [{
  *     "path": "/api/cron/send-announcements",
- *     "schedule": "0 *\/2 * * *"
+ *     "schedule": "0 9 * * *"
  *   }]
  * }
  */

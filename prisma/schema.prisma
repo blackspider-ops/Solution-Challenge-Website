@@ -123,6 +123,7 @@ model EventSettings {
   id                String   @id @default("singleton")
   maxCapacity       Int      @default(100)
   registrationOpen  Boolean  @default(true)
+  emailsEnabled     Boolean  @default(true)  // Super admin only - master kill switch for all emails
   updatedAt         DateTime @updatedAt
   updatedBy         String?
 

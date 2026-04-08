@@ -10,6 +10,21 @@ import { getEventSettings } from "./event-settings";
  * Send waitlist email
  */
 async function sendWaitlistEmail(email: string, name: string, position: number) {
+  // Check if emails are globally enabled
+  try {
+    const { db } = await import("@/lib/db");
+    const settings = await db.eventSettings.findUnique({
+      where: { id: "singleton" },
+      select: { emailsEnabled: true },
+    });
+    if (!settings?.emailsEnabled) {
+      console.log("Emails are disabled by super admin - skipping waitlist email");
+      return { success: false };
+    }
+  } catch (error) {
+    console.error("Error checking email settings:", error);
+  }
+
   const { Resend } = await import("resend");
   const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
   

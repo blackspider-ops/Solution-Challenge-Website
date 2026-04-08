@@ -4,6 +4,6 @@
   "framework": "nextjs",
   "crons": [{
     "path": "/api/cron/send-announcements",
-    "schedule": "0 */2 * * *"
+    "schedule": "0 9 * * *"
   }]
 }

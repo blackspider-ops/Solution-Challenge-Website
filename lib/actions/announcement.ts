@@ -45,14 +45,14 @@ export async function sendWelcomeAnnouncementToNewUsers(): Promise<{ sent: numbe
       return { sent: 0 };
     }
 
-    // Get users who registered in the last 2 hours
-    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
+    // Get users who registered in the last 24 hours
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     
     const newRegistrations = await db.registration.findMany({
       where: {
         status: "confirmed",
         createdAt: {
-          gte: twoHoursAgo,
+          gte: twentyFourHoursAgo,
         },
       },
       include: { user: { select: { email: true } } },

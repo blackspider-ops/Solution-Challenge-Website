@@ -153,6 +153,23 @@ function generateTicketEmailHTML(name: string, email: string, qrToken: string): 
 }
 
 /**
+ * Check if emails are enabled globally
+ */
+async function areEmailsEnabled(): Promise<boolean> {
+  try {
+    const { db } = await import("@/lib/db");
+    const settings = await db.eventSettings.findUnique({
+      where: { id: "singleton" },
+      select: { emailsEnabled: true },
+    });
+    return settings?.emailsEnabled ?? true;
+  } catch (error) {
+    console.error("Error checking email settings:", error);
+    return true; // Default to enabled if check fails
+  }
+}
+
+/**
  * Send ticket email to participant
  */
 export async function sendTicketEmail(
@@ -161,6 +178,13 @@ export async function sendTicketEmail(
   qrToken: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    // Check if emails are globally enabled
+    const emailsEnabled = await areEmailsEnabled();
+    if (!emailsEnabled) {
+      console.log("Emails are disabled by super admin - skipping ticket email");
+      return { success: false, error: "Emails are currently disabled" };
+    }
+
     if (!resend || !process.env.RESEND_API_KEY) {
       console.warn("RESEND_API_KEY not set - skipping email");
       return { success: false, error: "Email service not configured" };
@@ -195,6 +219,13 @@ export async function sendAnnouncementEmail(
   body: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    // Check if emails are globally enabled
+    const emailsEnabled = await areEmailsEnabled();
+    if (!emailsEnabled) {
+      console.log("Emails are disabled by super admin - skipping announcement email");
+      return { success: false, error: "Emails are currently disabled" };
+    }
+
     if (!resend || !process.env.RESEND_API_KEY) {
       console.warn("RESEND_API_KEY not set - skipping email");
       return { success: false, error: "Email service not configured" };
@@ -291,6 +322,13 @@ export async function sendFormSubmissionNotification(
   submittedAt: Date
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    // Check if emails are globally enabled
+    const emailsEnabled = await areEmailsEnabled();
+    if (!emailsEnabled) {
+      console.log("Emails are disabled by super admin - skipping form notification");
+      return { success: false, error: "Emails are currently disabled" };
+    }
+
     if (!resend || !process.env.RESEND_API_KEY) {
       console.warn("RESEND_API_KEY not set - skipping email");
       return { success: false, error: "Email service not configured" };
@@ -402,6 +440,13 @@ export async function sendPasswordResetConfirmationEmail(
   name: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    // Check if emails are globally enabled
+    const emailsEnabled = await areEmailsEnabled();
+    if (!emailsEnabled) {
+      console.log("Emails are disabled by super admin - skipping password reset email");
+      return { success: false, error: "Emails are currently disabled" };
+    }
+
     if (!resend || !process.env.RESEND_API_KEY) {
       console.warn("RESEND_API_KEY not set - skipping email");
       return { success: false, error: "Email service not configured" };
