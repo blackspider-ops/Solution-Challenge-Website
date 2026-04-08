@@ -20,6 +20,16 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Plus, Eye, EyeOff, Pencil, Trash2, X, Megaphone, Pin, Mail } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type Announcement = {
   id: string;
@@ -34,10 +44,16 @@ type Announcement = {
 
 type Mode = "idle" | "create" | { edit: Announcement };
 
+type ConfirmDialog = 
+  | { type: "none" }
+  | { type: "delete"; id: string; title: string }
+  | { type: "email"; id: string; title: string; audience: string };
+
 export function AnnouncementManager({ announcements }: { announcements: Announcement[] }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [mode, setMode] = useState<Mode>("idle");
+  const [confirmDialog, setConfirmDialog] = useState<ConfirmDialog>({ type: "none" });
 
   const isEditing = typeof mode === "object" && "edit" in mode;
   const editTarget = isEditing ? mode.edit : null;
@@ -114,8 +130,23 @@ export function AnnouncementManager({ announcements }: { announcements: Announce
     });
   }
 
-  function handleSendEmail(id: string, title: string) {
-    if (!confirm(`Send "${title}" to all registered participants?`)) return;
+  function handleSendEmail(id: string, title: string, audience: string) {
+    setConfirmDialog({ type: "email", id, title, audience });
+  }
+
+  function confirmSendEmail() {
+    if (confirmDialog.type !== "email") return;
+    
+    const { id, audience } = confirmDialog;
+    setConfirmDialog({ type: "none" });
+    
+    const audienceLabel = 
+      audience === "all" ? "all users" :
+      audience === "registered" ? "registered participants" :
+      audience === "volunteers" ? "volunteers" :
+      audience === "admins" ? "admins" :
+      audience === "waitlisted" ? "waitlisted users" : audience;
+    
     startTransition(async () => {
       try {
         const result = await sendAnnouncementAsEmail(id);
@@ -123,7 +154,7 @@ export function AnnouncementManager({ announcements }: { announcements: Announce
           toast.error(result.error); 
           return; 
         }
-        toast.success(`Email sent to ${result.data.sent} participants!`);
+        toast.success(`Email sent to ${result.data.sent} ${audienceLabel}!`);
       } catch {
         toast.error("Network error — please try again");
       }
@@ -143,7 +174,15 @@ export function AnnouncementManager({ announcements }: { announcements: Announce
   }
 
   function handleDelete(id: string, title: string) {
-    if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
+    setConfirmDialog({ type: "delete", id, title });
+  }
+
+  function confirmDelete() {
+    if (confirmDialog.type !== "delete") return;
+    
+    const { id } = confirmDialog;
+    setConfirmDialog({ type: "none" });
+    
     startTransition(async () => {
       try {
         const result = await deleteAnnouncement(id);
@@ -157,9 +196,21 @@ export function AnnouncementManager({ announcements }: { announcements: Announce
   }
 
   const showForm = mode === "create" || isEditing;
+  
+  const getAudienceLabel = (audience: string) => {
+    switch (audience) {
+      case "all": return "all users";
+      case "registered": return "registered participants";
+      case "volunteers": return "volunteers";
+      case "admins": return "admins";
+      case "waitlisted": return "waitlisted users";
+      default: return audience;
+    }
+  };
 
   return (
-    <div className="space-y-4">
+    <>
+      <div className="space-y-4">
       {/* Create button */}
       {!showForm && (
         <Button
@@ -319,9 +370,9 @@ export function AnnouncementManager({ announcements }: { announcements: Announce
                 <div className="flex items-center gap-1 shrink-0">
                   {a.published && (
                     <button
-                      onClick={() => handleSendEmail(a.id, a.title)}
+                      onClick={() => handleSendEmail(a.id, a.title, a.audience)}
                       disabled={isPending}
-                      title="Send email to all registered participants"
+                      title={`Send email to ${getAudienceLabel(a.audience)}`}
                       className="p-2 rounded-lg text-muted-foreground hover:text-blue-600 hover:bg-blue-50 transition-colors"
                     >
                       <Mail className="w-4 h-4" />
@@ -369,6 +420,51 @@ export function AnnouncementManager({ announcements }: { announcements: Announce
           ))}
         </div>
       )}
-    </div>
+      </div>
+
+      {/* Confirm Email Dialog */}
+      <AlertDialog open={confirmDialog.type === "email"} onOpenChange={() => setConfirmDialog({ type: "none" })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Send Announcement Email</AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmDialog.type === "email" && (
+                <>
+                  Send <span className="font-semibold text-foreground">"{confirmDialog.title}"</span> to{" "}
+                  <span className="font-semibold text-foreground">{getAudienceLabel(confirmDialog.audience)}</span>?
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmSendEmail}>Send Email</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Confirm Delete Dialog */}
+      <AlertDialog open={confirmDialog.type === "delete"} onOpenChange={() => setConfirmDialog({ type: "none" })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Announcement</AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmDialog.type === "delete" && (
+                <>
+                  Are you sure you want to delete <span className="font-semibold text-foreground">"{confirmDialog.title}"</span>?
+                  This action cannot be undone.
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
