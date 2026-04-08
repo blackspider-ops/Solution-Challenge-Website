@@ -301,8 +301,39 @@ export async function deleteAnnouncement(
 // ─── Read (no auth required) ───────────────────────────────────────────────
 
 export async function getPublishedAnnouncements(limit = 20) {
+  const session = await auth();
+  
+  // Build audience filter based on user's role and registration status
+  const audienceFilter: string[] = ["all"]; // Everyone sees "all" announcements
+  
+  if (session?.user) {
+    // Check user's role
+    if (session.user.role === "admin") {
+      audienceFilter.push("admins");
+    } else if (session.user.role === "volunteer") {
+      audienceFilter.push("volunteers");
+    }
+    
+    // Check registration status
+    const registration = await db.registration.findUnique({
+      where: { userId: session.user.id },
+      select: { status: true },
+    });
+    
+    if (registration) {
+      if (registration.status === "confirmed") {
+        audienceFilter.push("registered");
+      } else if (registration.status === "waitlisted") {
+        audienceFilter.push("waitlisted");
+      }
+    }
+  }
+  
   return db.announcement.findMany({
-    where: { published: true },
+    where: { 
+      published: true,
+      audience: { in: audienceFilter },
+    },
     orderBy: [
       { pinned: "desc" },    // pinned first
       { createdAt: "desc" }, // then newest

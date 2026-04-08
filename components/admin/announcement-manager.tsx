@@ -237,7 +237,7 @@ export function AnnouncementManager({ announcements }: { announcements: Announce
                 {...form.register("published")}
                 className="rounded border-border"
               />
-              Publish immediately (visible to participants)
+              Publish immediately (visible to selected audience)
             </label>
 
             <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer w-fit">
