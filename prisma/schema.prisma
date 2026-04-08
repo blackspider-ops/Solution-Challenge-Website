@@ -219,12 +219,27 @@ model Announcement {
   body        String
   published   Boolean  @default(false)
   pinned      Boolean  @default(false)
-  audience    String   @default("all") // "all", "registered", "volunteers"
+  audience    String   @default("all") // "all", "registered", "volunteers", "admins"
   createdById String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   createdBy User @relation(fields: [createdById], references: [id])
+  sentTo    AnnouncementSent[]
+}
+
+/// Track which users have received which announcements (to prevent duplicates)
+model AnnouncementSent {
+  id             String   @id @default(cuid())
+  announcementId String
+  userEmail      String
+  sentAt         DateTime @default(now())
+
+  announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+
+  @@unique([announcementId, userEmail])
+  @@index([userEmail])
+  @@index([announcementId])
 }
 
 // ─── Content / seed models ─────────────────────────────────────────────────

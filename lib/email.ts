@@ -182,6 +182,13 @@ export async function sendAnnouncementEmail(
       return { success: false, error: "Email service not configured" };
     }
 
+    // Convert body text to HTML with proper formatting
+    // Replace URLs with clickable links
+    let formattedBody = body
+      .replace(/https?:\/\/[^\s]+/g, (url) => `<a href="${url}" style="color: #667eea; text-decoration: underline;">${url}</a>`)
+      // Replace line breaks with <br>
+      .replace(/\n/g, '<br>');
+
     const htmlBody = `
       <!DOCTYPE html>
       <html lang="en">
@@ -196,9 +203,10 @@ export async function sendAnnouncementEmail(
               <td align="center">
                 <table width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
                   
-                  <!-- Header -->
+                  <!-- Header with Logo -->
                   <tr>
-                    <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;">
+                    <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 30px; text-align: center;">
+                      <img src="https://www.gdgpsu.dev/api/media?path=1762291432641-c8uv057d7gi.png" alt="GDG PSU" style="width: 60px; height: 60px; margin-bottom: 20px;" />
                       <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: bold;">${title}</h1>
                     </td>
                   </tr>
@@ -206,7 +214,7 @@ export async function sendAnnouncementEmail(
                   <!-- Content -->
                   <tr>
                     <td style="padding: 40px 30px;">
-                      <div style="font-size: 16px; color: #374151; line-height: 1.6; white-space: pre-wrap;">${body}</div>
+                      <div style="font-size: 16px; color: #374151; line-height: 1.8;">${formattedBody}</div>
                     </td>
                   </tr>
                   
@@ -231,7 +239,7 @@ export async function sendAnnouncementEmail(
     `;
 
     // Send to all emails (Resend supports batch sending)
-    const { data, error } = await resend.batch.send(
+    const { data, error} = await resend.batch.send(
       emails.map((email) => ({
         from: FROM_EMAIL,
         to: email,

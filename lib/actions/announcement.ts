@@ -27,6 +27,88 @@ export async function createAnnouncement(
   }
 }
 
+// ─── Auto-send announcement to new registrations ──────────────────────────
+
+export async function sendWelcomeAnnouncementToNewUsers(): Promise<{ sent: number }> {
+  try {
+    // Get the most recent pinned announcement (welcome message)
+    const welcomeAnnouncement = await db.announcement.findFirst({
+      where: { 
+        published: true,
+        pinned: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (!welcomeAnnouncement) {
+      console.log("No pinned announcement found for auto-send");
+      return { sent: 0 };
+    }
+
+    // Get users who registered in the last 2 hours
+    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
+    
+    const newRegistrations = await db.registration.findMany({
+      where: {
+        status: "confirmed",
+        createdAt: {
+          gte: twoHoursAgo,
+        },
+      },
+      include: { user: { select: { email: true } } },
+    });
+
+    if (newRegistrations.length === 0) {
+      return { sent: 0 };
+    }
+
+    const emails = newRegistrations.map((r) => r.user.email);
+
+    // Filter out users who have already received this announcement
+    const alreadySent = await db.announcementSent.findMany({
+      where: {
+        announcementId: welcomeAnnouncement.id,
+        userEmail: { in: emails },
+      },
+      select: { userEmail: true },
+    });
+
+    const alreadySentEmails = new Set(alreadySent.map((s) => s.userEmail));
+    const emailsToSend = emails.filter((email) => !alreadySentEmails.has(email));
+
+    if (emailsToSend.length === 0) {
+      console.log("All new users have already received the welcome announcement");
+      return { sent: 0 };
+    }
+
+    // Send the welcome announcement
+    const result = await sendAnnouncementEmail(
+      emailsToSend,
+      welcomeAnnouncement.title,
+      welcomeAnnouncement.body
+    );
+
+    if (result.success) {
+      // Track sent emails
+      await db.announcementSent.createMany({
+        data: emailsToSend.map((email) => ({
+          announcementId: welcomeAnnouncement.id,
+          userEmail: email,
+        })),
+        skipDuplicates: true,
+      });
+
+      console.log(`Auto-sent welcome announcement to ${emailsToSend.length} new users`);
+      return { sent: emailsToSend.length };
+    }
+
+    return { sent: 0 };
+  } catch (error) {
+    console.error("Auto-send announcement error:", error);
+    return { sent: 0 };
+  }
+}
+
 // ─── Send announcement email ───────────────────────────────────────────────
 
 export async function sendAnnouncementAsEmail(
@@ -48,37 +130,69 @@ export async function sendAnnouncementAsEmail(
 
     // Get emails based on audience
     if (announcement.audience === "all") {
-      // Get ALL registered users (participants, volunteers, admins)
-      const registrations = await db.registration.findMany({
-        where: { status: "confirmed" },
-        include: { user: { select: { email: true } } },
+      // Get ALL users with confirmed registrations (participants, volunteers, admins)
+      const users = await db.user.findMany({
+        where: {
+          OR: [
+            // Users with confirmed participant registration
+            { registration: { status: "confirmed" } },
+            // Volunteers
+            { role: "volunteer" },
+            // Admins
+            { role: "admin" },
+          ],
+        },
+        select: { email: true },
       });
-      emails = registrations.map((r) => r.user.email);
+      emails = users.map((u) => u.email);
     } else if (announcement.audience === "registered") {
-      // Get only registered participants (not volunteers/admins)
+      // Get only participants with confirmed registration
       const registrations = await db.registration.findMany({
         where: { 
           status: "confirmed",
-          user: { role: "participant" }
         },
         include: { user: { select: { email: true } } },
       });
       emails = registrations.map((r) => r.user.email);
     } else if (announcement.audience === "volunteers") {
-      // Get users who have submitted volunteer registration
-      const volunteerRegs = await db.volunteerRegistration.findMany({
-        include: { user: { select: { email: true } } },
+      // Get only users with volunteer role
+      const volunteers = await db.user.findMany({
+        where: { role: "volunteer" },
+        select: { email: true },
       });
-      emails = volunteerRegs.map((v) => v.user.email);
+      emails = volunteers.map((v) => v.email);
+    } else if (announcement.audience === "admins") {
+      // Get only users with admin role
+      const admins = await db.user.findMany({
+        where: { role: "admin" },
+        select: { email: true },
+      });
+      emails = admins.map((a) => a.email);
     }
 
     if (emails.length === 0) {
       return { error: `No ${announcement.audience === "all" ? "registered participants" : announcement.audience} to email` };
     }
 
+    // Filter out users who have already received this announcement
+    const alreadySent = await db.announcementSent.findMany({
+      where: {
+        announcementId: id,
+        userEmail: { in: emails },
+      },
+      select: { userEmail: true },
+    });
+
+    const alreadySentEmails = new Set(alreadySent.map((s) => s.userEmail));
+    const emailsToSend = emails.filter((email) => !alreadySentEmails.has(email));
+
+    if (emailsToSend.length === 0) {
+      return { error: "All users have already received this announcement" };
+    }
+
     // Send email
     const result = await sendAnnouncementEmail(
-      emails,
+      emailsToSend,
       announcement.title,
       announcement.body
     );
@@ -87,7 +201,16 @@ export async function sendAnnouncementAsEmail(
       return { error: result.error || "Failed to send emails" };
     }
 
-    return { data: { sent: emails.length } };
+    // Track sent emails
+    await db.announcementSent.createMany({
+      data: emailsToSend.map((email) => ({
+        announcementId: id,
+        userEmail: email,
+      })),
+      skipDuplicates: true,
+    });
+
+    return { data: { sent: emailsToSend.length } };
   } catch (error) {
     console.error("Send announcement email error:", error);
     return { error: "Failed to send announcement email" };

@@ -53,7 +53,7 @@ export function AnnouncementManager({ announcements }: { announcements: Announce
   }
 
   function openEdit(a: Announcement) {
-    form.reset({ title: a.title, body: a.body, published: a.published, pinned: a.pinned, audience: a.audience as "all" | "registered" | "volunteers" });
+    form.reset({ title: a.title, body: a.body, published: a.published, pinned: a.pinned, audience: a.audience as "all" | "registered" | "volunteers" | "admins" });
     setMode({ edit: a });
   }
 
@@ -223,6 +223,7 @@ export function AnnouncementManager({ announcements }: { announcements: Announce
                 <option value="registered">Registered Participants (default)</option>
                 <option value="all">All (Participants + Volunteers + Admins)</option>
                 <option value="volunteers">Volunteers Only</option>
+                <option value="admins">Admins Only</option>
               </select>
               <p className="text-xs text-muted-foreground">
                 Choose who will receive this announcement via email
@@ -298,7 +299,7 @@ export function AnnouncementManager({ announcements }: { announcements: Announce
                     </Badge>
                     {a.audience !== "all" && (
                       <Badge variant="outline" className="text-xs">
-                        {a.audience === "registered" ? "Participants" : "Volunteers"}
+                        {a.audience === "registered" ? "Participants" : a.audience === "volunteers" ? "Volunteers" : a.audience === "admins" ? "Admins" : a.audience}
                       </Badge>
                     )}
                   </div>

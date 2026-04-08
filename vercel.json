@@ -1,5 +1,9 @@
 {
   "buildCommand": "npm run db:generate && npm run build",
   "installCommand": "npm install",
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "crons": [{
+    "path": "/api/cron/send-announcements",
+    "schedule": "0 */2 * * *"
+  }]
 }
