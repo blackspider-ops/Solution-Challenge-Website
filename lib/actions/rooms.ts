@@ -97,6 +97,15 @@ export async function bookRoomForTeam(qrToken: string): Promise<RoomBookingResul
       // Calculate this team's size
       const thisTeamSize = 1 + userTeam.members.length;
 
+      console.log("Room booking debug:", {
+        roomName: room.name,
+        roomCapacity: room.capacity,
+        currentOccupancy,
+        thisTeamSize,
+        totalAfterBooking: currentOccupancy + thisTeamSize,
+        wouldExceed: currentOccupancy + thisTeamSize > room.capacity,
+      });
+
       // Check if adding this team would exceed room capacity
       if (currentOccupancy + thisTeamSize > room.capacity) {
         return {
