@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, Upload, QrCode, Megaphone, Shield, UserCheck } from "lucide-react";
+import { LayoutDashboard, Users, Upload, QrCode, Megaphone, Shield, UserCheck, Scale } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -101,6 +101,19 @@ export function DashboardNav({
           >
             <UserCheck className="w-4 h-4 shrink-0" />
             <span className="flex-1">Volunteer Panel</span>
+          </Link>
+        </>
+      )}
+      
+      {(userRole === "judge" || isAdmin) && (
+        <>
+          {!canAccessVolunteerPanel && <div className="my-2 border-t border-border" />}
+          <Link
+            href="/judge"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors bg-gradient-to-r from-amber-500/10 to-amber-600/10 text-amber-600 hover:from-amber-500/20 hover:to-amber-600/20 border border-amber-500/20"
+          >
+            <Scale className="w-4 h-4 shrink-0" />
+            <span className="flex-1">Judge Panel</span>
           </Link>
         </>
       )}
