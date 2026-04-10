@@ -53,25 +53,34 @@ function ResultCard({ result }: { result: RoomBookingResult }) {
         <div className="flex-1">
           <p className="font-semibold text-amber-700">Room at Maximum Capacity</p>
           <p className="text-sm text-amber-600 mb-2">
-            {result.roomName} has reached its capacity of {result.capacity} {result.capacity === 1 ? "person" : "people"}. 
+            {result.roomName} has {result.currentOccupancy} of {result.capacity} {result.capacity === 1 ? "person" : "people"} already. 
             Adding your team would exceed the room limit.
           </p>
-          <div className="space-y-2">
-            <p className="text-xs font-semibold text-amber-700">Teams Currently in This Room:</p>
-            {result.currentBookings.map((booking, idx) => (
-              <div key={idx} className="text-xs bg-amber-500/5 rounded p-2">
-                <p className="font-medium text-amber-700">{booking.teamName}</p>
-                <div className="flex items-center gap-1 text-amber-600 mt-0.5">
-                  <Users className="w-3 h-3" />
-                  <span>{booking.leaderName || "Team Leader"}</span>
+          {result.currentBookings.length > 0 ? (
+            <div className="space-y-2">
+              <p className="text-xs font-semibold text-amber-700">Teams Currently in This Room:</p>
+              {result.currentBookings.map((booking, idx) => (
+                <div key={idx} className="text-xs bg-amber-500/5 rounded p-2">
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="font-medium text-amber-700">{booking.teamName}</p>
+                    <span className="text-amber-600">{booking.teamSize} {booking.teamSize === 1 ? "person" : "people"}</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-amber-600 mt-0.5">
+                    <Users className="w-3 h-3" />
+                    <span>{booking.leaderName || "Team Leader"}</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-amber-600">
+                    <Mail className="w-3 h-3" />
+                    <span>{booking.leaderEmail}</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1 text-amber-600">
-                  <Mail className="w-3 h-3" />
-                  <span>{booking.leaderEmail}</span>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-amber-600 mt-2">
+              Room capacity reached. No team information available.
+            </p>
+          )}
           <p className="text-xs text-amber-600 mt-2">
             Please try scanning a different hacking space QR code.
           </p>

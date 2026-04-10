@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 
 export type RoomBookingResult =
   | { status: "success"; roomName: string; bookedAt: Date }
-  | { status: "room_full"; roomName: string; capacity: number; currentBookings: Array<{ teamName: string; leaderName: string | null; leaderEmail: string }> }
+  | { status: "room_full"; roomName: string; capacity: number; currentOccupancy: number; currentBookings: Array<{ teamName: string; teamSize: number; leaderName: string | null; leaderEmail: string }> }
   | { status: "already_booked"; roomName: string }
   | { status: "no_team"; message: string }
   | { status: "invalid" }
@@ -101,11 +101,16 @@ export async function bookRoomForTeam(qrToken: string): Promise<RoomBookingResul
           status: "room_full" as const,
           roomName: room.name,
           capacity: room.capacity,
-          currentBookings: room.bookings.map((b) => ({
-            teamName: b.team.name,
-            leaderName: b.team.leader.name,
-            leaderEmail: b.team.leader.email,
-          })),
+          currentOccupancy,
+          currentBookings: room.bookings.map((b) => {
+            const teamSize = 1 + b.team.members.length;
+            return {
+              teamName: b.team.name,
+              teamSize,
+              leaderName: b.team.leader.name,
+              leaderEmail: b.team.leader.email,
+            };
+          }),
         };
       }
 
