@@ -486,7 +486,7 @@ export function AnnouncementManager({ announcements }: { announcements: Announce
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive hover:bg-destructive/90 text-white">
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

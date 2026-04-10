@@ -427,7 +427,7 @@ export function SponsorManager({ sponsors }: { sponsors: Sponsor[] }) {
             <AlertDialogCancel onClick={() => setSponsorToDelete(null)}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive hover:bg-destructive/90 text-white"
             >
               Delete Sponsor
             </AlertDialogAction>

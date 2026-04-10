@@ -249,7 +249,7 @@ export function VolunteerFormBuilder({ sections: initialSections }: { sections: 
             <AlertDialogCancel onClick={() => setSectionToDelete(null)}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDeleteSection}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive hover:bg-destructive/90 text-white"
             >
               Delete Section
             </AlertDialogAction>
@@ -270,7 +270,7 @@ export function VolunteerFormBuilder({ sections: initialSections }: { sections: 
             <AlertDialogCancel onClick={() => setQuestionToDelete(null)}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDeleteQuestion}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive hover:bg-destructive/90 text-white"
             >
               Delete Question
             </AlertDialogAction>

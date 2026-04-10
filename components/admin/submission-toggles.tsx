@@ -209,7 +209,7 @@ export function SubmissionToggles({ submissionsOpen: initialSubmissionsOpen, all
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmSubmissions}
-              className={pendingSubmissionsValue ? "" : "bg-destructive text-destructive-foreground hover:bg-destructive/90"}
+              className={pendingSubmissionsValue ? "" : "bg-destructive hover:bg-destructive/90 text-white"}
             >
               {pendingSubmissionsValue ? "Open Submissions" : "Close Submissions"}
             </AlertDialogAction>
@@ -239,7 +239,7 @@ export function SubmissionToggles({ submissionsOpen: initialSubmissionsOpen, all
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmEdits}
-              className={pendingEditsValue ? "" : "bg-destructive text-destructive-foreground hover:bg-destructive/90"}
+              className={pendingEditsValue ? "" : "bg-destructive hover:bg-destructive/90 text-white"}
             >
               {pendingEditsValue ? "Allow Edits" : "Lock Edits"}
             </AlertDialogAction>

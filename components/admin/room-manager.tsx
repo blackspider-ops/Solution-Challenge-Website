@@ -483,7 +483,7 @@ export function RoomManager({ rooms }: { rooms: Room[] }) {
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                                 <AlertDialogAction
                                   onClick={() => handleRemoveTeam(booking.id, booking.team.name, r.name)}
-                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  className="bg-destructive hover:bg-destructive/90 text-white"
                                 >
                                   Remove Team
                                 </AlertDialogAction>
@@ -617,7 +617,7 @@ export function RoomManager({ rooms }: { rooms: Room[] }) {
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction
                           onClick={() => handleDelete(r.id, r.name)}
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          className="bg-destructive hover:bg-destructive/90 text-white"
                         >
                           Delete
                         </AlertDialogAction>

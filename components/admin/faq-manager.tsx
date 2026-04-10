@@ -328,7 +328,7 @@ export function FAQManager({ faqs }: { faqs: FAQ[] }) {
             <AlertDialogCancel onClick={() => setFaqToDelete(null)}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive hover:bg-destructive/90 text-white"
             >
               Delete FAQ
             </AlertDialogAction>

@@ -633,7 +633,7 @@ export function TeamView({ team, tracks, currentUserId, hasRoomBooking }: TeamVi
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmLeave}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive hover:bg-destructive/90 text-white"
             >
               Leave Team
             </AlertDialogAction>
@@ -655,7 +655,7 @@ export function TeamView({ team, tracks, currentUserId, hasRoomBooking }: TeamVi
             <AlertDialogCancel onClick={() => setMemberToRemove(null)}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmRemove}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive hover:bg-destructive/90 text-white"
             >
               Remove Member
             </AlertDialogAction>
