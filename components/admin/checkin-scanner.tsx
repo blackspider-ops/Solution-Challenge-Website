@@ -248,8 +248,53 @@ function CameraScanner({ onScan, active }: CameraScannerProps) {
 export function CheckInScanner() {
   const [result, setResult] = useState<CheckInResult | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [countdown, setCountdown] = useState<number | null>(null);
   const processingRef = useRef(false);
   const lastTokenRef = useRef<string>("");
+  const clearTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Clear result after 10 seconds with countdown
+  useEffect(() => {
+    if (result) {
+      // Clear any existing timeouts
+      if (clearTimeoutRef.current) {
+        clearTimeout(clearTimeoutRef.current);
+      }
+      if (countdownIntervalRef.current) {
+        clearInterval(countdownIntervalRef.current);
+      }
+      
+      // Start countdown from 10
+      setCountdown(10);
+      
+      // Update countdown every second
+      countdownIntervalRef.current = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev === null || prev <= 1) {
+            return null;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      
+      // Set timeout to clear result after 10 seconds
+      clearTimeoutRef.current = setTimeout(() => {
+        setResult(null);
+        setCountdown(null);
+        lastTokenRef.current = ""; // Allow rescanning the same QR code
+      }, 10000);
+    }
+
+    return () => {
+      if (clearTimeoutRef.current) {
+        clearTimeout(clearTimeoutRef.current);
+      }
+      if (countdownIntervalRef.current) {
+        clearInterval(countdownIntervalRef.current);
+      }
+    };
+  }, [result]);
 
   function processToken(raw: string) {
     const trimmed = raw.trim();
@@ -309,7 +354,18 @@ export function CheckInScanner() {
         </div>
 
         {/* Result */}
-        {result && <ResultCard result={result} />}
+        {result && (
+          <div className="relative">
+            <ResultCard result={result} />
+            {countdown !== null && (
+              <div className="absolute top-2 right-2">
+                <div className="w-8 h-8 rounded-full bg-background/80 backdrop-blur-sm border border-border flex items-center justify-center">
+                  <span className="text-xs font-semibold text-muted-foreground">{countdown}</span>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
