@@ -105,14 +105,44 @@ export async function joinTeam(
       if (count >= MAX_TEAM_SIZE) {
         throw Object.assign(new Error("full"), { code: "TEAM_FULL" });
       }
+      
+      // Check if team has booked a room and if adding this member would exceed room capacity
+      const roomBooking = await tx.roomBooking.findFirst({
+        where: { teamId: team.id },
+        include: {
+          room: {
+            select: { capacity: true, name: true },
+          },
+        },
+      });
+      
+      if (roomBooking) {
+        const newTeamSize = count + 1; // current members + new member
+        if (newTeamSize > roomBooking.room.capacity) {
+          throw Object.assign(
+            new Error("room_capacity"), 
+            { 
+              code: "ROOM_CAPACITY_EXCEEDED",
+              roomName: roomBooking.room.name,
+              roomCapacity: roomBooking.room.capacity,
+            }
+          );
+        }
+      }
+      
       return tx.teamMember.create({
         data: { teamId: team.id, userId: session.user.id },
       });
     });
     return { data: { id: member.id } };
   } catch (e: unknown) {
-    const err = e as { code?: string; message?: string };
+    const err = e as { code?: string; message?: string; roomName?: string; roomCapacity?: number };
     if (err.code === "TEAM_FULL") return { error: "This team is full (maximum 4 members)" };
+    if (err.code === "ROOM_CAPACITY_EXCEEDED") {
+      return { 
+        error: `Cannot join: Team has booked ${err.roomName} (capacity: ${err.roomCapacity} people). Adding you would exceed the room limit. Contact a volunteer or admin for assistance.` 
+      };
+    }
     if (err.code === "P2002") return { error: "You are already on a team" };
     return { error: "Failed to join team. Please try again." };
   }
