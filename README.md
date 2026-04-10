@@ -13,27 +13,60 @@ npm run dev
 
 Visit http://localhost:3000
 
+## ✨ Key Features
+
+**For Participants:**
+- Registration with QR code tickets
+- Team formation (up to 4 members)
+- Project submissions with track selection
+- Room/hacking space booking
+- Real-time announcements
+
+**For Admins:**
+- Complete event management dashboard
+- QR code check-in system
+- Food distribution tracking (3 meal types)
+- Room/space management
+- Announcement system with email notifications
+- Submission controls (open/close, lock edits)
+
+**For Judges:**
+- Aggregate scoring system
+- Multiple criteria with weighted scores
+- Individual judge comments
+- Real-time score updates
+
+**For Volunteers:**
+- Check-in scanning
+- Food distribution management
+
+## 🔒 Security Features
+
+- Role-based access control (participant, volunteer, admin, judge)
+- Super admin controls for critical settings
+- Input validation and sanitization
+- Race condition prevention with transactions
+- XSS protection
+- Backend validation for all submissions
+
 ## 📚 Documentation
 
-All documentation is in the `/docs` folder:
+See `/docs` folder for detailed documentation:
+- [Features](./docs/FEATURES.md) - Complete feature list
+- [Deployment](./docs/DEPLOYMENT.md) - Deploy to production
+- [Scripts](./docs/SCRIPTS.md) - Database seeding and utilities
+- [Security Audit](./docs/SECURITY_AUDIT_REPORT.md) - Security analysis
+- [Final Audit](./docs/FINAL_AUDIT_REPORT.md) - Production readiness
 
-- **[START HERE](./docs/START_HERE.md)** - Quick start guide
-- **[Full Documentation](./docs/README.md)** - Complete project docs
-- **[Deployment Guide](./docs/DEPLOYMENT.md)** - Deploy to Vercel
-- **[Admin Content Management](./docs/ADMIN_CONTENT_MANAGEMENT.md)** - Manage content
-- **[Email System Setup](./docs/EMAIL_SYSTEM_SETUP.md)** - Email configuration
-- **[Registration Flow](./docs/REGISTRATION_FLOW.md)** - Registration system
-- **[Quick Reference](./docs/QUICK_REFERENCE.md)** - Quick reference
-- **[Checklist](./docs/CHECKLIST.md)** - Pre-launch checklist
+## 🛠️ Tech Stack
 
-## ✅ Features
-
-- Complete registration with QR tickets
-- Email system with Resend
-- Admin content management
-- Team and submission management
-- QR code check-in system
-- Track visibility controls
+- **Framework:** Next.js 14 (App Router)
+- **Database:** PostgreSQL (Neon)
+- **ORM:** Prisma
+- **Auth:** NextAuth.js
+- **Email:** Resend
+- **Styling:** Tailwind CSS
+- **QR Codes:** qrcode, @zxing/browser
 
 ## 📧 Contact
 
