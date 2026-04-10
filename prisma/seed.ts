@@ -127,6 +127,54 @@ async function main() {
   await db.sponsor.createMany({ data: sponsors });
   console.log(`  ✓ ${sponsors.length} sponsors`);
 
+  // ── Judging Criteria ─────────────────────────────────────────────────────
+  const judgingCriteria = [
+    {
+      name: "Innovation",
+      description: "Originality and creativity of the solution. Does it bring a fresh perspective or novel approach to solving the problem?",
+      maxScore: 10,
+      weight: 1.5,
+      order: 0,
+    },
+    {
+      name: "Technical Complexity",
+      description: "Quality of code, architecture, and technical implementation. How well is the solution built from a technical standpoint?",
+      maxScore: 10,
+      weight: 1.0,
+      order: 1,
+    },
+    {
+      name: "Impact & Relevance",
+      description: "Potential real-world impact and alignment with UN Sustainable Development Goals. How meaningful is this solution?",
+      maxScore: 10,
+      weight: 1.5,
+      order: 2,
+    },
+    {
+      name: "User Experience",
+      description: "Design, usability, and overall user experience. Is the solution intuitive and accessible?",
+      maxScore: 10,
+      weight: 1.0,
+      order: 3,
+    },
+    {
+      name: "Presentation",
+      description: "Quality of demo, pitch, and communication. How well did the team present their solution?",
+      maxScore: 10,
+      weight: 0.8,
+      order: 4,
+    },
+  ];
+
+  for (const criteria of judgingCriteria) {
+    await db.judgingCriteria.upsert({
+      where: { name: criteria.name },
+      update: criteria,
+      create: criteria,
+    });
+  }
+  console.log(`  ✓ ${judgingCriteria.length} judging criteria`);
+
   console.log("✅ Seed complete");
 }
 
