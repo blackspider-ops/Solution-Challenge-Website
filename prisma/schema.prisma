@@ -183,6 +183,38 @@ model FoodDistribution {
   @@index([mealType])
 }
 
+// ─── Room/Hacking Space System ─────────────────────────────────────────────
+
+/// A physical room or hacking space that teams can claim
+model Room {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  capacity    Int      @default(1) // How many teams can claim this room
+  qrToken     String   @unique @default(cuid())
+  active      Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  bookings RoomBooking[]
+}
+
+/// Records which team has claimed which room
+model RoomBooking {
+  id        String   @id @default(cuid())
+  roomId    String
+  teamId    String
+  bookedAt  DateTime @default(now())
+
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, teamId]) // A team can only book a room once
+  @@index([roomId])
+  @@index([teamId])
+}
+
 /// A challenge category. Seeded from the landing page tracks.
 /// visible = false means the detail page is hidden from public users.
 /// slug is used as the URL path segment.
@@ -218,6 +250,7 @@ model Team {
   track      Track?       @relation(fields: [trackId], references: [id])
   members    TeamMember[]
   submission Submission?
+  roomBookings RoomBooking[]
 }
 
 /// Join table between User and Team.
