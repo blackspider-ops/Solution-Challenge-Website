@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
-import { CheckCircle, Clock, Users, Upload, QrCode, AlertCircle, Megaphone, Pin, ArrowRight, CalendarDays, UserCheck } from "lucide-react";
+import { CheckCircle, Clock, Users, Upload, QrCode, AlertCircle, Megaphone, Pin, ArrowRight, CalendarDays, UserCheck, Scale } from "lucide-react";
 import Link from "next/link";
 import { RegisterButton } from "@/components/dashboard/register-button";
 import { getPublishedAnnouncements } from "@/lib/actions/announcement";
@@ -193,6 +193,25 @@ export default async function DashboardPage() {
       {/* Quick actions */}
       {registration && registration.status === "confirmed" && (
         <div className="grid sm:grid-cols-2 gap-4">
+          {/* Judge Panel Link (for judges and admins) */}
+          {(session.user.role === "judge" || session.user.role === "admin") && (
+            <Link
+              href="/judge"
+              className="group flex items-center gap-4 p-5 rounded-2xl border border-amber-500/30 bg-amber-500/5 hover:border-amber-500/50 hover:shadow-lg transition-all"
+            >
+              <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center group-hover:bg-amber-500/20 transition-colors shrink-0">
+                <Scale className="w-5 h-5 text-amber-600" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-foreground">Judge Panel</p>
+                <p className="text-xs text-muted-foreground">
+                  Score and evaluate submissions
+                </p>
+              </div>
+              <ArrowRight className="w-4 h-4 text-amber-600 shrink-0 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          )}
+
           <Link
             href="/dashboard/ticket"
             className="group flex items-center gap-4 p-5 rounded-2xl border border-border bg-card hover:border-primary/30 hover:shadow-lg transition-all"

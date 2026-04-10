@@ -23,7 +23,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Search, Shield, UserCog, User, CheckCircle, XCircle, Mail } from "lucide-react";
+import { Search, Shield, UserCog, User, CheckCircle, XCircle, Mail, Scale } from "lucide-react";
 import { updateUserRole } from "@/lib/actions/users";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -111,6 +111,7 @@ export function UserManagement({ users, currentUser }: {
             <SelectItem value="all">All Roles</SelectItem>
             <SelectItem value="participant">Participants</SelectItem>
             <SelectItem value="volunteer">Volunteers</SelectItem>
+            <SelectItem value="judge">Judges</SelectItem>
             <SelectItem value="admin">Admins</SelectItem>
           </SelectContent>
         </Select>
@@ -165,12 +166,15 @@ export function UserManagement({ users, currentUser }: {
                             ? "default"
                             : user.role === "volunteer"
                             ? "secondary"
+                            : user.role === "judge"
+                            ? "default"
                             : "outline"
                         }
-                        className="text-xs"
+                        className={`text-xs ${user.role === "judge" ? "bg-amber-500" : ""}`}
                       >
                         {user.role === "admin" && <Shield className="w-3 h-3 mr-1" />}
                         {user.role === "volunteer" && <UserCog className="w-3 h-3 mr-1" />}
+                        {user.role === "judge" && <Scale className="w-3 h-3 mr-1" />}
                         {user.role}
                       </Badge>
 
@@ -276,6 +280,25 @@ export function UserManagement({ users, currentUser }: {
                             <p className="font-medium">Volunteer</p>
                             <p className={`text-xs ${user.role === "volunteer" ? "text-blue-100" : "text-muted-foreground"}`}>
                               Can check-in participants
+                            </p>
+                          </div>
+                        </Button>
+
+                        <Button
+                          variant="outline"
+                          className={`w-full justify-start gap-2 ${
+                            user.role === "judge" 
+                              ? "bg-amber-500 text-white hover:bg-amber-600 border-amber-500" 
+                              : "hover:bg-muted"
+                          }`}
+                          onClick={() => handleRoleChange(user.id, user.name || user.email, "judge")}
+                          disabled={user.role === "judge" || (user.role === "admin" && !isSuperAdmin)}
+                        >
+                          <UserCog className="w-4 h-4" />
+                          <div className="text-left">
+                            <p className="font-medium">Judge</p>
+                            <p className={`text-xs ${user.role === "judge" ? "text-amber-100" : "text-muted-foreground"}`}>
+                              Can judge submissions
                             </p>
                           </div>
                         </Button>

@@ -12,6 +12,7 @@ enum Role {
   participant
   volunteer
   admin
+  judge
 }
 
 enum RegistrationStatus {
@@ -102,6 +103,7 @@ model User {
   checkInsPerformed CheckIn[]  @relation("CheckInPerformedBy")
   formResponse  FormResponse?
   volunteerRegistration VolunteerRegistration?
+  judgingScores JudgingScore[]
 }
 
 /// Created when a user registers for the event.
@@ -221,8 +223,46 @@ model Submission {
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
 
-  team  Team  @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  track Track @relation(fields: [trackId], references: [id])
+  team   Team           @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  track  Track          @relation(fields: [trackId], references: [id])
+  scores JudgingScore[]
+}
+
+// ─── Judging System ────────────────────────────────────────────────────────
+
+/// Judging criteria configured by admins
+model JudgingCriteria {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String
+  maxScore    Int      @default(10)
+  weight      Float    @default(1.0) // multiplier for final score calculation
+  order       Int      @default(0)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  scores JudgingScore[]
+}
+
+/// Individual score given by a judge for a submission on a specific criteria
+model JudgingScore {
+  id           String   @id @default(cuid())
+  submissionId String
+  judgeId      String
+  criteriaId   String
+  score        Int      // 0 to maxScore
+  comment      String?  // optional feedback
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  submission Submission       @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  judge      User             @relation(fields: [judgeId], references: [id], onDelete: Cascade)
+  criteria   JudgingCriteria  @relation(fields: [criteriaId], references: [id], onDelete: Cascade)
+
+  @@unique([submissionId, judgeId, criteriaId]) // one score per judge per criteria per submission
+  @@index([submissionId])
+  @@index([judgeId])
 }
 
 /// A message posted by an admin, visible to all participants on their dashboard.

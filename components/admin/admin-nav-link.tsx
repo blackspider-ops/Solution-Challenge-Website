@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard, Users, QrCode, Upload, Megaphone, Layers, Settings, FileEdit, UserCheck, Clock,
+  LayoutDashboard, Users, QrCode, Upload, Megaphone, Layers, Settings, FileEdit, UserCheck, Clock, Scale,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -17,6 +17,7 @@ const adminNavItems = [
   { href: "/admin/volunteers",         label: "Volunteers",        icon: UserCheck },
   { href: "/admin/teams",              label: "Teams",             icon: Users },
   { href: "/admin/submissions",        label: "Submissions",       icon: Upload },
+  { href: "/admin/judging-criteria",   label: "Judging Criteria",  icon: Scale },
   { href: "/admin/tracks",             label: "Tracks",            icon: Layers },
   { href: "/admin/content",            label: "Content",           icon: Settings },
   { href: "/admin/checkin",            label: "Check-in",          icon: QrCode },
