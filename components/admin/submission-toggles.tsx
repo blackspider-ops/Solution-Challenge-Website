@@ -5,6 +5,16 @@ import { updateEventSettings } from "@/lib/actions/event-settings";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Lock, LockOpen, Edit, FileX } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type Props = {
   submissionsOpen: boolean;
@@ -16,13 +26,28 @@ export function SubmissionToggles({ submissionsOpen: initialSubmissionsOpen, all
   const [isPending, startTransition] = useTransition();
   const [submissionsOpen, setSubmissionsOpen] = useState(initialSubmissionsOpen);
   const [allowEdits, setAllowEdits] = useState(initialAllowEdits);
+  const [showSubmissionsDialog, setShowSubmissionsDialog] = useState(false);
+  const [showEditsDialog, setShowEditsDialog] = useState(false);
+  const [pendingSubmissionsValue, setPendingSubmissionsValue] = useState(false);
+  const [pendingEditsValue, setPendingEditsValue] = useState(false);
 
-  function handleToggleSubmissions() {
-    const newValue = !submissionsOpen;
-    
-    if (!confirm(`Are you sure you want to ${newValue ? "OPEN" : "CLOSE"} submissions? ${!newValue ? "Teams will NOT be able to submit new projects!" : ""}`)) {
-      return;
-    }
+  function handleToggleSubmissionsClick() {
+    setPendingSubmissionsValue(!submissionsOpen);
+    setShowSubmissionsDialog(true);
+  }
+
+  function handleToggleEditsClick() {
+    setPendingEditsValue(!allowEdits);
+    setShowEditsDialog(true);
+  }
+
+  function handleConfirmSubmissions() {
+    const newValue = pendingSubmissionsValue;
+    setShowSubmissionsDialog(false);
+
+  function handleConfirmSubmissions() {
+    const newValue = pendingSubmissionsValue;
+    setShowSubmissionsDialog(false);
 
     startTransition(async () => {
       try {
@@ -46,12 +71,9 @@ export function SubmissionToggles({ submissionsOpen: initialSubmissionsOpen, all
     });
   }
 
-  function handleToggleEdits() {
-    const newValue = !allowEdits;
-    
-    if (!confirm(`Are you sure you want to ${newValue ? "ALLOW" : "PREVENT"} editing submitted projects? ${!newValue ? "Teams will NOT be able to edit their submitted projects!" : ""}`)) {
-      return;
-    }
+  function handleConfirmEdits() {
+    const newValue = pendingEditsValue;
+    setShowEditsDialog(false);
 
     startTransition(async () => {
       try {
@@ -109,7 +131,7 @@ export function SubmissionToggles({ submissionsOpen: initialSubmissionsOpen, all
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={handleToggleSubmissions}
+              onClick={handleToggleSubmissionsClick}
               disabled={isPending}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                 submissionsOpen ? "bg-emerald-500" : "bg-red-500"
@@ -146,7 +168,7 @@ export function SubmissionToggles({ submissionsOpen: initialSubmissionsOpen, all
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={handleToggleEdits}
+              onClick={handleToggleEditsClick}
               disabled={isPending}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                 allowEdits ? "bg-emerald-500" : "bg-red-500"
@@ -168,6 +190,66 @@ export function SubmissionToggles({ submissionsOpen: initialSubmissionsOpen, all
       <p className="text-xs text-amber-600 mt-4">
         ⚠️ These controls affect all teams. Use carefully during judging or after deadlines.
       </p>
+
+      {/* Submissions Dialog */}
+      <AlertDialog open={showSubmissionsDialog} onOpenChange={setShowSubmissionsDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {pendingSubmissionsValue ? "Open" : "Close"} Submissions?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingSubmissionsValue ? (
+                "Teams will be able to submit new projects. Use this when the submission period begins."
+              ) : (
+                <>
+                  <strong className="text-destructive">Warning:</strong> Teams will NOT be able to submit new projects after this. 
+                  Use this when the submission deadline has passed or during judging.
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmSubmissions}
+              className={pendingSubmissionsValue ? "" : "bg-destructive text-destructive-foreground hover:bg-destructive/90"}
+            >
+              {pendingSubmissionsValue ? "Open Submissions" : "Close Submissions"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Edits Dialog */}
+      <AlertDialog open={showEditsDialog} onOpenChange={setShowEditsDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {pendingEditsValue ? "Allow" : "Prevent"} Editing Submitted Projects?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingEditsValue ? (
+                "Teams will be able to edit their submitted projects. Use this if teams need to make corrections."
+              ) : (
+                <>
+                  <strong className="text-destructive">Warning:</strong> Teams will NOT be able to edit their submitted projects. 
+                  Use this during judging to prevent changes while projects are being reviewed.
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmEdits}
+              className={pendingEditsValue ? "" : "bg-destructive text-destructive-foreground hover:bg-destructive/90"}
+            >
+              {pendingEditsValue ? "Allow Edits" : "Lock Edits"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -21,6 +21,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import {
@@ -82,6 +92,12 @@ export function TeamView({ team, tracks, currentUserId, hasRoomBooking }: TeamVi
   const [showTransfer, setShowTransfer] = useState(false);
   const [showTrackEdit, setShowTrackEdit] = useState(false);
   const [selectedTrack, setSelectedTrack] = useState(team?.track?.id ?? "");
+  
+  // Dialog states
+  const [showLeaveDialog, setShowLeaveDialog] = useState(false);
+  const [showRemoveDialog, setShowRemoveDialog] = useState(false);
+  const [showTransferDialog, setShowTransferDialog] = useState(false);
+  const [memberToRemove, setMemberToRemove] = useState<{ id: string; name: string } | null>(null);
 
   const createForm = useForm<CreateTeamInput>({ resolver: zodResolver(createTeamSchema) });
   const joinForm = useForm<JoinTeamInput>({ resolver: zodResolver(joinTeamSchema) });
@@ -115,7 +131,11 @@ export function TeamView({ team, tracks, currentUserId, hasRoomBooking }: TeamVi
   }
 
   function handleLeave() {
-    if (!confirm("Are you sure you want to leave this team?")) return;
+    setShowLeaveDialog(true);
+  }
+
+  function confirmLeave() {
+    setShowLeaveDialog(false);
     run(async () => {
       const result = await leaveTeam();
       if ("error" in result) { toast.error(result.error); return; }
@@ -125,18 +145,29 @@ export function TeamView({ team, tracks, currentUserId, hasRoomBooking }: TeamVi
   }
 
   function handleRemoveMember(userId: string, name: string) {
-    if (!confirm(`Remove ${name} from the team?`)) return;
+    setMemberToRemove({ id: userId, name });
+    setShowRemoveDialog(true);
+  }
+
+  function confirmRemove() {
+    if (!memberToRemove) return;
+    setShowRemoveDialog(false);
     run(async () => {
-      const result = await removeMember(userId);
+      const result = await removeMember(memberToRemove.id);
       if ("error" in result) { toast.error(result.error); return; }
-      toast.success(`${name} removed from team`);
+      toast.success(`${memberToRemove.name} removed from team`);
+      setMemberToRemove(null);
       router.refresh();
     });
   }
 
   function handleTransferLeadership() {
     if (!transferTarget) { toast.error("Select a member first"); return; }
-    if (!confirm("Transfer leadership? You will become a regular member.")) return;
+    setShowTransferDialog(true);
+  }
+
+  function confirmTransfer() {
+    setShowTransferDialog(false);
     run(async () => {
       const result = await transferLeadership({ newLeaderId: transferTarget });
       if ("error" in result) { toast.error(result.error); return; }
@@ -588,6 +619,68 @@ export function TeamView({ team, tracks, currentUserId, hasRoomBooking }: TeamVi
           </form>
         </div>
       )}
+
+      {/* Leave Team Dialog */}
+      <AlertDialog open={showLeaveDialog} onOpenChange={setShowLeaveDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Leave Team?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to leave this team? You'll need a new invite code to rejoin.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmLeave}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Leave Team
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Remove Member Dialog */}
+      <AlertDialog open={showRemoveDialog} onOpenChange={setShowRemoveDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Team Member?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove <strong>{memberToRemove?.name}</strong> from the team? 
+              They'll need a new invite code to rejoin.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setMemberToRemove(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmRemove}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Remove Member
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Transfer Leadership Dialog */}
+      <AlertDialog open={showTransferDialog} onOpenChange={setShowTransferDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Transfer Leadership?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to transfer leadership? You will become a regular team member and 
+              will no longer have leader privileges.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmTransfer}>
+              Transfer Leadership
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
