@@ -12,7 +12,15 @@ export default async function RoomsPage() {
 
   const totalRooms = rooms.length;
   const totalCapacity = rooms.reduce((sum, r) => sum + r.capacity, 0);
-  const totalBooked = rooms.reduce((sum, r) => sum + r.bookings.length, 0);
+  
+  // Calculate total people currently booked (sum of all team sizes across all rooms)
+  const totalBooked = rooms.reduce((sum, room) => {
+    const roomOccupancy = room.bookings.reduce((bookingSum, booking) => {
+      const teamSize = 1 + booking.team.members.length; // leader + members
+      return bookingSum + teamSize;
+    }, 0);
+    return sum + roomOccupancy;
+  }, 0);
 
   return (
     <div className="space-y-6">

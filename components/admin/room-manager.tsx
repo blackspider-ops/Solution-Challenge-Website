@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,10 +28,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, DoorOpen, QrCode, Users, Mail } from "lucide-react";
+import { Plus, Pencil, Trash2, DoorOpen, QrCode, Users, Mail, Printer } from "lucide-react";
 import { createRoom, updateRoom, deleteRoom } from "@/lib/actions/rooms";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import QRCodeLib from "qrcode";
 
 type Room = {
   id: string;
@@ -48,6 +49,7 @@ type Room = {
         name: string | null;
         email: string;
       };
+      members: Array<{ id: string }>; // Include members to calculate team size
     };
   }>;
 };
@@ -57,12 +59,151 @@ export function RoomManager({ rooms }: { rooms: Room[] }) {
   const [isPending, startTransition] = useTransition();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingRoom, setEditingRoom] = useState<Room | null>(null);
+  const [qrCodes, setQrCodes] = useState<Record<string, string>>({});
 
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     capacity: 1,
   });
+
+  // Generate QR codes for all rooms
+  useEffect(() => {
+    async function generateQRCodes() {
+      const codes: Record<string, string> = {};
+      for (const room of rooms) {
+        try {
+          const qrDataUrl = await QRCodeLib.toDataURL(room.qrToken, {
+            width: 300,
+            margin: 2,
+            color: {
+              dark: "#000000",
+              light: "#FFFFFF",
+            },
+          });
+          codes[room.id] = qrDataUrl;
+        } catch (error) {
+          console.error(`Failed to generate QR for room ${room.id}:`, error);
+        }
+      }
+      setQrCodes(codes);
+    }
+
+    if (rooms.length > 0) {
+      generateQRCodes();
+    }
+  }, [rooms]);
+
+  function handlePrint(room: Room) {
+    const qrDataUrl = qrCodes[room.id];
+    if (!qrDataUrl) {
+      toast.error("QR code not ready yet");
+      return;
+    }
+
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      toast.error("Please allow popups to print");
+      return;
+    }
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Print QR Code - ${room.name}</title>
+          <style>
+            @media print {
+              @page {
+                size: A4;
+                margin: 20mm;
+              }
+            }
+            body {
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              min-height: 100vh;
+              margin: 0;
+              padding: 40px;
+              text-align: center;
+            }
+            .container {
+              max-width: 600px;
+              border: 2px solid #e5e7eb;
+              border-radius: 16px;
+              padding: 40px;
+              background: white;
+            }
+            h1 {
+              font-size: 32px;
+              font-weight: bold;
+              margin: 0 0 8px 0;
+              color: #111827;
+            }
+            .capacity {
+              font-size: 18px;
+              color: #6b7280;
+              margin: 0 0 32px 0;
+            }
+            .qr-container {
+              margin: 32px 0;
+              padding: 20px;
+              background: #f9fafb;
+              border-radius: 12px;
+            }
+            img {
+              max-width: 100%;
+              height: auto;
+              display: block;
+              margin: 0 auto;
+            }
+            .instructions {
+              font-size: 16px;
+              color: #374151;
+              margin-top: 24px;
+              line-height: 1.6;
+            }
+            .token {
+              font-family: 'Courier New', monospace;
+              font-size: 14px;
+              color: #6b7280;
+              margin-top: 16px;
+              padding: 8px 12px;
+              background: #f3f4f6;
+              border-radius: 6px;
+              display: inline-block;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h1>${room.name}</h1>
+            <p class="capacity">Capacity: ${room.capacity} team${room.capacity !== 1 ? 's' : ''}</p>
+            ${room.description ? `<p class="instructions">${room.description}</p>` : ''}
+            <div class="qr-container">
+              <img src="${qrDataUrl}" alt="QR Code for ${room.name}" />
+            </div>
+            <p class="instructions">
+              <strong>Scan this QR code to book this hacking space</strong><br>
+              Teams can scan this code from their Team page to reserve this room.
+            </p>
+            <div class="token">Token: ${room.qrToken}</div>
+          </div>
+          <script>
+            window.onload = function() {
+              setTimeout(function() {
+                window.print();
+              }, 500);
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  }
 
   function resetForm() {
     setFormData({
@@ -232,7 +373,14 @@ export function RoomManager({ rooms }: { rooms: Room[] }) {
         </Card>
       ) : (
         <div className="space-y-3">
-          {rooms.map((r) => (
+          {rooms.map((r) => {
+            // Calculate current occupancy (sum of all team sizes)
+            const currentOccupancy = r.bookings.reduce((sum, booking) => {
+              const teamSize = 1 + booking.team.members.length; // leader + members
+              return sum + teamSize;
+            }, 0);
+            
+            return (
             <Card key={r.id} className="p-4">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
@@ -242,25 +390,54 @@ export function RoomManager({ rooms }: { rooms: Room[] }) {
                       {r.active ? "Active" : "Inactive"}
                     </Badge>
                     <Badge variant="outline">
-                      {r.bookings.length}/{r.capacity} booked
+                      {currentOccupancy}/{r.capacity} people
                     </Badge>
+                    {r.bookings.length > 0 && (
+                      <Badge variant="secondary">
+                        {r.bookings.length} {r.bookings.length === 1 ? "team" : "teams"}
+                      </Badge>
+                    )}
                   </div>
                   
                   {r.description && (
                     <p className="text-sm text-muted-foreground mb-2">{r.description}</p>
                   )}
 
+                  {/* QR Code Display */}
+                  <div className="mt-3 mb-3">
+                    {qrCodes[r.id] ? (
+                      <div className="inline-block p-3 bg-white rounded-lg border border-border">
+                        <img 
+                          src={qrCodes[r.id]} 
+                          alt={`QR Code for ${r.name}`}
+                          className="w-32 h-32"
+                        />
+                      </div>
+                    ) : (
+                      <div className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+                        <QrCode className="w-4 h-4 animate-pulse" />
+                        <span>Generating QR code...</span>
+                      </div>
+                    )}
+                  </div>
+
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <QrCode className="w-3 h-3" />
                     <code className="bg-muted px-2 py-0.5 rounded">{r.qrToken}</code>
                   </div>
 
                   {r.bookings.length > 0 && (
                     <div className="mt-3 space-y-2">
                       <p className="text-xs font-semibold text-muted-foreground">Booked by:</p>
-                      {r.bookings.map((booking) => (
+                      {r.bookings.map((booking) => {
+                        const teamSize = 1 + booking.team.members.length;
+                        return (
                         <div key={booking.id} className="text-xs bg-muted/50 rounded p-2">
-                          <p className="font-medium">{booking.team.name}</p>
+                          <div className="flex items-center justify-between mb-1">
+                            <p className="font-medium">{booking.team.name}</p>
+                            <span className="text-muted-foreground">
+                              {teamSize} {teamSize === 1 ? "person" : "people"}
+                            </span>
+                          </div>
                           <div className="flex items-center gap-1 text-muted-foreground mt-0.5">
                             <Users className="w-3 h-3" />
                             <span>{booking.team.leader.name || "Team Leader"}</span>
@@ -270,12 +447,23 @@ export function RoomManager({ rooms }: { rooms: Room[] }) {
                             <span>{booking.team.leader.email}</span>
                           </div>
                         </div>
-                      ))}
+                      )})}
                     </div>
                   )}
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePrint(r)}
+                    disabled={!qrCodes[r.id]}
+                    className="gap-2"
+                  >
+                    <Printer className="w-4 h-4" />
+                    Print QR
+                  </Button>
+
                   <Switch
                     checked={r.active}
                     onCheckedChange={(checked) => handleToggleActive(r.id, checked)}
@@ -395,7 +583,7 @@ export function RoomManager({ rooms }: { rooms: Room[] }) {
                 </div>
               </div>
             </Card>
-          ))}
+          )})}
         </div>
       )}
     </div>

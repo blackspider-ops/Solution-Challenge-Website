@@ -38,8 +38,9 @@ function ResultCard({ result }: { result: RoomBookingResult }) {
       <div className="p-4 rounded-xl border bg-blue-500/10 border-blue-500/20 flex items-start gap-3">
         <AlertTriangle className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
         <div>
-          <p className="font-semibold text-blue-700">Already Booked</p>
-          <p className="text-sm text-blue-600">Your team has already booked {result.roomName}</p>
+          <p className="font-semibold text-blue-700">Room Already Booked</p>
+          <p className="text-sm text-blue-600">Your team has already booked {result.roomName}.</p>
+          <p className="text-xs text-blue-500 mt-1">Teams cannot change rooms once booked.</p>
         </div>
       </div>
     );
@@ -50,12 +51,13 @@ function ResultCard({ result }: { result: RoomBookingResult }) {
       <div className="p-4 rounded-xl border bg-amber-500/10 border-amber-500/20 flex items-start gap-3">
         <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
         <div className="flex-1">
-          <p className="font-semibold text-amber-700">Room Full</p>
+          <p className="font-semibold text-amber-700">Room at Maximum Capacity</p>
           <p className="text-sm text-amber-600 mb-2">
-            {result.roomName} is at capacity ({result.capacity} {result.capacity === 1 ? "team" : "teams"})
+            {result.roomName} has reached its capacity of {result.capacity} {result.capacity === 1 ? "person" : "people"}. 
+            Adding your team would exceed the room limit.
           </p>
           <div className="space-y-2">
-            <p className="text-xs font-semibold text-amber-700">Current Teams:</p>
+            <p className="text-xs font-semibold text-amber-700">Teams Currently in This Room:</p>
             {result.currentBookings.map((booking, idx) => (
               <div key={idx} className="text-xs bg-amber-500/5 rounded p-2">
                 <p className="font-medium text-amber-700">{booking.teamName}</p>
@@ -70,6 +72,9 @@ function ResultCard({ result }: { result: RoomBookingResult }) {
               </div>
             ))}
           </div>
+          <p className="text-xs text-amber-600 mt-2">
+            Please try scanning a different hacking space QR code.
+          </p>
         </div>
       </div>
     );

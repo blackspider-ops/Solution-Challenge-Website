@@ -40,6 +40,7 @@ export async function bookRoomForTeam(qrToken: string): Promise<RoomBookingResul
                   leader: {
                     select: { name: true, email: true },
                   },
+                  members: true, // Include members to count team size
                 },
               },
             },
@@ -61,6 +62,7 @@ export async function bookRoomForTeam(qrToken: string): Promise<RoomBookingResul
         },
         include: {
           roomBookings: true,
+          members: true, // Include members to count team size
         },
       });
 
@@ -83,8 +85,18 @@ export async function bookRoomForTeam(qrToken: string): Promise<RoomBookingResul
         };
       }
 
-      // Check if room is at capacity
-      if (room.bookings.length >= room.capacity) {
+      // Calculate current room occupancy (sum of all team sizes)
+      const currentOccupancy = room.bookings.reduce((sum, booking) => {
+        // Team size = leader (1) + members count
+        const teamSize = 1 + booking.team.members.length;
+        return sum + teamSize;
+      }, 0);
+
+      // Calculate this team's size
+      const thisTeamSize = 1 + userTeam.members.length;
+
+      // Check if adding this team would exceed room capacity
+      if (currentOccupancy + thisTeamSize > room.capacity) {
         return {
           status: "room_full" as const,
           roomName: room.name,
@@ -153,6 +165,9 @@ export async function getRooms() {
               include: {
                 leader: {
                   select: { name: true, email: true },
+                },
+                members: {
+                  select: { id: true }, // Include members to calculate team size
                 },
               },
             },
