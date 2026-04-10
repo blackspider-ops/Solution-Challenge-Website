@@ -266,7 +266,7 @@ export function FoodScanner({ mealType }: { mealType: MealType }) {
   const clearTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Clear result after 10 seconds with countdown
+  // Clear result after 5 seconds with countdown
   useEffect(() => {
     if (result) {
       // Clear any existing timeouts
@@ -277,8 +277,8 @@ export function FoodScanner({ mealType }: { mealType: MealType }) {
         clearInterval(countdownIntervalRef.current);
       }
       
-      // Start countdown from 10
-      setCountdown(10);
+      // Start countdown from 5
+      setCountdown(5);
       
       // Update countdown every second
       countdownIntervalRef.current = setInterval(() => {
@@ -290,12 +290,12 @@ export function FoodScanner({ mealType }: { mealType: MealType }) {
         });
       }, 1000);
       
-      // Set timeout to clear result after 10 seconds
+      // Set timeout to clear result after 5 seconds
       clearTimeoutRef.current = setTimeout(() => {
         setResult(null);
         setCountdown(null);
         lastTokenRef.current = ""; // Allow rescanning the same QR code
-      }, 10000);
+      }, 5000);
     }
 
     return () => {
@@ -312,7 +312,19 @@ export function FoodScanner({ mealType }: { mealType: MealType }) {
     const trimmed = raw.trim();
     if (!trimmed || processingRef.current) return;
     
-    if (trimmed === lastTokenRef.current) return;
+    // Allow new scans even if there's a current result showing
+    // Just clear the old result and process the new one
+    if (result) {
+      if (clearTimeoutRef.current) {
+        clearTimeout(clearTimeoutRef.current);
+      }
+      if (countdownIntervalRef.current) {
+        clearInterval(countdownIntervalRef.current);
+      }
+      setResult(null);
+      setCountdown(null);
+    }
+    
     lastTokenRef.current = trimmed;
     processingRef.current = true;
 
