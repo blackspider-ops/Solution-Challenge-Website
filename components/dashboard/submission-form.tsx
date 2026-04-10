@@ -40,6 +40,7 @@ type ExistingSubmission = {
 interface SubmissionFormProps {
   existing: ExistingSubmission;
   trackName: string | null;
+  hasRoomBooking?: boolean;
 }
 
 // ─── Status config ─────────────────────────────────────────────────────────
@@ -52,7 +53,7 @@ const STATUS_CONFIG = {
 const DESCRIPTION_MAX = 2000;
 
 // ─── Component ─────────────────────────────────────────────────────────────
-export function SubmissionForm({ existing, trackName }: SubmissionFormProps) {
+export function SubmissionForm({ existing, trackName, hasRoomBooking = false }: SubmissionFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [lastSaved, setLastSaved] = useState<Date | null>(
@@ -304,8 +305,9 @@ export function SubmissionForm({ existing, trackName }: SubmissionFormProps) {
               <Button
                 type="button"
                 onClick={() => setShowSubmitDialog(true)}
-                disabled={isPending || !existing}
+                disabled={isPending || !existing || !hasRoomBooking}
                 className="bg-gradient-to-r from-primary to-primary/90 text-primary-foreground shadow-lg shadow-primary/25 gap-2"
+                title={!hasRoomBooking ? "Book a hacking space first" : undefined}
               >
                 <Send className="w-4 h-4" />
                 {isPending ? "Submitting..." : "Submit project"}
@@ -315,6 +317,13 @@ export function SubmissionForm({ existing, trackName }: SubmissionFormProps) {
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
                   <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
                   Save a draft first, then submit when ready
+                </p>
+              )}
+
+              {existing && !hasRoomBooking && (
+                <p className="text-xs text-amber-600 flex items-center gap-1">
+                  <AlertTriangle className="w-3.5 h-3.5" />
+                  Book a hacking space before submitting
                 </p>
               )}
             </div>

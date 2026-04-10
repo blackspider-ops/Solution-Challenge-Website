@@ -25,12 +25,14 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import {
   Users, Crown, LogOut, Copy, Check,
-  Plus, UserPlus, UserMinus, RefreshCw, ChevronDown,
+  Plus, UserPlus, UserMinus, RefreshCw, ChevronDown, DoorOpen,
 } from "lucide-react";
+import { RoomScanner } from "./room-scanner";
 
 // ─── Inline types (no @prisma/client import in client components) ──────────
 type Track = { id: string; name: string; icon: string; gradient: string };
 type TeamMemberUser = { id: string; name: string | null; email: string; image: string | null };
+type RoomBooking = { id: string; bookedAt: Date; room: { id: string; name: string; description: string | null } };
 type TeamWithDetails = {
   id: string;
   name: string;
@@ -39,12 +41,14 @@ type TeamWithDetails = {
   track: Track | null;
   leader: { id: string; name: string | null; email: string };
   members: { id: string; joinedAt: Date; user: TeamMemberUser }[];
+  roomBookings?: RoomBooking[];
 };
 
 interface TeamViewProps {
   team: TeamWithDetails | null;
   tracks: Track[];
   currentUserId: string;
+  hasRoomBooking?: boolean;
 }
 
 // ─── Avatar helper ─────────────────────────────────────────────────────────
@@ -68,7 +72,7 @@ function Avatar({ user }: { user: TeamMemberUser }) {
 }
 
 // ─── Main component ────────────────────────────────────────────────────────
-export function TeamView({ team, tracks, currentUserId }: TeamViewProps) {
+export function TeamView({ team, tracks, currentUserId, hasRoomBooking }: TeamViewProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [mode, setMode] = useState<"idle" | "create" | "join">("idle");
@@ -326,6 +330,45 @@ export function TeamView({ team, tracks, currentUserId }: TeamViewProps) {
               </p>
             </div>
           )}
+
+          {/* Hacking Space */}
+          <div className="p-4 rounded-xl bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 mb-4">
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <div className="flex items-center gap-2">
+                <DoorOpen className="w-4 h-4 text-primary" />
+                <p className="text-sm font-semibold text-foreground">Hacking Space</p>
+              </div>
+              {hasRoomBooking && team.roomBookings && team.roomBookings.length > 0 && (
+                <Badge className="bg-emerald-500 hover:bg-emerald-600">
+                  <Check className="w-3 h-3 mr-1" />
+                  Booked
+                </Badge>
+              )}
+            </div>
+
+            {hasRoomBooking && team.roomBookings && team.roomBookings.length > 0 ? (
+              <div className="space-y-2">
+                {team.roomBookings.map((booking) => (
+                  <div key={booking.id} className="bg-background/50 rounded-lg p-3 border border-border">
+                    <p className="font-medium text-sm">{booking.room.name}</p>
+                    {booking.room.description && (
+                      <p className="text-xs text-muted-foreground mt-1">{booking.room.description}</p>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Booked on {new Date(booking.bookedAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div>
+                <p className="text-xs text-muted-foreground mb-3">
+                  Scan a hacking space QR code to reserve your team's workspace
+                </p>
+                <RoomScanner />
+              </div>
+            )}
+          </div>
 
           {/* Leader actions */}
           {isLeader && otherMembers.length > 0 && (

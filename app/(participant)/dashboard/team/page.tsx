@@ -8,7 +8,7 @@ export default async function TeamPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
-  const [membership, tracks] = await Promise.all([
+  const [membership, tracks, roomBooking] = await Promise.all([
     db.teamMember.findUnique({
       where: { userId: session.user.id },
       include: {
@@ -22,6 +22,11 @@ export default async function TeamPage() {
                 user: { select: { id: true, name: true, email: true, image: true } },
               },
             },
+            roomBookings: {
+              include: {
+                room: true,
+              },
+            },
           },
         },
       },
@@ -30,9 +35,25 @@ export default async function TeamPage() {
       orderBy: { order: "asc" },
       select: { id: true, name: true, icon: true, gradient: true },
     }),
+    // Get room booking for user's team
+    db.teamMember.findUnique({
+      where: { userId: session.user.id },
+      select: {
+        team: {
+          select: {
+            roomBookings: {
+              include: {
+                room: true,
+              },
+            },
+          },
+        },
+      },
+    }),
   ]);
 
   const team = membership?.team ?? null;
+  const hasRoomBooking = (roomBooking?.team?.roomBookings?.length ?? 0) > 0;
 
   return (
     <div className="space-y-6">
@@ -54,6 +75,7 @@ export default async function TeamPage() {
         team={team}
         tracks={tracks}
         currentUserId={session.user.id}
+        hasRoomBooking={hasRoomBooking}
       />
     </div>
   );
