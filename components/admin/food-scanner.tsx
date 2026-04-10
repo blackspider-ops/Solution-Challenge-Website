@@ -145,7 +145,7 @@ function CameraScanner({ onScan, active }: CameraScannerProps) {
                 const scannedText = result.getText();
                 const now = Date.now();
                 
-                if (scannedText !== lastScanRef.current || now - lastScanTimeRef.current > 3000) {
+                if (scannedText !== lastScanRef.current || now - lastScanTimeRef.current > 5000) {
                   lastScanRef.current = scannedText;
                   lastScanTimeRef.current = now;
                   onScanRef.current(scannedText);

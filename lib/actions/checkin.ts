@@ -19,6 +19,9 @@ export async function checkInParticipant(qrToken: string): Promise<CheckInResult
   const session = await auth();
   if (!session?.user?.id) return { status: "unauthenticated" };
 
+  // Input validation
+  if (!qrToken?.trim()) return { status: "invalid" };
+
   const role = session.user.role;
   if (role !== "admin" && role !== "volunteer") return { status: "unauthorized" };
 

@@ -26,6 +26,15 @@ export async function distributeFoodToParticipant(
     return { status: "unauthenticated" };
   }
 
+  // Input validation
+  if (!qrToken?.trim()) {
+    return { status: "invalid" };
+  }
+
+  if (!["dinner", "midnight_snack", "breakfast"].includes(mealType)) {
+    return { status: "invalid" };
+  }
+
   const user = await db.user.findUnique({
     where: { id: session.user.id },
     select: { role: true },
@@ -37,7 +46,7 @@ export async function distributeFoodToParticipant(
 
   // Find the ticket
   const ticket = await db.ticket.findUnique({
-    where: { qrToken },
+    where: { qrToken: qrToken.trim() },
     include: {
       registration: {
         include: {
@@ -83,6 +92,11 @@ export async function distributeFoodToParticipant(
     }
   }
 
+  // Prevent more than 2 servings
+  if (servingNumber > 2) {
+    return { status: "second_serving_disabled" };
+  }
+
   // Create food distribution record
   const distribution = await db.foodDistribution.create({
     data: {
@@ -110,6 +124,20 @@ export async function distributeFoodToParticipant(
  * Get food distribution statistics
  */
 export async function getFoodStats() {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { error: "Unauthorized" };
+  }
+
+  const user = await db.user.findUnique({
+    where: { id: session.user.id },
+    select: { role: true },
+  });
+
+  if (user?.role !== "admin" && user?.role !== "volunteer") {
+    return { error: "Unauthorized" };
+  }
+
   try {
     const [totalCheckedIn, dinnerCount, midnightCount, breakfastCount, settings] = await Promise.all([
       db.checkIn.count(),
@@ -166,9 +194,26 @@ export async function getFoodStats() {
  * Get recent food distributions
  */
 export async function getRecentFoodDistributions(mealType?: MealType, limit = 20) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { error: "Unauthorized" };
+  }
+
+  const user = await db.user.findUnique({
+    where: { id: session.user.id },
+    select: { role: true },
+  });
+
+  if (user?.role !== "admin" && user?.role !== "volunteer") {
+    return { error: "Unauthorized" };
+  }
+
   try {
+    // Validate limit
+    const safeLimit = Math.min(Math.max(1, limit), 100);
+
     const distributions = await db.foodDistribution.findMany({
-      take: limit,
+      take: safeLimit,
       where: mealType ? { mealType } : undefined,
       orderBy: { distributedAt: "desc" },
       include: {
@@ -213,6 +258,8 @@ export async function toggleSecondServings(enabled: boolean) {
     });
 
     revalidatePath("/admin/settings");
+    revalidatePath("/admin/food");
+    revalidatePath("/volunteer/food");
     return { success: true };
   } catch (error) {
     console.error("Toggle second servings error:", error);

@@ -69,6 +69,7 @@ export async function submitProject(): Promise<{ error: string } | { data: true 
         include: {
           submission: true,
           track: true,
+          roomBookings: true,
         },
       },
     },
@@ -81,6 +82,12 @@ export async function submitProject(): Promise<{ error: string } | { data: true 
   if (!team.trackId) {
     return { error: "Your team must select a challenge track before submitting" };
   }
+
+  // CRITICAL: Check if team has booked a hacking space
+  if (team.roomBookings.length === 0) {
+    return { error: "Your team must book a hacking space before submitting. Visit the Team page to scan a room QR code." };
+  }
+
   if (!team.submission) {
     return { error: "Save a draft first before submitting" };
   }

@@ -125,8 +125,8 @@ function CameraScanner({ onScan, active }: CameraScannerProps) {
                 const scannedText = result.getText();
                 const now = Date.now();
                 
-                // Prevent duplicate scans within 3 seconds
-                if (scannedText !== lastScanRef.current || now - lastScanTimeRef.current > 3000) {
+                // Prevent duplicate scans within 5 seconds
+                if (scannedText !== lastScanRef.current || now - lastScanTimeRef.current > 5000) {
                   lastScanRef.current = scannedText;
                   lastScanTimeRef.current = now;
                   onScanRef.current(scannedText);

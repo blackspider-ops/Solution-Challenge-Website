@@ -55,6 +55,23 @@ export async function createJudgingCriteria(data: {
   }
 
   try {
+    // Input validation
+    if (!data.name?.trim() || !data.description?.trim()) {
+      return { error: "Name and description are required" };
+    }
+
+    if (typeof data.maxScore !== "number" || data.maxScore < 1 || data.maxScore > 100) {
+      return { error: "Max score must be between 1 and 100" };
+    }
+
+    if (typeof data.weight !== "number" || data.weight < 0 || data.weight > 10) {
+      return { error: "Weight must be between 0 and 10" };
+    }
+
+    // Sanitize inputs
+    const sanitizedName = data.name.trim().slice(0, 100);
+    const sanitizedDescription = data.description.trim().slice(0, 500);
+
     const maxOrder = await db.judgingCriteria.findFirst({
       orderBy: { order: "desc" },
       select: { order: true },
@@ -62,12 +79,16 @@ export async function createJudgingCriteria(data: {
 
     const criteria = await db.judgingCriteria.create({
       data: {
-        ...data,
+        name: sanitizedName,
+        description: sanitizedDescription,
+        maxScore: Math.floor(data.maxScore),
+        weight: data.weight,
         order: (maxOrder?.order ?? -1) + 1,
       },
     });
 
     revalidatePath("/admin/judging-criteria");
+    revalidatePath("/judge");
     return { data: criteria };
   } catch (error) {
     console.error("Create judging criteria error:", error);
@@ -94,12 +115,54 @@ export async function updateJudgingCriteria(
   }
 
   try {
+    // Input validation
+    if (!id) {
+      return { error: "Criteria ID is required" };
+    }
+
+    const updateData: any = {};
+
+    if (data.name !== undefined) {
+      const trimmed = data.name.trim();
+      if (!trimmed) {
+        return { error: "Name cannot be empty" };
+      }
+      updateData.name = trimmed.slice(0, 100);
+    }
+
+    if (data.description !== undefined) {
+      const trimmed = data.description.trim();
+      if (!trimmed) {
+        return { error: "Description cannot be empty" };
+      }
+      updateData.description = trimmed.slice(0, 500);
+    }
+
+    if (data.maxScore !== undefined) {
+      if (typeof data.maxScore !== "number" || data.maxScore < 1 || data.maxScore > 100) {
+        return { error: "Max score must be between 1 and 100" };
+      }
+      updateData.maxScore = Math.floor(data.maxScore);
+    }
+
+    if (data.weight !== undefined) {
+      if (typeof data.weight !== "number" || data.weight < 0 || data.weight > 10) {
+        return { error: "Weight must be between 0 and 10" };
+      }
+      updateData.weight = data.weight;
+    }
+
+    if (data.active !== undefined) {
+      updateData.active = Boolean(data.active);
+    }
+
     const criteria = await db.judgingCriteria.update({
       where: { id },
-      data,
+      data: updateData,
     });
 
     revalidatePath("/admin/judging-criteria");
+    revalidatePath("/judge");
     return { data: criteria };
   } catch (error) {
     console.error("Update judging criteria error:", error);
@@ -117,11 +180,26 @@ export async function deleteJudgingCriteria(id: string) {
   }
 
   try {
+    // Input validation
+    if (!id) {
+      return { error: "Criteria ID is required" };
+    }
+
+    // Check if criteria has existing scores
+    const scoresCount = await db.judgingScore.count({
+      where: { criteriaId: id },
+    });
+
+    if (scoresCount > 0) {
+      return { error: `Cannot delete criteria with ${scoresCount} existing scores. Deactivate it instead.` };
+    }
+
     await db.judgingCriteria.delete({
       where: { id },
     });
 
     revalidatePath("/admin/judging-criteria");
+    revalidatePath("/judge");
     return { success: true };
   } catch (error) {
     console.error("Delete judging criteria error:", error);
@@ -185,6 +263,18 @@ export async function submitJudgingScore(data: {
   const session = await requireAdminOrJudge();
 
   try {
+    // Input validation
+    if (!data.submissionId || !data.criteriaId) {
+      return { error: "Missing required fields" };
+    }
+
+    if (typeof data.score !== "number" || !Number.isFinite(data.score)) {
+      return { error: "Invalid score value" };
+    }
+
+    // Sanitize comment to prevent XSS
+    const sanitizedComment = data.comment?.trim().slice(0, 1000);
+
     // Verify criteria exists and get maxScore
     const criteria = await db.judgingCriteria.findUnique({
       where: { id: data.criteriaId },
@@ -194,8 +284,26 @@ export async function submitJudgingScore(data: {
       return { error: "Criteria not found" };
     }
 
+    if (!criteria.active) {
+      return { error: "This criteria is no longer active" };
+    }
+
     if (data.score < 0 || data.score > criteria.maxScore) {
       return { error: `Score must be between 0 and ${criteria.maxScore}` };
+    }
+
+    // Verify submission exists and is submitted
+    const submission = await db.submission.findUnique({
+      where: { id: data.submissionId },
+      select: { status: true },
+    });
+
+    if (!submission) {
+      return { error: "Submission not found" };
+    }
+
+    if (submission.status !== "submitted") {
+      return { error: "Can only score submitted projects" };
     }
 
     // Upsert the score
@@ -212,11 +320,11 @@ export async function submitJudgingScore(data: {
         judgeId: session.user.id!,
         criteriaId: data.criteriaId,
         score: data.score,
-        comment: data.comment,
+        comment: sanitizedComment,
       },
       update: {
         score: data.score,
-        comment: data.comment,
+        comment: sanitizedComment,
       },
     });
 
@@ -236,6 +344,11 @@ export async function getSubmissionScores(submissionId: string) {
   await requireAdminOrJudge();
 
   try {
+    // Input validation
+    if (!submissionId) {
+      return { error: "Submission ID is required" };
+    }
+
     const scores = await db.judgingScore.findMany({
       where: { submissionId },
       include: {
