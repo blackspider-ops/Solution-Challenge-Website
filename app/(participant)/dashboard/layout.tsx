@@ -12,11 +12,37 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const session = await auth();
   if (!session) redirect("/login");
 
-  const [announcementCount, volunteerRegistration, registration] = await Promise.all([
-    db.announcement.count({ where: { published: true } }),
+  const [volunteerRegistration, registration] = await Promise.all([
     db.volunteerRegistration.findUnique({ where: { userId: session.user.id } }),
     db.registration.findUnique({ where: { userId: session.user.id } }),
   ]);
+
+  // Build audience filter based on user's role and registration status (same logic as getPublishedAnnouncements)
+  const audienceFilter: string[] = ["all"]; // Everyone sees "all" announcements
+  
+  if (session.user.role === "admin") {
+    audienceFilter.push("admins");
+  } else if (session.user.role === "volunteer") {
+    audienceFilter.push("volunteers");
+  }
+  
+  if (registration) {
+    if (registration.status === "confirmed") {
+      audienceFilter.push("registered");
+    } else if (registration.status === "waitlisted") {
+      audienceFilter.push("waitlisted");
+    }
+  } else if (!volunteerRegistration && session.user.role === "participant") {
+    // User has account but no registration and is not a volunteer
+    audienceFilter.push("not_registered");
+  }
+  
+  const announcementCount = await db.announcement.count({
+    where: {
+      published: true,
+      audience: { in: audienceFilter },
+    },
+  });
 
   const initials = session.user?.name
     ? session.user.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()

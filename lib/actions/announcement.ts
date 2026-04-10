@@ -334,6 +334,17 @@ export async function getPublishedAnnouncements(limit = 20) {
       } else if (registration.status === "waitlisted") {
         audienceFilter.push("waitlisted");
       }
+    } else if (session.user.role === "participant") {
+      // Check if they have volunteer registration
+      const volunteerReg = await db.volunteerRegistration.findUnique({
+        where: { userId: session.user.id },
+        select: { id: true },
+      });
+      
+      // If no registration and no volunteer registration, they're "not_registered"
+      if (!volunteerReg) {
+        audienceFilter.push("not_registered");
+      }
     }
   }
   
