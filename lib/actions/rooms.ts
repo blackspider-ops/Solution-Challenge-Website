@@ -86,7 +86,9 @@ export async function bookRoomForTeam(qrToken: string): Promise<RoomBookingResul
       }
 
       // Calculate current room occupancy (sum of all team sizes)
-      const currentOccupancy = room.bookings.reduce((sum, booking) => {
+      // Filter out bookings where team is null (orphaned bookings)
+      const validBookings = room.bookings.filter(b => b.team !== null);
+      const currentOccupancy = validBookings.reduce((sum, booking) => {
         // Team size = leader (1) + members count
         const teamSize = 1 + booking.team.members.length;
         return sum + teamSize;
@@ -102,7 +104,7 @@ export async function bookRoomForTeam(qrToken: string): Promise<RoomBookingResul
           roomName: room.name,
           capacity: room.capacity,
           currentOccupancy,
-          currentBookings: room.bookings.map((b) => {
+          currentBookings: validBookings.map((b) => {
             const teamSize = 1 + b.team.members.length;
             return {
               teamName: b.team.name,
