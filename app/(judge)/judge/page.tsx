@@ -130,6 +130,7 @@ export default async function JudgePage() {
                     submission={submission}
                     criteria={criteria}
                     existingScores={myScores}
+                    currentJudgeEmail={session.user?.email || ""}
                   />
                 );
               })}
