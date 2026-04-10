@@ -28,8 +28,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, DoorOpen, QrCode, Users, Mail, Printer } from "lucide-react";
-import { createRoom, updateRoom, deleteRoom } from "@/lib/actions/rooms";
+import { Plus, Pencil, Trash2, DoorOpen, QrCode, Users, Mail, Printer, X } from "lucide-react";
+import { createRoom, updateRoom, deleteRoom, removeTeamFromRoom } from "@/lib/actions/rooms";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import QRCodeLib from "qrcode";
@@ -273,6 +273,18 @@ export function RoomManager({ rooms }: { rooms: Room[] }) {
     });
   }
 
+  function handleRemoveTeam(bookingId: string, teamName: string, roomName: string) {
+    startTransition(async () => {
+      const result = await removeTeamFromRoom(bookingId);
+      if ("error" in result) {
+        toast.error(result.error);
+      } else {
+        toast.success(`Removed "${teamName}" from ${roomName}`);
+        router.refresh();
+      }
+    });
+  }
+
   function openEditDialog(r: Room) {
     setEditingRoom(r);
     setFormData({
@@ -431,21 +443,53 @@ export function RoomManager({ rooms }: { rooms: Room[] }) {
                       {r.bookings.map((booking) => {
                         const teamSize = 1 + booking.team.members.length;
                         return (
-                        <div key={booking.id} className="text-xs bg-muted/50 rounded p-2">
-                          <div className="flex items-center justify-between mb-1">
-                            <p className="font-medium">{booking.team.name}</p>
-                            <span className="text-muted-foreground">
-                              {teamSize} {teamSize === 1 ? "person" : "people"}
-                            </span>
+                        <div key={booking.id} className="text-xs bg-muted/50 rounded p-2 flex items-start justify-between gap-2">
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-1">
+                              <p className="font-medium">{booking.team.name}</p>
+                              <span className="text-muted-foreground">
+                                {teamSize} {teamSize === 1 ? "person" : "people"}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1 text-muted-foreground mt-0.5">
+                              <Users className="w-3 h-3" />
+                              <span>{booking.team.leader.name || "Team Leader"}</span>
+                            </div>
+                            <div className="flex items-center gap-1 text-muted-foreground">
+                              <Mail className="w-3 h-3" />
+                              <span>{booking.team.leader.email}</span>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-1 text-muted-foreground mt-0.5">
-                            <Users className="w-3 h-3" />
-                            <span>{booking.team.leader.name || "Team Leader"}</span>
-                          </div>
-                          <div className="flex items-center gap-1 text-muted-foreground">
-                            <Mail className="w-3 h-3" />
-                            <span>{booking.team.leader.email}</span>
-                          </div>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-7 w-7 shrink-0"
+                                disabled={isPending}
+                              >
+                                <X className="w-3.5 h-3.5 text-destructive" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Remove Team from Room</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to remove "{booking.team.name}" from {r.name}? 
+                                  The team will be able to book a different room after removal.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleRemoveTeam(booking.id, booking.team.name, r.name)}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  Remove Team
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </div>
                       )})}
                     </div>

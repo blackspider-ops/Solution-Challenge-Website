@@ -399,3 +399,50 @@ export async function getTeamRoomBooking(teamId: string) {
     return { error: "Failed to fetch room booking" };
   }
 }
+
+/**
+ * Remove a team's room booking (admin only)
+ */
+export async function removeTeamFromRoom(bookingId: string) {
+  const session = await auth();
+  if (session?.user?.role !== "admin") {
+    return { error: "Unauthorized - Admin access required" };
+  }
+
+  try {
+    // Input validation
+    if (!bookingId) {
+      return { error: "Booking ID is required" };
+    }
+
+    // Get booking details before deleting for the response
+    const booking = await db.roomBooking.findUnique({
+      where: { id: bookingId },
+      include: {
+        team: { select: { name: true } },
+        room: { select: { name: true } },
+      },
+    });
+
+    if (!booking) {
+      return { error: "Booking not found" };
+    }
+
+    await db.roomBooking.delete({
+      where: { id: bookingId },
+    });
+
+    revalidatePath("/admin/rooms");
+    revalidatePath("/dashboard/team");
+    revalidatePath("/dashboard/submission");
+    
+    return { 
+      success: true,
+      teamName: booking.team.name,
+      roomName: booking.room.name,
+    };
+  } catch (error) {
+    console.error("Remove team from room error:", error);
+    return { error: "Failed to remove team from room" };
+  }
+}
