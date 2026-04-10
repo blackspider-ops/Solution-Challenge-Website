@@ -45,10 +45,6 @@ export function SubmissionToggles({ submissionsOpen: initialSubmissionsOpen, all
     const newValue = pendingSubmissionsValue;
     setShowSubmissionsDialog(false);
 
-  function handleConfirmSubmissions() {
-    const newValue = pendingSubmissionsValue;
-    setShowSubmissionsDialog(false);
-
     startTransition(async () => {
       try {
         const result = await updateEventSettings({

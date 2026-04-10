@@ -9,6 +9,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Plus, Trash2, Edit, GripVertical, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -48,6 +58,10 @@ type Question = {
 export function FormBuilder({ sections: initialSections }: { sections: Section[] }) {
   const [sections, setSections] = useState(initialSections);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+  const [showDeleteSectionDialog, setShowDeleteSectionDialog] = useState(false);
+  const [showDeleteQuestionDialog, setShowDeleteQuestionDialog] = useState(false);
+  const [sectionToDelete, setSectionToDelete] = useState<string | null>(null);
+  const [questionToDelete, setQuestionToDelete] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   function toggleSection(id: string) {
@@ -59,6 +73,44 @@ export function FormBuilder({ sections: initialSections }: { sections: Section[]
         next.add(id);
       }
       return next;
+    });
+  }
+
+  function confirmDeleteSection() {
+    if (!sectionToDelete) return;
+    setShowDeleteSectionDialog(false);
+
+    startTransition(async () => {
+      const result = await deleteSection(sectionToDelete);
+      if ("error" in result) {
+        toast.error(result.error);
+      } else {
+        toast.success("Section deleted");
+        setSections((prev) => prev.filter((s) => s.id !== sectionToDelete));
+      }
+      setSectionToDelete(null);
+    });
+  }
+
+  function confirmDeleteQuestion() {
+    if (!questionToDelete) return;
+    setShowDeleteQuestionDialog(false);
+
+    startTransition(async () => {
+      const result = await deleteQuestion(questionToDelete);
+      if ("error" in result) {
+        toast.error(result.error);
+      } else {
+        toast.success("Question deleted");
+        // Refresh sections to update the UI
+        setSections((prev) => 
+          prev.map(section => ({
+            ...section,
+            questions: section.questions.filter(q => q.id !== questionToDelete)
+          }))
+        );
+      }
+      setQuestionToDelete(null);
     });
   }
 
@@ -121,17 +173,8 @@ export function FormBuilder({ sections: initialSections }: { sections: Section[]
                     variant="ghost"
                     size="icon"
                     onClick={() => {
-                      if (confirm("Delete this section and all its questions?")) {
-                        startTransition(async () => {
-                          const result = await deleteSection(section.id);
-                          if ("error" in result) {
-                            toast.error(result.error);
-                          } else {
-                            toast.success("Section deleted");
-                            setSections((prev) => prev.filter((s) => s.id !== section.id));
-                          }
-                        });
-                      }
+                      setSectionToDelete(section.id);
+                      setShowDeleteSectionDialog(true);
                     }}
                   >
                     <Trash2 className="w-4 h-4 text-destructive" />
@@ -197,6 +240,48 @@ export function FormBuilder({ sections: initialSections }: { sections: Section[]
           setSections((prev) => [...prev, newSection as Section]);
         }}
       />
+
+      {/* Delete Section Dialog */}
+      <AlertDialog open={showDeleteSectionDialog} onOpenChange={setShowDeleteSectionDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Section?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this section and all its questions? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setSectionToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteSection}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete Section
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Question Dialog */}
+      <AlertDialog open={showDeleteQuestionDialog} onOpenChange={setShowDeleteQuestionDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Question?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this question? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setQuestionToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteQuestion}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete Question
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
@@ -256,17 +341,8 @@ function QuestionItem({
               size="icon"
               className="h-8 w-8"
               onClick={() => {
-                if (confirm("Delete this question?")) {
-                  startTransition(async () => {
-                    const result = await deleteQuestion(question.id);
-                    if ("error" in result) {
-                      toast.error(result.error);
-                    } else {
-                      toast.success("Question deleted");
-                      onDelete();
-                    }
-                  });
-                }
+                setQuestionToDelete(question.id);
+                setShowDeleteQuestionDialog(true);
               }}
             >
               <Trash2 className="w-3 h-3 text-destructive" />

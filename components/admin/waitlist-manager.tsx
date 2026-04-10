@@ -7,6 +7,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { updateEventSettings, promoteFromWaitlist } from "@/lib/actions/event-settings";
 import { Users, CheckCircle, Clock, ArrowRight } from "lucide-react";
 
@@ -31,6 +41,8 @@ export function WaitlistManager({ maxCapacity: initialCapacity, confirmedCount, 
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [capacity, setCapacity] = useState(initialCapacity);
+  const [showPromoteDialog, setShowPromoteDialog] = useState(false);
+  const [userToPromote, setUserToPromote] = useState<{ id: string; name: string } | null>(null);
 
   function handleUpdateCapacity() {
     if (capacity < confirmedCount) {
@@ -59,18 +71,25 @@ export function WaitlistManager({ maxCapacity: initialCapacity, confirmedCount, 
   }
 
   function handlePromote(registrationId: string, userName: string) {
-    if (!confirm(`Promote ${userName} from waitlist to confirmed?`)) return;
+    setUserToPromote({ id: registrationId, name: userName });
+    setShowPromoteDialog(true);
+  }
+
+  function confirmPromote() {
+    if (!userToPromote) return;
+    setShowPromoteDialog(false);
 
     startTransition(async () => {
       try {
-        const result = await promoteFromWaitlist(registrationId);
+        const result = await promoteFromWaitlist(userToPromote.id);
 
         if ("error" in result) {
           toast.error(result.error);
           return;
         }
 
-        toast.success(`${userName} has been promoted and will receive their ticket via email`);
+        toast.success(`${userToPromote.name} has been promoted and will receive their ticket via email`);
+        setUserToPromote(null);
         router.refresh();
       } catch {
         toast.error("Network error — please try again");
@@ -199,6 +218,25 @@ export function WaitlistManager({ maxCapacity: initialCapacity, confirmedCount, 
           </div>
         )}
       </div>
+
+      {/* Promote Dialog */}
+      <AlertDialog open={showPromoteDialog} onOpenChange={setShowPromoteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Promote from Waitlist?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to promote <strong>{userToPromote?.name}</strong> from the waitlist to confirmed? 
+              They will receive their ticket via email.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setUserToPromote(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmPromote}>
+              Promote to Confirmed
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

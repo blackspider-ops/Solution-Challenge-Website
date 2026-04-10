@@ -8,6 +8,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { createFAQ, updateFAQ, deleteFAQ } from "@/lib/actions/content";
 
 type FAQ = {
@@ -26,6 +36,8 @@ export function FAQManager({ faqs }: { faqs: FAQ[] }) {
   });
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [faqToDelete, setFaqToDelete] = useState<{ id: string; question: string } | null>(null);
 
   function startEdit(faq: FAQ) {
     setEditingId(faq.id);
@@ -92,16 +104,23 @@ export function FAQManager({ faqs }: { faqs: FAQ[] }) {
   }
 
   function removeFAQ(id: string, question: string) {
-    if (!confirm(`Delete FAQ: "${question}"?`)) return;
+    setFaqToDelete({ id, question });
+    setShowDeleteDialog(true);
+  }
+
+  function confirmDelete() {
+    if (!faqToDelete) return;
+    setShowDeleteDialog(false);
 
     startTransition(async () => {
       try {
-        const result = await deleteFAQ(id);
+        const result = await deleteFAQ(faqToDelete.id);
         if ("error" in result) {
           toast.error(result.error);
           return;
         }
         toast.success("FAQ deleted");
+        setFaqToDelete(null);
         router.refresh();
       } catch {
         toast.error("Network error");
@@ -291,6 +310,31 @@ export function FAQManager({ faqs }: { faqs: FAQ[] }) {
           );
         })}
       </div>
+
+      {/* Delete FAQ Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete FAQ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this FAQ?
+              <div className="mt-2 p-2 bg-muted rounded text-sm">
+                <strong>Q:</strong> {faqToDelete?.question}
+              </div>
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setFaqToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete FAQ
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

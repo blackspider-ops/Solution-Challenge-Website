@@ -8,6 +8,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { createSponsor, updateSponsor, deleteSponsor } from "@/lib/actions/content";
 
 type Sponsor = {
@@ -30,6 +40,8 @@ export function SponsorManager({ sponsors }: { sponsors: Sponsor[] }) {
   });
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [sponsorToDelete, setSponsorToDelete] = useState<{ id: string; name: string } | null>(null);
 
   function startEdit(sponsor: Sponsor) {
     setEditingId(sponsor.id);
@@ -99,16 +111,23 @@ export function SponsorManager({ sponsors }: { sponsors: Sponsor[] }) {
   }
 
   function removeSponsor(id: string, name: string) {
-    if (!confirm(`Delete sponsor "${name}"?`)) return;
+    setSponsorToDelete({ id, name });
+    setShowDeleteDialog(true);
+  }
+
+  function confirmDelete() {
+    if (!sponsorToDelete) return;
+    setShowDeleteDialog(false);
 
     startTransition(async () => {
       try {
-        const result = await deleteSponsor(id);
+        const result = await deleteSponsor(sponsorToDelete.id);
         if ("error" in result) {
           toast.error(result.error);
           return;
         }
         toast.success("Sponsor deleted");
+        setSponsorToDelete(null);
         router.refresh();
       } catch {
         toast.error("Network error");
@@ -393,6 +412,28 @@ export function SponsorManager({ sponsors }: { sponsors: Sponsor[] }) {
           );
         })}
       </div>
+
+      {/* Delete Sponsor Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Sponsor?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete <strong>{sponsorToDelete?.name}</strong>? 
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setSponsorToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete Sponsor
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
