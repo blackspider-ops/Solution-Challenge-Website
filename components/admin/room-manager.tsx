@@ -439,7 +439,7 @@ export function RoomManager({ rooms }: { rooms: Room[] }) {
           {rooms.map((r) => {
             // Calculate current occupancy (sum of all team sizes)
             const currentOccupancy = r.bookings.reduce((sum, booking) => {
-              const teamSize = 1 + booking.team.members.length; // leader + members
+              const teamSize = booking.team.members.length; // leader is included in members
               return sum + teamSize;
             }, 0);
             
@@ -492,7 +492,7 @@ export function RoomManager({ rooms }: { rooms: Room[] }) {
                     <div className="mt-3 space-y-2">
                       <p className="text-xs font-semibold text-muted-foreground">Booked by:</p>
                       {r.bookings.map((booking) => {
-                        const teamSize = 1 + booking.team.members.length;
+                        const teamSize = booking.team.members.length;
                         return (
                         <div key={booking.id} className="text-xs bg-muted/50 rounded p-2 flex items-start justify-between gap-2">
                           <div className="flex-1">

@@ -89,19 +89,23 @@ export async function bookRoomForTeam(qrToken: string): Promise<RoomBookingResul
       // Filter out bookings where team is null (orphaned bookings)
       const validBookings = room.bookings.filter(b => b.team !== null);
       const currentOccupancy = validBookings.reduce((sum, booking) => {
-        // Team size = leader (1) + members count
-        const teamSize = 1 + booking.team.members.length;
+        // Team size = number of members (leader is included in members)
+        const teamSize = booking.team.members.length;
         return sum + teamSize;
       }, 0);
 
       // Calculate this team's size
-      const thisTeamSize = 1 + userTeam.members.length;
+      // Note: leader is also included in the members array
+      const thisTeamSize = userTeam.members.length;
 
       console.log("Room booking debug:", {
         roomName: room.name,
         roomCapacity: room.capacity,
         currentOccupancy,
         thisTeamSize,
+        teamLeaderId: userTeam.leaderId,
+        teamMembersCount: userTeam.members.length,
+        teamMemberIds: userTeam.members.map(m => m.userId),
         totalAfterBooking: currentOccupancy + thisTeamSize,
         wouldExceed: currentOccupancy + thisTeamSize > room.capacity,
       });
@@ -114,7 +118,7 @@ export async function bookRoomForTeam(qrToken: string): Promise<RoomBookingResul
           capacity: room.capacity,
           currentOccupancy,
           currentBookings: validBookings.map((b) => {
-            const teamSize = 1 + b.team.members.length;
+            const teamSize = b.team.members.length;
             return {
               teamName: b.team.name,
               teamSize,

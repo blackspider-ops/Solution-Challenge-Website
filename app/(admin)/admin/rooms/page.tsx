@@ -16,7 +16,7 @@ export default async function RoomsPage() {
   // Calculate total people currently booked (sum of all team sizes across all rooms)
   const totalBooked = rooms.reduce((sum, room) => {
     const roomOccupancy = room.bookings.reduce((bookingSum, booking) => {
-      const teamSize = 1 + booking.team.members.length; // leader + members
+      const teamSize = booking.team.members.length; // leader is included in members
       return bookingSum + teamSize;
     }, 0);
     return sum + roomOccupancy;
