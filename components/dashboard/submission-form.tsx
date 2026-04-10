@@ -41,6 +41,7 @@ interface SubmissionFormProps {
   existing: ExistingSubmission;
   trackName: string | null;
   hasRoomBooking?: boolean;
+  allMembersCheckedIn?: boolean;
 }
 
 // ─── Status config ─────────────────────────────────────────────────────────
@@ -53,7 +54,7 @@ const STATUS_CONFIG = {
 const DESCRIPTION_MAX = 2000;
 
 // ─── Component ─────────────────────────────────────────────────────────────
-export function SubmissionForm({ existing, trackName, hasRoomBooking = false }: SubmissionFormProps) {
+export function SubmissionForm({ existing, trackName, hasRoomBooking = false, allMembersCheckedIn = false }: SubmissionFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [lastSaved, setLastSaved] = useState<Date | null>(
@@ -305,9 +306,13 @@ export function SubmissionForm({ existing, trackName, hasRoomBooking = false }: 
               <Button
                 type="button"
                 onClick={() => setShowSubmitDialog(true)}
-                disabled={isPending || !existing || !hasRoomBooking}
+                disabled={isPending || !existing || !hasRoomBooking || !allMembersCheckedIn}
                 className="bg-gradient-to-r from-primary to-primary/90 text-primary-foreground shadow-lg shadow-primary/25 gap-2"
-                title={!hasRoomBooking ? "Book a hacking space first" : undefined}
+                title={
+                  !hasRoomBooking ? "Book a hacking space first" : 
+                  !allMembersCheckedIn ? "All team members must check in first" : 
+                  undefined
+                }
               >
                 <Send className="w-4 h-4" />
                 {isPending ? "Submitting..." : "Submit project"}
@@ -324,6 +329,13 @@ export function SubmissionForm({ existing, trackName, hasRoomBooking = false }: 
                 <p className="text-xs text-amber-600 flex items-center gap-1">
                   <AlertTriangle className="w-3.5 h-3.5" />
                   Book a hacking space before submitting
+                </p>
+              )}
+
+              {existing && hasRoomBooking && !allMembersCheckedIn && (
+                <p className="text-xs text-red-600 flex items-center gap-1">
+                  <AlertTriangle className="w-3.5 h-3.5" />
+                  All team members must check in before submitting
                 </p>
               )}
             </div>

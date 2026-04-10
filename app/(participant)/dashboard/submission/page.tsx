@@ -10,48 +10,92 @@ export default async function SubmissionPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
-  const [membership, roomBooking] = await Promise.all([
-    db.teamMember.findUnique({
-      where: { userId: session.user.id },
-      include: {
-        team: {
-          include: {
-            track: { select: { id: true, name: true } },
-            submission: {
-              select: {
-                id: true,
-                title: true,
-                description: true,
-                repoUrl: true,
-                demoUrl: true,
-                videoUrl: true,
-                status: true,
-                updatedAt: true,
+  const membership = await db.teamMember.findUnique({
+    where: { userId: session.user.id },
+    include: {
+      team: {
+        include: {
+          track: { select: { id: true, name: true } },
+          submission: {
+            select: {
+              id: true,
+              title: true,
+              description: true,
+              repoUrl: true,
+              demoUrl: true,
+              videoUrl: true,
+              status: true,
+              updatedAt: true,
+            },
+          },
+          roomBookings: {
+            include: {
+              room: { select: { name: true } },
+            },
+          },
+          members: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  registration: {
+                    select: {
+                      ticket: {
+                        select: {
+                          checkIn: true,
+                        },
+                      },
+                    },
+                  },
+                },
               },
             },
-            roomBookings: {
-              include: {
-                room: { select: { name: true } },
+          },
+          leader: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              registration: {
+                select: {
+                  ticket: {
+                    select: {
+                      checkIn: true,
+                    },
+                  },
+                },
               },
             },
           },
         },
       },
-    }),
-    db.teamMember.findUnique({
-      where: { userId: session.user.id },
-      select: {
-        team: {
-          select: {
-            roomBookings: true,
-          },
-        },
-      },
-    }),
-  ]);
+    },
+  });
 
   const team = membership?.team ?? null;
-  const hasRoomBooking = (roomBooking?.team?.roomBookings?.length ?? 0) > 0;
+  const hasRoomBooking = (team?.roomBookings?.length ?? 0) > 0;
+
+  // Check if all team members are checked in
+  let allCheckedIn = false;
+  let notCheckedInMembers: string[] = [];
+
+  if (team) {
+    const allMembers = [
+      { 
+        name: team.leader.name || team.leader.email, 
+        checkedIn: !!team.leader.registration?.ticket?.checkIn 
+      },
+      ...team.members.map(m => ({
+        name: m.user.name || m.user.email,
+        checkedIn: !!m.user.registration?.ticket?.checkIn
+      }))
+    ];
+
+    notCheckedInMembers = allMembers.filter(m => !m.checkedIn).map(m => m.name);
+    allCheckedIn = notCheckedInMembers.length === 0;
+  }
 
   return (
     <div className="space-y-6">
@@ -106,6 +150,22 @@ export default async function SubmissionPage() {
         </div>
       )}
 
+      {/* Has team but not all members checked in */}
+      {membership && !allCheckedIn && notCheckedInMembers.length > 0 && (
+        <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-5 flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-red-700">Team members must check in</p>
+            <p className="text-xs text-red-600 mt-1">
+              All team members must be checked in at the event entrance before submitting.
+            </p>
+            <p className="text-xs text-red-600 mt-2 font-medium">
+              Not checked in: {notCheckedInMembers.join(", ")}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Has team but no track */}
       {membership && !team?.track && (
         <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-5 flex items-start gap-3">
@@ -129,6 +189,7 @@ export default async function SubmissionPage() {
           existing={team?.submission ?? null}
           trackName={team?.track?.name ?? null}
           hasRoomBooking={hasRoomBooking}
+          allMembersCheckedIn={allCheckedIn}
         />
       )}
     </div>

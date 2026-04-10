@@ -89,6 +89,42 @@ export async function submitProject(): Promise<{ error: string } | { data: true 
           submission: true,
           track: true,
           roomBookings: true,
+          members: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  registration: {
+                    select: {
+                      ticket: {
+                        select: {
+                          checkIn: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          leader: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              registration: {
+                select: {
+                  ticket: {
+                    select: {
+                      checkIn: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
       },
     },
@@ -105,6 +141,31 @@ export async function submitProject(): Promise<{ error: string } | { data: true 
   // CRITICAL: Check if team has booked a hacking space
   if (team.roomBookings.length === 0) {
     return { error: "Your team must book a hacking space before submitting. Visit the Team page to scan a room QR code." };
+  }
+
+  // CRITICAL: Check if all team members are checked in
+  const allMembers = [
+    { 
+      id: team.leader.id, 
+      name: team.leader.name, 
+      email: team.leader.email,
+      checkedIn: !!team.leader.registration?.ticket?.checkIn 
+    },
+    ...team.members.map(m => ({
+      id: m.user.id,
+      name: m.user.name,
+      email: m.user.email,
+      checkedIn: !!m.user.registration?.ticket?.checkIn
+    }))
+  ];
+
+  const notCheckedIn = allMembers.filter(m => !m.checkedIn);
+
+  if (notCheckedIn.length > 0) {
+    const names = notCheckedIn.map(m => m.name || m.email).join(", ");
+    return { 
+      error: `All team members must be checked in before submitting. Not checked in: ${names}. Please check in at the event entrance.` 
+    };
   }
 
   if (!team.submission) {
