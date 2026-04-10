@@ -7,6 +7,7 @@ import {
 import Link from "next/link";
 import { getEventSettings } from "@/lib/actions/event-settings";
 import { EmailToggle } from "@/components/admin/email-toggle";
+import { SubmissionToggles } from "@/components/admin/submission-toggles";
 
 export default async function AdminOverviewPage() {
   const session = await requireAdmin();
@@ -119,6 +120,14 @@ export default async function AdminOverviewPage() {
         <EmailToggle emailsEnabled={eventSettings.emailsEnabled} maxCapacity={eventSettings.maxCapacity} />
       )}
 
+      {/* Super Admin Submission Controls */}
+      {isSuperAdmin && (
+        <SubmissionToggles 
+          submissionsOpen={eventSettings.submissionsOpen} 
+          allowSubmissionEdits={eventSettings.allowSubmissionEdits}
+        />
+      )}
+
       {/* Email Status Warning for Regular Admins */}
       {!eventSettings.emailsEnabled && !isSuperAdmin && (
         <div className="rounded-xl border border-red-500/30 bg-red-500/5 p-4">
@@ -128,6 +137,35 @@ export default async function AdminOverviewPage() {
               <p className="text-sm font-medium text-red-700 mb-1">Emails Disabled</p>
               <p className="text-xs text-red-600">
                 All email notifications are currently disabled by the super admin. No emails will be sent until re-enabled.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Submission Status Warnings for Regular Admins */}
+      {!eventSettings.submissionsOpen && !isSuperAdmin && (
+        <div className="rounded-xl border border-red-500/30 bg-red-500/5 p-4">
+          <div className="flex items-start gap-3">
+            <span className="text-lg">🔒</span>
+            <div>
+              <p className="text-sm font-medium text-red-700 mb-1">Submissions Closed</p>
+              <p className="text-xs text-red-600">
+                New project submissions are currently disabled by the super admin.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!eventSettings.allowSubmissionEdits && !isSuperAdmin && (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
+          <div className="flex items-start gap-3">
+            <span className="text-lg">🔒</span>
+            <div>
+              <p className="text-sm font-medium text-amber-700 mb-1">Submission Edits Locked</p>
+              <p className="text-xs text-amber-600">
+                Teams cannot edit their submitted projects. This is typically enabled during judging.
               </p>
             </div>
           </div>

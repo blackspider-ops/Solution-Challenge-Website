@@ -8,6 +8,8 @@ const eventSettingsSchema = z.object({
   maxCapacity: z.number().int().min(1).max(10000),
   registrationOpen: z.boolean(),
   emailsEnabled: z.boolean().optional(),
+  submissionsOpen: z.boolean().optional(),
+  allowSubmissionEdits: z.boolean().optional(),
 });
 
 // ─── Get Settings ──────────────────────────────────────────────────────────
@@ -26,6 +28,8 @@ export async function getEventSettings() {
           maxCapacity: 100,
           registrationOpen: true,
           emailsEnabled: true,
+          submissionsOpen: true,
+          allowSubmissionEdits: true,
         },
       });
     }
@@ -33,7 +37,17 @@ export async function getEventSettings() {
     return settings;
   } catch (error) {
     console.error("Get event settings error:", error);
-    return { id: "singleton", maxCapacity: 100, registrationOpen: true, emailsEnabled: true, updatedAt: new Date(), updatedBy: null };
+    return { 
+      id: "singleton", 
+      maxCapacity: 100, 
+      registrationOpen: true, 
+      emailsEnabled: true, 
+      allowSecondServings: false,
+      submissionsOpen: true,
+      allowSubmissionEdits: true,
+      updatedAt: new Date(), 
+      updatedBy: null 
+    };
   }
 }
 
@@ -49,14 +63,17 @@ export async function updateEventSettings(
   const parsed = eventSettingsSchema.safeParse(input);
   if (!parsed.success) return { error: parsed.error.errors[0].message };
 
-  // Check if trying to update emailsEnabled - only super admin can do this
-  if (parsed.data.emailsEnabled !== undefined) {
+  // Check if trying to update super admin only settings
+  const superAdminFields = ['emailsEnabled', 'submissionsOpen', 'allowSubmissionEdits'];
+  const hasSuperAdminField = superAdminFields.some(field => parsed.data[field as keyof typeof parsed.data] !== undefined);
+  
+  if (hasSuperAdminField) {
     const isSuperAdmin = 
       session.user.name === "Tejas Singhal" && 
       session.user.email?.endsWith("@psu.edu");
     
     if (!isSuperAdmin) {
-      return { error: "Only the super admin can toggle email settings" };
+      return { error: "Only the super admin can toggle these settings" };
     }
   }
 

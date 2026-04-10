@@ -128,6 +128,8 @@ model EventSettings {
   registrationOpen  Boolean  @default(true)
   emailsEnabled     Boolean  @default(true)  // Super admin only - master kill switch for all emails
   allowSecondServings Boolean @default(false) // Allow participants to get food twice
+  submissionsOpen   Boolean  @default(true)  // Super admin only - allow new submissions
+  allowSubmissionEdits Boolean @default(true) // Super admin only - allow editing submitted projects
   updatedAt         DateTime @updatedAt
   updatedBy         String?
 

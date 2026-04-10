@@ -26,10 +26,19 @@ export async function upsertSubmission(
     return { error: "Your team leader must select a challenge track before you can submit" };
   }
 
-  // Block edits on already-submitted projects
+  // Block edits on already-submitted projects if editing is disabled
   if (membership.team.submission?.status === "submitted") {
-    return { error: "Your project has already been submitted and cannot be edited" };
+    const settings = await db.eventSettings.findUnique({
+      where: { id: "singleton" },
+      select: { allowSubmissionEdits: true },
+    });
+
+    if (!settings?.allowSubmissionEdits) {
+      return { error: "Editing submitted projects is currently disabled. Contact an admin if you need to make changes." };
+    }
   }
+
+  // Block edits on reviewed projects (always)
   if (membership.team.submission?.status === "reviewed") {
     return { error: "Your project has been reviewed and cannot be edited" };
   }
@@ -61,6 +70,16 @@ export async function upsertSubmission(
 export async function submitProject(): Promise<{ error: string } | { data: true }> {
   const session = await auth();
   if (!session?.user?.id) return { error: "Not authenticated" };
+
+  // Check if submissions are open
+  const settings = await db.eventSettings.findUnique({
+    where: { id: "singleton" },
+    select: { submissionsOpen: true },
+  });
+
+  if (!settings?.submissionsOpen) {
+    return { error: "Submissions are currently closed. Contact an admin if you need assistance." };
+  }
 
   const membership = await db.teamMember.findUnique({
     where: { userId: session.user.id },
