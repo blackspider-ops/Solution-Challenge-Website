@@ -291,14 +291,78 @@ export function SubmissionJudgingCard({
                 </DialogDescription>
               </DialogHeader>
 
-              <Tabs defaultValue="score" className="flex-1 overflow-hidden flex flex-col">
+              <Tabs defaultValue="details" className="flex-1 overflow-hidden flex flex-col">
                 <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="details">Project Details</TabsTrigger>
                   <TabsTrigger value="score">Your Scores</TabsTrigger>
                   <TabsTrigger value="aggregate">All Judges</TabsTrigger>
-                  <TabsTrigger value="details">Project Details</TabsTrigger>
                 </TabsList>
 
                 <div className="flex-1 overflow-y-auto mt-4">
+                  {/* Project Details Tab */}
+                  <TabsContent value="details" className="space-y-4 mt-0">
+                    <Card className="p-6">
+                      <h4 className="font-semibold mb-3">Description</h4>
+                      <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
+                        {submission.description}
+                      </p>
+                    </Card>
+
+                    <Card className="p-6">
+                      <h4 className="font-semibold mb-3">Project Links</h4>
+                      <div className="space-y-3">
+                        {submission.repoUrl && (
+                          <a
+                            href={submission.repoUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted transition-colors"
+                          >
+                            <Github className="w-5 h-5" />
+                            <div className="flex-1">
+                              <p className="font-medium text-sm">Repository</p>
+                              <p className="text-xs text-muted-foreground truncate">
+                                {submission.repoUrl}
+                              </p>
+                            </div>
+                          </a>
+                        )}
+                        {submission.demoUrl && (
+                          <a
+                            href={submission.demoUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted transition-colors"
+                          >
+                            <Globe className="w-5 h-5" />
+                            <div className="flex-1">
+                              <p className="font-medium text-sm">Live Demo</p>
+                              <p className="text-xs text-muted-foreground truncate">
+                                {submission.demoUrl}
+                              </p>
+                            </div>
+                          </a>
+                        )}
+                        {submission.videoUrl && (
+                          <a
+                            href={submission.videoUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted transition-colors"
+                          >
+                            <Video className="w-5 h-5" />
+                            <div className="flex-1">
+                              <p className="font-medium text-sm">Video Demo</p>
+                              <p className="text-xs text-muted-foreground truncate">
+                                {submission.videoUrl}
+                              </p>
+                            </div>
+                          </a>
+                        )}
+                      </div>
+                    </Card>
+                  </TabsContent>
+
                   {/* Your Scores Tab */}
                   <TabsContent value="score" className="space-y-4 mt-0">
                     {criteria.map((c) => {
@@ -485,70 +549,6 @@ export function SubmissionJudgingCard({
                         </Card>
                       );
                     })}
-                  </TabsContent>
-
-                  {/* Project Details Tab */}
-                  <TabsContent value="details" className="space-y-4 mt-0">
-                    <Card className="p-6">
-                      <h4 className="font-semibold mb-3">Description</h4>
-                      <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
-                        {submission.description}
-                      </p>
-                    </Card>
-
-                    <Card className="p-6">
-                      <h4 className="font-semibold mb-3">Project Links</h4>
-                      <div className="space-y-3">
-                        {submission.repoUrl && (
-                          <a
-                            href={submission.repoUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted transition-colors"
-                          >
-                            <Github className="w-5 h-5" />
-                            <div className="flex-1">
-                              <p className="font-medium text-sm">Repository</p>
-                              <p className="text-xs text-muted-foreground truncate">
-                                {submission.repoUrl}
-                              </p>
-                            </div>
-                          </a>
-                        )}
-                        {submission.demoUrl && (
-                          <a
-                            href={submission.demoUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted transition-colors"
-                          >
-                            <Globe className="w-5 h-5" />
-                            <div className="flex-1">
-                              <p className="font-medium text-sm">Live Demo</p>
-                              <p className="text-xs text-muted-foreground truncate">
-                                {submission.demoUrl}
-                              </p>
-                            </div>
-                          </a>
-                        )}
-                        {submission.videoUrl && (
-                          <a
-                            href={submission.videoUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted transition-colors"
-                          >
-                            <Video className="w-5 h-5" />
-                            <div className="flex-1">
-                              <p className="font-medium text-sm">Video Demo</p>
-                              <p className="text-xs text-muted-foreground truncate">
-                                {submission.videoUrl}
-                              </p>
-                            </div>
-                          </a>
-                        )}
-                      </div>
-                    </Card>
                   </TabsContent>
                 </div>
               </Tabs>
