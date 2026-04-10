@@ -101,6 +101,7 @@ model User {
   ledTeams      Team[]         @relation("TeamLeader")
   announcements Announcement[]
   checkInsPerformed CheckIn[]  @relation("CheckInPerformedBy")
+  foodDistributionsPerformed FoodDistribution[] @relation("FoodDistributionPerformedBy")
   formResponse  FormResponse?
   volunteerRegistration VolunteerRegistration?
   judgingScores JudgingScore[]
@@ -126,6 +127,7 @@ model EventSettings {
   maxCapacity       Int      @default(100)
   registrationOpen  Boolean  @default(true)
   emailsEnabled     Boolean  @default(true)  // Super admin only - master kill switch for all emails
+  allowSecondServings Boolean @default(false) // Allow participants to get food twice
   updatedAt         DateTime @updatedAt
   updatedBy         String?
 
@@ -142,6 +144,7 @@ model Ticket {
 
   registration Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
   checkIn      CheckIn?
+  foodDistributions FoodDistribution[]
 }
 
 /// Records the moment a ticket was scanned at the event entrance.
@@ -154,6 +157,30 @@ model CheckIn {
 
   ticket    Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
   performer User   @relation("CheckInPerformedBy", fields: [performedBy], references: [id])
+}
+
+// ─── Food Tracking System ──────────────────────────────────────────────────
+
+enum MealType {
+  dinner
+  midnight_snack
+  breakfast
+}
+
+/// Records when a participant receives food
+model FoodDistribution {
+  id          String   @id @default(cuid())
+  ticketId    String
+  mealType    MealType
+  servingNumber Int    // 1 for first serving, 2 for second serving
+  performedBy String   // userId of the volunteer/admin who scanned
+  distributedAt DateTime @default(now())
+
+  ticket    Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  performer User   @relation("FoodDistributionPerformedBy", fields: [performedBy], references: [id])
+
+  @@index([ticketId, mealType])
+  @@index([mealType])
 }
 
 /// A challenge category. Seeded from the landing page tracks.
