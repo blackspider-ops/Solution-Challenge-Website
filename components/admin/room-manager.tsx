@@ -111,14 +111,31 @@ export function RoomManager({ rooms }: { rooms: Room[] }) {
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Print QR Code - ${room.name}</title>
+          <title>${room.name} - QR Code</title>
           <style>
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+            
+            @page {
+              size: A4 portrait;
+              margin: 0;
+            }
+            
             @media print {
-              @page {
-                size: A4;
-                margin: 20mm;
+              html, body {
+                width: 210mm;
+                height: 297mm;
+              }
+              
+              body {
+                margin: 0 !important;
+                padding: 0 !important;
               }
             }
+            
             body {
               font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
               display: flex;
@@ -127,51 +144,78 @@ export function RoomManager({ rooms }: { rooms: Room[] }) {
               justify-content: center;
               min-height: 100vh;
               margin: 0;
-              padding: 40px;
+              padding: 30px;
               text-align: center;
-            }
-            .container {
-              max-width: 600px;
-              border: 2px solid #e5e7eb;
-              border-radius: 16px;
-              padding: 40px;
               background: white;
             }
+            
+            .container {
+              max-width: 500px;
+              width: 100%;
+              border: 3px solid #e5e7eb;
+              border-radius: 20px;
+              padding: 40px 30px;
+              background: white;
+              page-break-inside: avoid;
+            }
+            
             h1 {
-              font-size: 32px;
+              font-size: 36px;
               font-weight: bold;
-              margin: 0 0 8px 0;
+              margin: 0 0 12px 0;
               color: #111827;
             }
+            
             .capacity {
-              font-size: 18px;
+              font-size: 20px;
               color: #6b7280;
-              margin: 0 0 32px 0;
+              margin: 0 0 20px 0;
+              font-weight: 500;
             }
+            
+            .description {
+              font-size: 16px;
+              color: #4b5563;
+              margin: 0 0 30px 0;
+              line-height: 1.5;
+            }
+            
             .qr-container {
-              margin: 32px 0;
-              padding: 20px;
+              margin: 30px 0;
+              padding: 25px;
               background: #f9fafb;
-              border-radius: 12px;
+              border-radius: 16px;
+              border: 2px solid #e5e7eb;
             }
+            
             img {
-              max-width: 100%;
-              height: auto;
+              width: 280px;
+              height: 280px;
               display: block;
               margin: 0 auto;
             }
+            
             .instructions {
-              font-size: 16px;
+              font-size: 18px;
               color: #374151;
-              margin-top: 24px;
+              margin-top: 30px;
               line-height: 1.6;
+              font-weight: 600;
             }
-            .token {
-              font-family: 'Courier New', monospace;
+            
+            .sub-instructions {
               font-size: 14px;
               color: #6b7280;
-              margin-top: 16px;
-              padding: 8px 12px;
+              margin-top: 10px;
+              line-height: 1.5;
+            }
+            
+            .token {
+              font-family: 'Courier New', monospace;
+              font-size: 12px;
+              color: #9ca3af;
+              margin-top: 20px;
+              padding: 6px 10px;
               background: #f3f4f6;
               border-radius: 6px;
               display: inline-block;
@@ -181,21 +225,28 @@ export function RoomManager({ rooms }: { rooms: Room[] }) {
         <body>
           <div class="container">
             <h1>${room.name}</h1>
-            <p class="capacity">Capacity: ${room.capacity} team${room.capacity !== 1 ? 's' : ''}</p>
-            ${room.description ? `<p class="instructions">${room.description}</p>` : ''}
+            <p class="capacity">Capacity: ${room.capacity} ${room.capacity === 1 ? 'person' : 'people'}</p>
+            ${room.description ? `<p class="description">${room.description}</p>` : ''}
             <div class="qr-container">
               <img src="${qrDataUrl}" alt="QR Code for ${room.name}" />
             </div>
-            <p class="instructions">
-              <strong>Scan this QR code to book this hacking space</strong><br>
-              Teams can scan this code from their Team page to reserve this room.
-            </p>
+            <p class="instructions">Scan this QR code to book this hacking space</p>
+            <p class="sub-instructions">Teams can scan this code from their Team page to reserve this room.</p>
             <div class="token">Token: ${room.qrToken}</div>
           </div>
           <script>
+            // Hide browser headers/footers
+            window.onbeforeprint = function() {
+              document.title = '';
+            };
+            
             window.onload = function() {
               setTimeout(function() {
                 window.print();
+                // Close after printing or canceling
+                setTimeout(function() {
+                  window.close();
+                }, 100);
               }, 500);
             };
           </script>
