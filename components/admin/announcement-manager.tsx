@@ -282,6 +282,7 @@ export function AnnouncementManager({ announcements }: { announcements: Announce
                 className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
               >
                 <option value="registered">Registered Participants (default)</option>
+                <option value="not_registered">Not Registered (have account but no registration)</option>
                 <option value="all">All (Participants + Volunteers + Admins)</option>
                 <option value="volunteers">Volunteers Only</option>
                 <option value="admins">Admins Only</option>

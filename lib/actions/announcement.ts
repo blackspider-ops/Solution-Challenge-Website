@@ -145,6 +145,17 @@ export async function sendAnnouncementAsEmail(
         include: { user: { select: { email: true } } },
       });
       emails = registrations.map((r) => r.user.email);
+    } else if (announcement.audience === "not_registered") {
+      // Get users who have accounts but no registration (exclude volunteers and admins)
+      const usersWithoutRegistration = await db.user.findMany({
+        where: {
+          role: "participant",
+          registration: null,
+          volunteerRegistration: null, // Exclude those who registered as volunteers
+        },
+        select: { email: true },
+      });
+      emails = usersWithoutRegistration.map((u) => u.email);
     } else if (announcement.audience === "volunteers") {
       // Get only users with volunteer role
       const volunteers = await db.user.findMany({
