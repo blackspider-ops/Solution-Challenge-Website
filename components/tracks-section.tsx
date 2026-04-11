@@ -1,16 +1,15 @@
-"use client"
-
 import { motion } from "framer-motion"
 import { Heart, Leaf, GraduationCap, ShieldCheck, Accessibility, Zap, ArrowUpRight } from "lucide-react"
 import Link from "next/link"
-import { TRACKS } from "@/lib/tracks-data"
 import type { LucideIcon } from "lucide-react"
+import { getVisibleTracks } from "@/lib/actions/tracks"
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Heart, Leaf, GraduationCap, ShieldCheck, Accessibility, Zap,
 }
 
-export function TracksSection() {
+export async function TracksSection() {
+  const tracks = await getVisibleTracks();
   return (
     <section id="tracks" className="py-32 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       <div className="absolute inset-0 -z-10 bg-gradient-to-b from-muted/50 via-muted/30 to-background" />
@@ -46,7 +45,7 @@ export function TracksSection() {
 
         {/* Tracks Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {TRACKS.map((track, index) => {
+          {tracks.map((track, index) => {
             const Icon = ICON_MAP[track.icon] ?? Zap
             return (
               <motion.div

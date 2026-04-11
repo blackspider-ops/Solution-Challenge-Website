@@ -28,3 +28,22 @@ export async function setAllTracksVisibility(
   const result = await db.track.updateMany({ data: { visible } });
   return { data: { count: result.count } };
 }
+
+export async function getVisibleTracks() {
+  const tracks = await db.track.findMany({
+    where: { visible: true },
+    orderBy: { order: "asc" },
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      icon: true,
+      gradient: true,
+      iconBg: true,
+      iconColor: true,
+      bgGradient: true,
+      description: true,
+    },
+  });
+  return tracks;
+}
