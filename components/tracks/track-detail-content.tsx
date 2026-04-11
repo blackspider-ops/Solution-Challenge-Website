@@ -101,9 +101,9 @@ export function TrackDetailContent({ track, staticData, isAdmin, isPreview }: Pr
           </p>
         </section>
 
-        {/* Challenge prompt */}
+        {/* Problem Statement */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-foreground mb-4">Challenge Prompt</h2>
+          <h2 className="text-2xl font-bold text-foreground mb-4">Problem Statement</h2>
           <div className={`rounded-2xl border-2 p-6 ${
             track.promptContent.startsWith("🔒")
               ? "border-dashed border-border bg-muted/30"
@@ -115,7 +115,7 @@ export function TrackDetailContent({ track, staticData, isAdmin, isPreview }: Pr
                 <div>
                   <p className="font-semibold text-foreground mb-1">Prompt not yet released</p>
                   <p className="text-sm text-muted-foreground">
-                    The challenge prompt for this track will be released at{" "}
+                    The problem statement for this track will be released at{" "}
                     <strong>8:00 PM on April 11</strong> — one hour after the event kickoff.
                   </p>
                 </div>
