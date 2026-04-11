@@ -57,13 +57,15 @@ export async function updateTrack(
   try {
     await requireAdmin();
 
-    await db.track.update({
+    const track = await db.track.update({
       where: { id },
       data,
     });
 
     revalidatePath("/admin/tracks");
+    revalidatePath("/admin/content");
     revalidatePath("/");
+    revalidatePath(`/tracks/${track.slug}`);
     revalidatePath("/tracks/[slug]", "page");
 
     return { success: true };
