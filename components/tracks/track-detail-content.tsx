@@ -136,7 +136,7 @@ export function TrackDetailContent({ track, isAdmin, isPreview }: Props) {
 
         {/* Full description */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-foreground mb-4">About this track</h2>
+          <h2 className="text-2xl font-bold text-foreground mb-4">Problem Scenario</h2>
           <p className="text-muted-foreground leading-relaxed text-lg">
             {track.fullDescription}
           </p>
