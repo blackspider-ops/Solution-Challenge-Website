@@ -1,0 +1,109 @@
+"use client"
+
+import { motion } from "framer-motion"
+import { Heart, Leaf, GraduationCap, ShieldCheck, Accessibility, Zap, ArrowUpRight } from "lucide-react"
+import Link from "next/link"
+import type { LucideIcon } from "lucide-react"
+
+const ICON_MAP: Record<string, LucideIcon> = {
+  Heart, Leaf, GraduationCap, ShieldCheck, Accessibility, Zap,
+}
+
+type Track = {
+  id: string
+  slug: string
+  name: string
+  icon: string
+  gradient: string
+  description: string
+  iconBg: string
+  iconColor: string
+  bgGradient: string
+}
+
+export function TracksGrid({ tracks }: { tracks: Track[] }) {
+  return (
+    <>
+      {/* Section Header */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        className="text-center mb-20"
+      >
+        <motion.span
+          initial={{ opacity: 0, scale: 0.9 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          className="inline-block text-sm font-semibold text-primary uppercase tracking-wider mb-4"
+        >
+          Challenge Categories
+        </motion.span>
+        <h2 className="text-4xl sm:text-5xl font-bold text-foreground mb-6 tracking-tight">
+          Choose Your{" "}
+          <span className="bg-gradient-to-r from-primary to-chart-2 bg-clip-text text-transparent">
+            Impact Area
+          </span>
+        </h2>
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+          Select a track aligned with your passion and build solutions that address the
+          United Nations Sustainable Development Goals.
+        </p>
+      </motion.div>
+
+      {/* Tracks Grid */}
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {tracks.map((track, index) => {
+          const Icon = ICON_MAP[track.icon] ?? Zap
+          return (
+            <motion.div
+              key={track.slug}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {/* Card links to the detail page — the page itself enforces visibility */}
+              <Link href={`/tracks/${track.slug}`} className="block h-full">
+                <motion.div
+                  whileHover={{ y: -8, scale: 1.02 }}
+                  transition={{ duration: 0.3 }}
+                  className="group relative h-full bg-card border-2 border-border rounded-3xl p-8 cursor-pointer hover:border-transparent hover:shadow-2xl transition-all duration-500 overflow-hidden"
+                >
+                  {/* Hover Gradient */}
+                  <div className={`absolute inset-0 bg-gradient-to-br ${track.bgGradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+
+                  <div className="relative z-10">
+                    {/* Icon */}
+                    <div className={`w-16 h-16 rounded-2xl ${track.iconBg} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                      <Icon className={`w-8 h-8 ${track.iconColor}`} />
+                    </div>
+
+                    {/* Title */}
+                    <div className="flex items-start justify-between mb-4">
+                      <h3 className="text-xl font-semibold text-foreground pr-4">
+                        {track.name}
+                      </h3>
+                      <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${track.gradient} flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 -translate-y-2 group-hover:translate-y-0 shrink-0`}>
+                        <ArrowUpRight className="w-4 h-4 text-white" />
+                      </div>
+                    </div>
+
+                    {/* Description — only the short public summary */}
+                    <p className="text-muted-foreground leading-relaxed">
+                      {track.description}
+                    </p>
+                  </div>
+
+                  {/* Bottom gradient line */}
+                  <div className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${track.gradient} transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left`} />
+                </motion.div>
+              </Link>
+            </motion.div>
+          )
+        })}
+      </div>
+    </>
+  )
+}
