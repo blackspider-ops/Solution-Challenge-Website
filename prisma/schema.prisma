@@ -279,6 +279,7 @@ model Submission {
   title       String
   description String
   repoUrl     String?
+  forkedRepoUrl String?        // Forked copy in GDG org (frozen at submission)
   demoUrl     String?
   videoUrl    String?
   status      SubmissionStatus @default(draft)

@@ -186,9 +186,26 @@ export async function submitProject(): Promise<{ error: string } | { data: true 
     return { error: "Project description is too short — update your draft first" };
   }
 
+  // Fork the repository to GDG org if a repo URL is provided
+  let forkedRepoUrl: string | null = null;
+  if (team.submission.repoUrl) {
+    const { forkRepository } = await import("@/lib/github");
+    const forkResult = await forkRepository(team.submission.repoUrl);
+    
+    if (forkResult.success && forkResult.forkedUrl) {
+      forkedRepoUrl = forkResult.forkedUrl;
+    } else {
+      console.error("Failed to fork repository:", forkResult.error);
+      // Don't block submission if fork fails, just log it
+    }
+  }
+
   await db.submission.update({
     where: { id: team.submission.id },
-    data: { status: "submitted" },
+    data: { 
+      status: "submitted",
+      forkedRepoUrl,
+    },
   });
 
   return { data: true };

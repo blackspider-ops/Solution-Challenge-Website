@@ -18,6 +18,7 @@ type SubmissionRow = {
   title: string;
   description: string;
   repoUrl: string | null;
+  forkedRepoUrl: string | null;
   demoUrl: string | null;
   videoUrl: string | null;
   status: string;
@@ -194,7 +195,7 @@ export default async function SubmissionsPage() {
                               <div>
                                 <h4 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-1.5">
                                   <Github className="w-4 h-4" />
-                                  Repository
+                                  Repository {sub.forkedRepoUrl && <span className="text-xs font-normal text-muted-foreground">(Original)</span>}
                                 </h4>
                                 <a
                                   href={sub.repoUrl}
@@ -203,6 +204,22 @@ export default async function SubmissionsPage() {
                                   className="text-sm text-primary hover:underline break-all"
                                 >
                                   {sub.repoUrl}
+                                </a>
+                              </div>
+                            )}
+                            {sub.forkedRepoUrl && (
+                              <div>
+                                <h4 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-1.5">
+                                  <Github className="w-4 h-4" />
+                                  Forked Copy <span className="text-xs font-normal text-green-600">(Frozen at submission)</span>
+                                </h4>
+                                <a
+                                  href={sub.forkedRepoUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-sm text-primary hover:underline break-all"
+                                >
+                                  {sub.forkedRepoUrl}
                                 </a>
                               </div>
                             )}
