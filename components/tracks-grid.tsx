@@ -4,24 +4,13 @@ import { motion } from "framer-motion"
 import { Heart, Leaf, GraduationCap, ShieldCheck, Accessibility, Zap, ArrowUpRight } from "lucide-react"
 import Link from "next/link"
 import type { LucideIcon } from "lucide-react"
+import type { TrackData } from "@/lib/tracks-data"
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Heart, Leaf, GraduationCap, ShieldCheck, Accessibility, Zap,
 }
 
-type Track = {
-  id: string
-  slug: string
-  name: string
-  icon: string
-  gradient: string
-  description: string
-  iconBg: string
-  iconColor: string
-  bgGradient: string
-}
-
-export function TracksGrid({ tracks }: { tracks: Track[] }) {
+export function TracksGrid({ tracks }: { tracks: TrackData[] }) {
   return (
     <>
       {/* Section Header */}
