@@ -53,7 +53,7 @@ export function TracksGrid({ tracks }: { tracks: Track[] }) {
       </motion.div>
 
       {/* Tracks Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className={`grid gap-6 ${tracks.length === 4 ? 'md:grid-cols-2 lg:grid-cols-2 max-w-4xl mx-auto' : 'md:grid-cols-2 lg:grid-cols-3'}`}>
         {tracks.map((track, index) => {
           const Icon = ICON_MAP[track.icon] ?? Zap
           return (
