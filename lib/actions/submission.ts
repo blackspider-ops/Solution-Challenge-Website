@@ -268,6 +268,7 @@ export async function forkAllSubmittedRepos(): Promise<{ error: string } | { for
     select: {
       id: true,
       repoUrl: true,
+      description: true,
     },
   });
   
@@ -277,7 +278,7 @@ export async function forkAllSubmittedRepos(): Promise<{ error: string } | { for
   for (const submission of submissions) {
     if (!submission.repoUrl) continue;
     
-    const forkResult = await forkRepository(submission.repoUrl);
+    const forkResult = await forkRepository(submission.repoUrl, submission.description);
     
     if (forkResult.success && forkResult.forkedUrl) {
       await db.submission.update({

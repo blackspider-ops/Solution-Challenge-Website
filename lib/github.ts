@@ -41,7 +41,7 @@ function parseGitHubUrl(url: string): { owner: string; repo: string } | null {
 /**
  * Fork a GitHub repository to the configured organization
  */
-export async function forkRepository(repoUrl: string): Promise<ForkResult> {
+export async function forkRepository(repoUrl: string, description?: string): Promise<ForkResult> {
   if (!GITHUB_TOKEN) {
     return { success: false, error: "GitHub token not configured" };
   }
@@ -59,7 +59,7 @@ export async function forkRepository(repoUrl: string): Promise<ForkResult> {
   
   try {
     // Fork the repository
-    const response = await fetch(
+    const forkResponse = await fetch(
       `https://api.github.com/repos/${owner}/${repo}/forks`,
       {
         method: "POST",
@@ -76,18 +76,37 @@ export async function forkRepository(repoUrl: string): Promise<ForkResult> {
       }
     );
     
-    if (!response.ok) {
-      const error = await response.json();
+    if (!forkResponse.ok) {
+      const error = await forkResponse.json();
       return { 
         success: false, 
-        error: error.message || `GitHub API error: ${response.status}` 
+        error: error.message || `GitHub API error: ${forkResponse.status}` 
       };
     }
     
-    const data = await response.json();
+    const forkData = await forkResponse.json();
+    
+    // If description is provided, update the forked repo's description
+    if (description) {
+      await fetch(
+        `https://api.github.com/repos/${GITHUB_ORG}/${repo}-submission`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${GITHUB_TOKEN}`,
+            Accept: "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+          },
+          body: JSON.stringify({
+            description: description.substring(0, 350), // GitHub limit is 350 chars
+          }),
+        }
+      );
+    }
+    
     return {
       success: true,
-      forkedUrl: data.html_url,
+      forkedUrl: forkData.html_url,
     };
   } catch (error) {
     console.error("Fork error:", error);
