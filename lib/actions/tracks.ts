@@ -39,11 +39,55 @@ export async function getVisibleTracks() {
       name: true,
       icon: true,
       gradient: true,
-      iconBg: true,
-      iconColor: true,
-      bgGradient: true,
       description: true,
     },
   });
-  return tracks;
+  
+  // Map to include computed styling fields from the icon/gradient
+  return tracks.map(track => {
+    // Derive styling from gradient
+    const gradientMap: Record<string, { iconBg: string; iconColor: string; bgGradient: string }> = {
+      "from-rose-500 to-pink-500": {
+        iconBg: "bg-rose-500/15",
+        iconColor: "text-rose-500",
+        bgGradient: "from-rose-500/10 to-pink-500/10"
+      },
+      "from-emerald-500 to-teal-500": {
+        iconBg: "bg-emerald-500/15",
+        iconColor: "text-emerald-500",
+        bgGradient: "from-emerald-500/10 to-teal-500/10"
+      },
+      "from-blue-500 to-indigo-500": {
+        iconBg: "bg-blue-500/15",
+        iconColor: "text-blue-500",
+        bgGradient: "from-blue-500/10 to-indigo-500/10"
+      },
+      "from-violet-500 to-purple-500": {
+        iconBg: "bg-violet-500/15",
+        iconColor: "text-violet-500",
+        bgGradient: "from-violet-500/10 to-purple-500/10"
+      },
+      "from-amber-500 to-orange-500": {
+        iconBg: "bg-amber-500/15",
+        iconColor: "text-amber-500",
+        bgGradient: "from-amber-500/10 to-orange-500/10"
+      },
+      "from-cyan-500 to-blue-500": {
+        iconBg: "bg-cyan-500/15",
+        iconColor: "text-cyan-500",
+        bgGradient: "from-cyan-500/10 to-blue-500/10"
+      },
+    };
+    
+    const styling = gradientMap[track.gradient] || {
+      iconBg: "bg-primary/15",
+      iconColor: "text-primary",
+      bgGradient: "from-primary/10 to-primary/10"
+    };
+    
+    return {
+      ...track,
+      ...styling,
+    };
+  });
 }
