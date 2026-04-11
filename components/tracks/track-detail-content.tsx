@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { ArrowLeft, Lock, Eye, Heart, Leaf, GraduationCap, ShieldCheck, Accessibility, Zap, Users, Globe, Lightbulb, Code, Rocket, Brain, Smartphone, Database, Cloud, Wifi, Target, TrendingUp, Award, Briefcase, BookOpen, Music, Camera, MessageCircle, ShoppingCart, Truck, Home, Utensils, Dumbbell, Palette, Gamepad, Plane, DollarSign, Activity } from "lucide-react";
-import type { TrackData } from "@/lib/tracks-data";
 import type { LucideIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
@@ -20,19 +19,61 @@ interface Props {
     id: string;
     slug: string;
     name: string;
+    description: string;
     fullDescription: string;
     promptContent: string;
     visible: boolean;
+    icon: string;
+    gradient: string;
   };
-  staticData: TrackData;
   isAdmin: boolean;
   isPreview: boolean;
 }
 
-export function TrackDetailContent({ track, staticData, isAdmin, isPreview }: Props) {
-  const Icon = ICON_MAP[staticData.icon] ?? Zap;
+export function TrackDetailContent({ track, isAdmin, isPreview }: Props) {
+  const Icon = ICON_MAP[track.icon] ?? Zap;
   const { data: session } = useSession();
   const router = useRouter();
+
+  // Derive styling from gradient
+  const gradientMap: Record<string, { iconBg: string; iconColor: string; bgGradient: string }> = {
+    "from-rose-500 to-pink-500": {
+      iconBg: "bg-rose-500/15",
+      iconColor: "text-rose-500",
+      bgGradient: "from-rose-500/10 to-pink-500/10"
+    },
+    "from-emerald-500 to-teal-500": {
+      iconBg: "bg-emerald-500/15",
+      iconColor: "text-emerald-500",
+      bgGradient: "from-emerald-500/10 to-teal-500/10"
+    },
+    "from-blue-500 to-indigo-500": {
+      iconBg: "bg-blue-500/15",
+      iconColor: "text-blue-500",
+      bgGradient: "from-blue-500/10 to-indigo-500/10"
+    },
+    "from-violet-500 to-purple-500": {
+      iconBg: "bg-violet-500/15",
+      iconColor: "text-violet-500",
+      bgGradient: "from-violet-500/10 to-purple-500/10"
+    },
+    "from-amber-500 to-orange-500": {
+      iconBg: "bg-amber-500/15",
+      iconColor: "text-amber-500",
+      bgGradient: "from-amber-500/10 to-orange-500/10"
+    },
+    "from-cyan-500 to-blue-500": {
+      iconBg: "bg-cyan-500/15",
+      iconColor: "text-cyan-500",
+      bgGradient: "from-cyan-500/10 to-blue-500/10"
+    },
+  };
+  
+  const styling = gradientMap[track.gradient] || {
+    iconBg: "bg-primary/15",
+    iconColor: "text-primary",
+    bgGradient: "from-primary/10 to-primary/10"
+  };
 
   function handleSubmitClick() {
     if (!session) {
@@ -73,11 +114,11 @@ export function TrackDetailContent({ track, staticData, isAdmin, isPreview }: Pr
 
         {/* Header */}
         <div className="mb-12">
-          <div className={`w-20 h-20 rounded-3xl ${staticData.iconBg} flex items-center justify-center mb-6`}>
-            <Icon className={`w-10 h-10 ${staticData.iconColor}`} />
+          <div className={`w-20 h-20 rounded-3xl ${styling.iconBg} flex items-center justify-center mb-6`}>
+            <Icon className={`w-10 h-10 ${styling.iconColor}`} />
           </div>
 
-          <div className={`inline-block text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full bg-gradient-to-r ${staticData.gradient} text-white mb-4`}>
+          <div className={`inline-block text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full bg-gradient-to-r ${track.gradient} text-white mb-4`}>
             Challenge Track
           </div>
 
@@ -86,12 +127,12 @@ export function TrackDetailContent({ track, staticData, isAdmin, isPreview }: Pr
           </h1>
 
           <p className="text-xl text-muted-foreground leading-relaxed max-w-2xl">
-            {staticData.description}
+            {track.description}
           </p>
         </div>
 
         {/* Divider */}
-        <div className={`h-1 w-24 rounded-full bg-gradient-to-r ${staticData.gradient} mb-12`} />
+        <div className={`h-1 w-24 rounded-full bg-gradient-to-r ${track.gradient} mb-12`} />
 
         {/* Full description */}
         <section className="mb-12">
@@ -107,7 +148,7 @@ export function TrackDetailContent({ track, staticData, isAdmin, isPreview }: Pr
           <div className={`rounded-2xl border-2 p-6 ${
             track.promptContent.startsWith("🔒")
               ? "border-dashed border-border bg-muted/30"
-              : `border-${staticData.iconColor.replace("text-", "")}/20 bg-gradient-to-br ${staticData.bgGradient}`
+              : `border-${styling.iconColor.replace("text-", "")}/20 bg-gradient-to-br ${styling.bgGradient}`
           }`}>
             {track.promptContent.startsWith("🔒") ? (
               <div className="flex items-start gap-3">
@@ -136,11 +177,10 @@ export function TrackDetailContent({ track, staticData, isAdmin, isPreview }: Pr
               "Your solution must directly address the track theme",
               "Teams of up to 4 members",
               "Any technology stack is allowed",
-              "Submit by 10:00 AM on April 12",
-              "Judging begins at 12:00 PM on April 12",
+              "Submit by the Deadline on April 12",
             ].map((item, i) => (
               <div key={i} className="flex items-start gap-3">
-                <div className={`w-5 h-5 rounded-full bg-gradient-to-br ${staticData.gradient} flex items-center justify-center shrink-0 mt-0.5`}>
+                <div className={`w-5 h-5 rounded-full bg-gradient-to-br ${track.gradient} flex items-center justify-center shrink-0 mt-0.5`}>
                   <span className="text-white text-xs font-bold">{i + 1}</span>
                 </div>
                 <p className="text-muted-foreground">{item}</p>
@@ -153,7 +193,7 @@ export function TrackDetailContent({ track, staticData, isAdmin, isPreview }: Pr
         <div className="flex flex-col sm:flex-row gap-4">
           <button
             onClick={handleSubmitClick}
-            className={`inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-semibold text-white bg-gradient-to-r ${staticData.gradient} shadow-lg hover:scale-105 transition-all duration-300`}
+            className={`inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-semibold text-white bg-gradient-to-r ${track.gradient} shadow-lg hover:scale-105 transition-all duration-300`}
           >
             Submit for this track
           </button>

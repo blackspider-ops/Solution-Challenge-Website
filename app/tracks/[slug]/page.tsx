@@ -16,7 +16,6 @@
 import { notFound } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { getTrackBySlug } from "@/lib/tracks-data";
 import { TrackDetailContent } from "@/components/tracks/track-detail-content";
 
 // Never statically generate — visibility is dynamic and admin-controlled
@@ -31,31 +30,43 @@ interface Props {
 
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
-  const staticData = getTrackBySlug(slug);
-  if (!staticData) return { title: "Track Not Found" };
+  const track = await db.track.findUnique({ 
+    where: { slug },
+    select: { name: true, description: true }
+  });
+  if (!track) return { title: "Track Not Found" };
   return {
-    title: `${staticData.name} | Solution Challenge — GDG Penn State`,
-    description: staticData.description,
+    title: `${track.name} | Solution Challenge — GDG Penn State`,
+    description: track.description,
   };
 }
 
 export default async function TrackPage({ params }: Props) {
   const { slug } = await params;
 
-  // 1. Validate slug against known tracks
-  const staticData = getTrackBySlug(slug);
-  if (!staticData) notFound();
-
-  // 2. Fetch DB record for visibility state
-  const track = await db.track.findUnique({ where: { slug } });
+  // Fetch track from database
+  const track = await db.track.findUnique({ 
+    where: { slug },
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      description: true,
+      fullDescription: true,
+      promptContent: true,
+      icon: true,
+      gradient: true,
+      visible: true,
+    }
+  });
+  
   if (!track) notFound();
 
-  // 3. Check if the requester is an admin
+  // Check if the requester is an admin
   const session = await auth();
   const isAdmin = session?.user?.role === "admin";
 
-  // 4. GATE: if not visible and not admin → show "Track Hidden" message
-  //    Instead of 404, we show a friendly message that the track is not yet available
+  // GATE: if not visible and not admin → show "Track Hidden" message
   if (!track.visible && !isAdmin) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
@@ -90,11 +101,10 @@ export default async function TrackPage({ params }: Props) {
     );
   }
 
-  // 5. Only reaches here if visible=true OR admin
+  // Only reaches here if visible=true OR admin
   return (
     <TrackDetailContent
       track={track}
-      staticData={staticData}
       isAdmin={isAdmin}
       isPreview={!track.visible && isAdmin}
     />
