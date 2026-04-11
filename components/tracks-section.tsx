@@ -1,13 +1,14 @@
+import { getAllTracks } from "@/lib/actions/tracks"
 import { TracksGrid } from "./tracks-grid"
-import { TRACKS } from "@/lib/tracks-data"
 
-export function TracksSection() {
+export async function TracksSection() {
+  const tracks = await getAllTracks();
   return (
     <section id="tracks" className="py-32 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       <div className="absolute inset-0 -z-10 bg-gradient-to-b from-muted/50 via-muted/30 to-background" />
 
       <div className="max-w-7xl mx-auto">
-        <TracksGrid tracks={TRACKS} />
+        <TracksGrid tracks={tracks} />
       </div>
     </section>
   )

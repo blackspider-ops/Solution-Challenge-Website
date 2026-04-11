@@ -29,9 +29,8 @@ export async function setAllTracksVisibility(
   return { data: { count: result.count } };
 }
 
-export async function getVisibleTracks() {
+export async function getAllTracks() {
   const tracks = await db.track.findMany({
-    where: { visible: true },
     orderBy: { order: "asc" },
     select: {
       id: true,
