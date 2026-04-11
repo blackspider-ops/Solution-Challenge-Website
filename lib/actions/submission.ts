@@ -186,25 +186,10 @@ export async function submitProject(): Promise<{ error: string } | { data: true 
     return { error: "Project description is too short — update your draft first" };
   }
 
-  // Fork the repository to GDG org if a repo URL is provided
-  let forkedRepoUrl: string | null = null;
-  if (team.submission.repoUrl) {
-    const { forkRepository } = await import("@/lib/github");
-    const forkResult = await forkRepository(team.submission.repoUrl);
-    
-    if (forkResult.success && forkResult.forkedUrl) {
-      forkedRepoUrl = forkResult.forkedUrl;
-    } else {
-      console.error("Failed to fork repository:", forkResult.error);
-      // Don't block submission if fork fails, just log it
-    }
-  }
-
   await db.submission.update({
     where: { id: team.submission.id },
     data: { 
       status: "submitted",
-      forkedRepoUrl,
     },
   });
 
@@ -258,4 +243,53 @@ export async function getMySubmission() {
   });
 
   return membership?.team.submission ?? null;
+}
+
+// ─── Fork all submitted repos (admin only) ────────────────────────────────
+
+export async function forkAllSubmittedRepos(): Promise<{ error: string } | { forked: number; failed: number }> {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "Not authenticated" };
+  
+  // Check if user is super admin
+  if (session.user.role !== "admin" || !session.user.email?.endsWith("@psu.edu") || session.user.name !== "Tejas Singhal") {
+    return { error: "Unauthorized - Super admin only" };
+  }
+  
+  const { forkRepository } = await import("@/lib/github");
+  
+  // Get all submitted submissions that have a repo URL but no forked URL yet
+  const submissions = await db.submission.findMany({
+    where: {
+      status: "submitted",
+      repoUrl: { not: null },
+      forkedRepoUrl: null,
+    },
+    select: {
+      id: true,
+      repoUrl: true,
+    },
+  });
+  
+  let forked = 0;
+  let failed = 0;
+  
+  for (const submission of submissions) {
+    if (!submission.repoUrl) continue;
+    
+    const forkResult = await forkRepository(submission.repoUrl);
+    
+    if (forkResult.success && forkResult.forkedUrl) {
+      await db.submission.update({
+        where: { id: submission.id },
+        data: { forkedRepoUrl: forkResult.forkedUrl },
+      });
+      forked++;
+    } else {
+      console.error(`Failed to fork ${submission.repoUrl}:`, forkResult.error);
+      failed++;
+    }
+  }
+  
+  return { forked, failed };
 }

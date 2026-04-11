@@ -67,6 +67,7 @@ type Submission = {
   title: string;
   description: string;
   repoUrl: string | null;
+  forkedRepoUrl: string | null;
   demoUrl: string | null;
   videoUrl: string | null;
   team: {
@@ -237,7 +238,18 @@ export function SubmissionJudgingCard({
 
             {/* Links */}
             <div className="flex items-center gap-3">
-              {submission.repoUrl && (
+              {submission.forkedRepoUrl && (
+                <a
+                  href={submission.forkedRepoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-sm font-bold text-foreground hover:text-primary transition-colors"
+                >
+                  <Github className="w-4 h-4" />
+                  Forked Repo (Frozen)
+                </a>
+              )}
+              {submission.repoUrl && !submission.forkedRepoUrl && (
                 <a
                   href={submission.repoUrl}
                   target="_blank"
@@ -311,6 +323,22 @@ export function SubmissionJudgingCard({
                     <Card className="p-6">
                       <h4 className="font-semibold mb-3">Project Links</h4>
                       <div className="space-y-3">
+                        {submission.forkedRepoUrl && (
+                          <a
+                            href={submission.forkedRepoUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-3 p-3 rounded-lg border-2 border-primary bg-primary/5 hover:bg-primary/10 transition-colors"
+                          >
+                            <Github className="w-5 h-5 text-primary" />
+                            <div className="flex-1">
+                              <p className="font-bold text-sm text-foreground">Forked Repository (Frozen at Submission)</p>
+                              <p className="text-xs text-muted-foreground truncate">
+                                {submission.forkedRepoUrl}
+                              </p>
+                            </div>
+                          </a>
+                        )}
                         {submission.repoUrl && (
                           <a
                             href={submission.repoUrl}
@@ -320,7 +348,7 @@ export function SubmissionJudgingCard({
                           >
                             <Github className="w-5 h-5" />
                             <div className="flex-1">
-                              <p className="font-medium text-sm">Repository</p>
+                              <p className="font-medium text-sm">Original Repository {submission.forkedRepoUrl && <span className="text-xs text-muted-foreground">(may have been edited)</span>}</p>
                               <p className="text-xs text-muted-foreground truncate">
                                 {submission.repoUrl}
                               </p>

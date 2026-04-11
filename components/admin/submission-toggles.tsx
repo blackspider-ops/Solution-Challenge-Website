@@ -85,7 +85,24 @@ export function SubmissionToggles({ submissionsOpen: initialSubmissionsOpen, all
         }
 
         setAllowEdits(newValue);
-        toast.success(`Submission editing ${newValue ? "allowed" : "prevented"} successfully`);
+        
+        // If disabling edits, fork all submitted repos
+        if (!newValue) {
+          toast.info("Forking all submitted repositories to GDG org...");
+          
+          // Import and call fork function
+          const { forkAllSubmittedRepos } = await import("@/lib/actions/submission");
+          const forkResult = await forkAllSubmittedRepos();
+          
+          if ("error" in forkResult) {
+            toast.error(`Forking failed: ${forkResult.error}`);
+          } else {
+            toast.success(`Forked ${forkResult.forked} repositories successfully`);
+          }
+        } else {
+          toast.success(`Submission editing ${newValue ? "allowed" : "prevented"} successfully`);
+        }
+        
         router.refresh();
       } catch {
         toast.error("Network error — please try again");
