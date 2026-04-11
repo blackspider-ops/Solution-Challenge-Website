@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import {
   CheckCircle, FileText, Github, Globe, Video,
-  AlertTriangle, RotateCcw, Send, X, Loader2,
+  AlertTriangle, Edit, Send, X, Loader2,
 } from "lucide-react";
 import {
   Dialog,
@@ -61,7 +61,7 @@ export function SubmissionForm({ existing, trackName, hasRoomBooking = false, al
     existing ? new Date(existing.updatedAt) : null
   );
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
-  const [showWithdrawDialog, setShowWithdrawDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
 
   const isLocked = existing?.status === "submitted" || existing?.status === "reviewed";
   const statusConfig = existing?.status ? STATUS_CONFIG[existing.status as keyof typeof STATUS_CONFIG] : null;
@@ -113,16 +113,16 @@ export function SubmissionForm({ existing, trackName, hasRoomBooking = false, al
     });
   }
 
-  function handleWithdraw() {
+  function handleEdit() {
     startTransition(async () => {
       try {
         const result = await withdrawSubmission();
         if ("error" in result) { toast.error(result.error); return; }
-        toast.success("Submission withdrawn — back to draft");
-        setShowWithdrawDialog(false);
+        toast.success("You can now edit your submission");
+        setShowEditDialog(false);
         router.refresh();
       } catch {
-        toast.error("Network error — could not withdraw submission");
+        toast.error("Network error — could not enable editing");
       }
     });
   }
@@ -136,18 +136,18 @@ export function SubmissionForm({ existing, trackName, hasRoomBooking = false, al
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-blue-700">Project submitted</p>
             <p className="text-xs text-blue-600 mt-0.5">
-              Your project is under review. You can withdraw it to make changes.
+              Your project is under review. Click Edit to make changes.
             </p>
           </div>
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setShowWithdrawDialog(true)}
+            onClick={() => setShowEditDialog(true)}
             disabled={isPending}
             className="shrink-0 gap-1.5 text-xs border-blue-500/30 text-blue-700 hover:bg-blue-500/10"
           >
-            <RotateCcw className="w-3 h-3" />
-            Withdraw
+            <Edit className="w-3 h-3" />
+            Edit
           </Button>
         </div>
       )}
@@ -358,7 +358,6 @@ export function SubmissionForm({ existing, trackName, hasRoomBooking = false, al
               <ul className="list-disc list-inside space-y-1 text-sm">
                 <li>Your project will be reviewed by the judging panel</li>
                 <li>You can still edit your submission if needed</li>
-                <li>You can withdraw it anytime to make changes</li>
               </ul>
               <p className="text-sm font-medium text-foreground pt-2">
                 Ready to submit?
@@ -394,57 +393,50 @@ export function SubmissionForm({ existing, trackName, hasRoomBooking = false, al
         </DialogContent>
       </Dialog>
 
-      {/* Withdraw Confirmation Dialog */}
-      <Dialog open={showWithdrawDialog} onOpenChange={setShowWithdrawDialog}>
+      {/* Edit Confirmation Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <RotateCcw className="w-5 h-5 text-amber-600" />
-              Withdraw Submission
+              <Edit className="w-5 h-5 text-blue-600" />
+              Edit Submission
             </DialogTitle>
             <DialogDescription className="space-y-3 pt-2">
               <p>
-                Withdrawing your submission will:
+                Editing your submission will:
               </p>
               <ul className="list-disc list-inside space-y-1 text-sm">
                 <li>Revert your project to draft status</li>
-                <li>Remove it from the judging queue</li>
                 <li>Allow you to make changes</li>
-                <li>You can resubmit anytime before the deadline</li>
+                <li>You can resubmit after making your edits</li>
               </ul>
-              <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 mt-3">
-                <p className="text-sm font-medium text-amber-700">
-                  ⚠️ Important: If not resubmitted by judging time (April 12, 12:00 PM), your project will be skipped and count as an auto-withdrawal.
-                </p>
-              </div>
               <p className="text-sm font-medium text-foreground pt-2">
-                Are you sure you want to withdraw?
+                Ready to edit your submission?
               </p>
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">
             <Button
               variant="outline"
-              onClick={() => setShowWithdrawDialog(false)}
+              onClick={() => setShowEditDialog(false)}
               disabled={isPending}
             >
               Cancel
             </Button>
             <Button
-              onClick={handleWithdraw}
+              onClick={handleEdit}
               disabled={isPending}
-              variant="destructive"
-              className="gap-2"
+              className="gap-2 bg-blue-600 hover:bg-blue-700 text-white"
             >
               {isPending ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Withdrawing...
+                  Processing...
                 </>
               ) : (
                 <>
-                  <RotateCcw className="w-4 h-4" />
-                  Withdraw Submission
+                  <Edit className="w-4 h-4" />
+                  Edit Submission
                 </>
               )}
             </Button>

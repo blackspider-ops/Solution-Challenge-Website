@@ -5,6 +5,7 @@ import { checkInParticipant, type CheckInResult } from "@/lib/actions/checkin";
 import { CheckCircle, XCircle, AlertTriangle, Camera } from "lucide-react";
 import { toast } from "sonner";
 import { formatLocalTime } from "@/lib/format-date";
+import { useRouter } from "next/navigation";
 
 // ─── Result display ────────────────────────────────────────────────────────
 
@@ -246,6 +247,7 @@ function CameraScanner({ onScan, active }: CameraScannerProps) {
 // ─── Main scanner component ────────────────────────────────────────────────
 
 export function CheckInScanner() {
+  const router = useRouter();
   const [result, setResult] = useState<CheckInResult | null>(null);
   const [isPending, startTransition] = useTransition();
   const [countdown, setCountdown] = useState<number | null>(null);
@@ -320,6 +322,11 @@ export function CheckInScanner() {
       try {
         const res = await checkInParticipant(trimmed);
         setResult(res);
+        
+        // Refresh the page to show the new check-in in the recent list
+        if (res.status === "success") {
+          router.refresh();
+        }
       } catch {
         setResult({ status: "invalid" });
         toast.error("Network error — please try again");
