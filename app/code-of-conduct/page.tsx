@@ -77,6 +77,10 @@ export default function CodeOfConductPage() {
               <li>✓ Respect the privacy and personal information of others</li>
               <li>✓ Give credit where credit is due</li>
               <li>✓ Be open to constructive criticism and feedback</li>
+              <li>✓ Keep your workspace clean and organized</li>
+              <li>✓ Respect venue rules and property</li>
+              <li>✓ Wear your event badge at all times</li>
+              <li>✓ Follow check-in and check-out procedures</li>
             </ul>
           </section>
 

@@ -97,8 +97,19 @@ export default function TermsOfServicePage() {
             <ul className="space-y-2 text-muted-foreground">
               <li>• Teams may consist of 1-4 members</li>
               <li>• All team members must be registered participants</li>
+              <li>• All team members must be checked in at the event to submit</li>
+              <li>• Teams must book a hacking space before submitting</li>
               <li>• Team formation occurs at the designated time</li>
               <li>• Teams cannot be changed after formation deadline</li>
+            </ul>
+
+            <h3 className="text-xl font-semibold text-foreground mt-6 mb-3">Workspace Requirements</h3>
+            <ul className="space-y-2 text-muted-foreground">
+              <li>• Teams must book and maintain a designated hacking space</li>
+              <li>• Workspaces must be kept clean and organized at all times</li>
+              <li>• Proper disposal of food and trash is required</li>
+              <li>• Respect other teams' spaces and equipment</li>
+              <li>• Failure to maintain workspace may result in warnings or disqualification</li>
             </ul>
 
             <h3 className="text-xl font-semibold text-foreground mt-6 mb-3">Project Development</h3>
@@ -113,9 +124,14 @@ export default function TermsOfServicePage() {
             <h3 className="text-xl font-semibold text-foreground mt-6 mb-3">Submissions</h3>
             <ul className="space-y-2 text-muted-foreground">
               <li>• Submissions must be completed by the deadline</li>
-              <li>• Late submissions will not be accepted</li>
+              <li>• Late submissions will not be accepted under any circumstances</li>
               <li>• Required: project description, demo, and repository link</li>
               <li>• One submission per team</li>
+              <li>• All team members must be checked in to submit</li>
+              <li>• Teams must have a booked hacking space to submit</li>
+              <li>• All GitHub repositories will be forked by organizers at the edit deadline</li>
+              <li>• After forking, no changes to the forked repository will be accepted</li>
+              <li>• Judges will review the forked version, not your original repository</li>
             </ul>
           </section>
 
@@ -175,6 +191,10 @@ export default function TermsOfServicePage() {
               <li>✗ Attempt to hack or compromise event systems</li>
               <li>✗ Share your account credentials</li>
               <li>✗ Interfere with other participants' projects</li>
+              <li>✗ Leave workspace in an unclean or disorganized state</li>
+              <li>✗ Submit without all team members being checked in</li>
+              <li>✗ Submit without booking a hacking space</li>
+              <li>✗ Modify forked repositories after the edit deadline</li>
             </ul>
           </section>
 
