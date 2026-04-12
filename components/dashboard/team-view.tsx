@@ -202,7 +202,8 @@ export function TeamView({ team, tracks, currentUserId, hasRoomBooking }: TeamVi
     const otherMembers = team.members.filter((m) => m.user.id !== currentUserId);
 
     return (
-      <div className="space-y-4">
+      <>
+        <div className="space-y-4">
         {/* Team card */}
         <div className="rounded-2xl border border-border bg-card p-6">
 
@@ -461,7 +462,70 @@ export function TeamView({ team, tracks, currentUserId, hasRoomBooking }: TeamVi
             </div>
           )}
         </div>
+
+        {/* Leave Team Dialog */}
+        <AlertDialog open={showLeaveDialog} onOpenChange={setShowLeaveDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Leave Team?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to leave this team? You'll need a new invite code to rejoin.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={confirmLeave}
+                className="bg-destructive hover:bg-destructive/90 text-white"
+              >
+                Leave Team
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Remove Member Dialog */}
+        <AlertDialog open={showRemoveDialog} onOpenChange={setShowRemoveDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Remove Team Member?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to remove <strong>{memberToRemove?.name}</strong> from the team? 
+                They'll need a new invite code to rejoin.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setMemberToRemove(null)}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={confirmRemove}
+                className="bg-destructive hover:bg-destructive/90 text-white"
+              >
+                Remove Member
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Transfer Leadership Dialog */}
+        <AlertDialog open={showTransferDialog} onOpenChange={setShowTransferDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Transfer Leadership?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to transfer leadership? You will become a regular team member and 
+                will no longer have leader privileges.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmTransfer}>
+                Transfer Leadership
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
+      </>
     );
   }
 
@@ -619,68 +683,6 @@ export function TeamView({ team, tracks, currentUserId, hasRoomBooking }: TeamVi
           </form>
         </div>
       )}
-
-      {/* Leave Team Dialog */}
-      <AlertDialog open={showLeaveDialog} onOpenChange={setShowLeaveDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Leave Team?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to leave this team? You'll need a new invite code to rejoin.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmLeave}
-              className="bg-destructive hover:bg-destructive/90 text-white"
-            >
-              Leave Team
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Remove Member Dialog */}
-      <AlertDialog open={showRemoveDialog} onOpenChange={setShowRemoveDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Remove Team Member?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to remove <strong>{memberToRemove?.name}</strong> from the team? 
-              They'll need a new invite code to rejoin.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setMemberToRemove(null)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmRemove}
-              className="bg-destructive hover:bg-destructive/90 text-white"
-            >
-              Remove Member
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Transfer Leadership Dialog */}
-      <AlertDialog open={showTransferDialog} onOpenChange={setShowTransferDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Transfer Leadership?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to transfer leadership? You will become a regular team member and 
-              will no longer have leader privileges.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmTransfer}>
-              Transfer Leadership
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }
