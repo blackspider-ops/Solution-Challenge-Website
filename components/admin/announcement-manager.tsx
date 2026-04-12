@@ -211,6 +211,8 @@ export function AnnouncementManager({ announcements }: { announcements: Announce
     switch (audience) {
       case "all": return "all users";
       case "registered": return "registered participants";
+      case "not_registered": return "not registered users";
+      case "checked_in": return "checked in participants";
       case "volunteers": return "volunteers";
       case "admins": return "admins";
       case "waitlisted": return "waitlisted users";
@@ -283,6 +285,7 @@ export function AnnouncementManager({ announcements }: { announcements: Announce
               >
                 <option value="registered">Registered Participants (default)</option>
                 <option value="not_registered">Not Registered (have account but no registration)</option>
+                <option value="checked_in">Checked In Only</option>
                 <option value="all">All (Participants + Volunteers + Admins)</option>
                 <option value="volunteers">Volunteers Only</option>
                 <option value="admins">Admins Only</option>
@@ -362,7 +365,12 @@ export function AnnouncementManager({ announcements }: { announcements: Announce
                     </Badge>
                     {a.audience !== "all" && (
                       <Badge variant="outline" className="text-xs">
-                        {a.audience === "registered" ? "Participants" : a.audience === "volunteers" ? "Volunteers" : a.audience === "admins" ? "Admins" : a.audience === "waitlisted" ? "Waitlisted" : a.audience}
+                        {a.audience === "registered" ? "Participants" : 
+                         a.audience === "not_registered" ? "Not Registered" :
+                         a.audience === "checked_in" ? "Checked In" :
+                         a.audience === "volunteers" ? "Volunteers" : 
+                         a.audience === "admins" ? "Admins" : 
+                         a.audience === "waitlisted" ? "Waitlisted" : a.audience}
                       </Badge>
                     )}
                   </div>

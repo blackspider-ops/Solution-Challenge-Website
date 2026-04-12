@@ -156,6 +156,20 @@ export async function sendAnnouncementAsEmail(
         select: { email: true },
       });
       emails = usersWithoutRegistration.map((u) => u.email);
+    } else if (announcement.audience === "checked_in") {
+      // Get only participants who have checked in
+      const checkedIn = await db.registration.findMany({
+        where: {
+          status: "confirmed",
+          ticket: {
+            checkIn: {
+              isNot: null,
+            },
+          },
+        },
+        include: { user: { select: { email: true } } },
+      });
+      emails = checkedIn.map((r) => r.user.email);
     } else if (announcement.audience === "volunteers") {
       // Get only users with volunteer role
       const volunteers = await db.user.findMany({
