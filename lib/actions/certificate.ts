@@ -15,14 +15,15 @@ async function htmlToPdf(html: string): Promise<Buffer> {
   try {
     // Launch browser with chromium
     browser = await puppeteer.launch({
-      args: chromium.args,
+      args: [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox'],
       defaultViewport: { width: 1920, height: 1080 },
       executablePath: await chromium.executablePath(),
       headless: true,
+      timeout: 30000,
     });
 
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'networkidle0' });
+    await page.setContent(html, { waitUntil: 'domcontentloaded', timeout: 30000 });
     
     const pdfBuffer = await page.pdf({
       format: 'A4',
@@ -34,10 +35,15 @@ async function htmlToPdf(html: string): Promise<Buffer> {
     return Buffer.from(pdfBuffer);
   } catch (error) {
     console.error('PDF generation error:', error);
-    throw new Error('Failed to generate PDF');
+    // If PDF generation fails, throw to trigger fallback
+    throw error;
   } finally {
     if (browser) {
-      await browser.close();
+      try {
+        await browser.close();
+      } catch (e) {
+        console.error('Error closing browser:', e);
+      }
     }
   }
 }
@@ -341,8 +347,19 @@ export async function sendCertificates(
           .replace(/\{\{track\}\}/g, recipient.trackName || "N/A")
           .replace(/\{\{signature\}\}/g, "");
 
-        // Generate PDF from HTML
-        const pdfBuffer = await htmlToPdf(certificateHtml);
+        let pdfBuffer: Buffer;
+        let filename: string;
+        
+        try {
+          // Try to generate PDF from HTML
+          pdfBuffer = await htmlToPdf(certificateHtml);
+          filename = `${certificate.name.replace(/\s+/g, '_')}_${recipient.userName.replace(/\s+/g, '_')}.pdf`;
+        } catch (pdfError) {
+          console.error('PDF generation failed, sending HTML instead:', pdfError);
+          // Fallback: send as HTML that can be printed to PDF
+          pdfBuffer = Buffer.from(certificateHtml, 'utf-8');
+          filename = `${certificate.name.replace(/\s+/g, '_')}_${recipient.userName.replace(/\s+/g, '_')}.html`;
+        }
 
         // Create nice email body
         const emailHtml = `
@@ -396,7 +413,7 @@ export async function sendCertificates(
           html: emailHtml,
           attachments: [
             {
-              filename: `${certificate.name.replace(/\s+/g, '_')}_${recipient.userName.replace(/\s+/g, '_')}.pdf`,
+              filename: filename,
               content: pdfBuffer,
             },
           ],
