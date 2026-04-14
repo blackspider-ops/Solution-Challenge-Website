@@ -4,8 +4,6 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { certificateSchema, sendCertificateSchema, type CertificateInput, type SendCertificateInput } from "@/lib/schemas/certificate";
 import { Resend } from "resend";
-import puppeteer from "puppeteer-core";
-import chromium from "@sparticuz/chromium";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -13,17 +11,32 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 async function htmlToPdf(html: string): Promise<Buffer> {
   let browser;
   try {
-    // Launch browser with chromium
-    browser = await puppeteer.launch({
-      args: [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox'],
-      defaultViewport: { width: 1920, height: 1080 },
-      executablePath: await chromium.executablePath(),
-      headless: true,
-      timeout: 30000,
-    });
+    // Dynamically import puppeteer based on environment
+    const isProduction = process.env.VERCEL || process.env.NODE_ENV === 'production';
+    
+    if (isProduction) {
+      const puppeteer = await import('puppeteer-core');
+      const chromium = await import('@sparticuz/chromium');
+      
+      browser = await puppeteer.default.launch({
+        args: [...chromium.default.args, '--no-sandbox', '--disable-setuid-sandbox'],
+        defaultViewport: { width: 1920, height: 1080 },
+        executablePath: await chromium.default.executablePath(),
+        headless: true,
+      });
+    } else {
+      const puppeteer = await import('puppeteer');
+      browser = await puppeteer.default.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      });
+    }
 
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.setContent(html, { waitUntil: 'domcontentloaded' });
+    
+    // Wait a bit for fonts to load
+    await page.waitForTimeout(1000);
     
     const pdfBuffer = await page.pdf({
       format: 'A4',
@@ -32,12 +45,10 @@ async function htmlToPdf(html: string): Promise<Buffer> {
       margin: { top: 0, right: 0, bottom: 0, left: 0 },
     });
 
+    await browser.close();
     return Buffer.from(pdfBuffer);
   } catch (error) {
     console.error('PDF generation error:', error);
-    // If PDF generation fails, throw to trigger fallback
-    throw error;
-  } finally {
     if (browser) {
       try {
         await browser.close();
@@ -45,6 +56,7 @@ async function htmlToPdf(html: string): Promise<Buffer> {
         console.error('Error closing browser:', e);
       }
     }
+    throw error;
   }
 }
 
@@ -347,19 +359,9 @@ export async function sendCertificates(
           .replace(/\{\{track\}\}/g, recipient.trackName || "N/A")
           .replace(/\{\{signature\}\}/g, "");
 
-        let pdfBuffer: Buffer;
-        let filename: string;
-        
-        try {
-          // Try to generate PDF from HTML
-          pdfBuffer = await htmlToPdf(certificateHtml);
-          filename = `${certificate.name.replace(/\s+/g, '_')}_${recipient.userName.replace(/\s+/g, '_')}.pdf`;
-        } catch (pdfError) {
-          console.error('PDF generation failed, sending HTML instead:', pdfError);
-          // Fallback: send as HTML that can be printed to PDF
-          pdfBuffer = Buffer.from(certificateHtml, 'utf-8');
-          filename = `${certificate.name.replace(/\s+/g, '_')}_${recipient.userName.replace(/\s+/g, '_')}.html`;
-        }
+        // Generate PDF from HTML
+        const pdfBuffer = await htmlToPdf(certificateHtml);
+        const filename = `${certificate.name.replace(/\s+/g, '_')}_${recipient.userName.replace(/\s+/g, '_')}.pdf`;
 
         // Create nice email body
         const emailHtml = `
