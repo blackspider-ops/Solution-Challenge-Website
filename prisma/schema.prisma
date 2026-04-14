@@ -105,6 +105,8 @@ model User {
   formResponse  FormResponse?
   volunteerRegistration VolunteerRegistration?
   judgingScores JudgingScore[]
+  certificates  Certificate[]
+  certificatesSent CertificateSent[]
 }
 
 /// Created when a user registers for the event.
@@ -253,6 +255,7 @@ model Team {
   members    TeamMember[]
   submission Submission?
   roomBookings RoomBooking[]
+  certificatesSent CertificateSent[]
 }
 
 /// Join table between User and Team.
@@ -524,4 +527,32 @@ model VolunteerFormAnswer {
   question     VolunteerFormQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@unique([registrationId, questionId]) // one answer per question per registration
+}
+
+/// Certificate template for sending to participants
+model Certificate {
+  id          String   @id @default(cuid())
+  name        String   // e.g., "Participation Certificate", "Winner Certificate"
+  htmlContent String   @db.Text // HTML template with {{name}}, {{team}}, {{track}} placeholders
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String
+
+  creator User               @relation(fields: [createdBy], references: [id])
+  sent    CertificateSent[]
+}
+
+/// Track which certificates have been sent to which users
+model CertificateSent {
+  id            String   @id @default(cuid())
+  certificateId String
+  userId        String
+  teamId        String?
+  sentAt        DateTime @default(now())
+
+  certificate Certificate @relation(fields: [certificateId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team        Team?       @relation(fields: [teamId], references: [id], onDelete: SetNull)
+
+  @@unique([certificateId, userId]) // prevent duplicate sends
 }
