@@ -29,7 +29,7 @@ async function htmlToPdf(html: string): Promise<Buffer> {
         landscape: true,
         format: 'A4',
         margin: { top: 0, right: 0, bottom: 0, left: 0 },
-        print_background: true,
+        printBackground: true,
       }),
     });
 
