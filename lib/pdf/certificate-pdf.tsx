@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 8,
-    backgroundColor: '#C5221F',
+    backgroundColor: '#EA4335',
   },
   borderBottom: {
     position: 'absolute',
@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 8,
-    backgroundColor: '#0F9D58',
+    backgroundColor: '#FBBC04',
   },
   innerBorder: {
     position: 'absolute',
@@ -44,16 +44,23 @@ const styles = StyleSheet.create({
     marginBottom: 40,
     marginTop: 20,
   },
-  googleLogo: {
+  googleText: {
     fontSize: 42,
     fontWeight: 700,
-    color: '#C5221F',
     letterSpacing: -1,
     marginBottom: 5,
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
+  g1: { color: '#EA4335' },
+  o1: { color: '#FBBC04' },
+  o2: { color: '#34A853' },
+  g2: { color: '#4285F4' },
+  l: { color: '#EA4335' },
+  e: { color: '#FBBC04' },
   developers: {
     fontSize: 12,
-    color: '#E37400',
+    color: '#F09300',
     letterSpacing: 6,
     textTransform: 'uppercase',
   },
@@ -80,7 +87,7 @@ const styles = StyleSheet.create({
   recipientName: {
     fontSize: 48,
     fontWeight: 700,
-    color: '#C5221F',
+    color: '#EA4335',
     marginVertical: 20,
   },
   description: {
@@ -185,7 +192,7 @@ interface CertificatePDFProps {
   certificateName: string;
 }
 
-export const CertificatePDF: React.FC<CertificatePDFProps> = ({ name, team, track, certificateName }) => (
+export const CertificatePDF = ({ name, team, track, certificateName }: CertificatePDFProps) => (
   <Document>
     <Page size="A4" orientation="landscape" style={styles.page}>
       <View style={styles.borderTop} />
@@ -193,7 +200,14 @@ export const CertificatePDF: React.FC<CertificatePDFProps> = ({ name, team, trac
       <View style={styles.innerBorder} />
 
       <View style={styles.header}>
-        <Text style={styles.googleLogo}>GOOGLE</Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+          <Text style={[styles.googleText, styles.g1]}>G</Text>
+          <Text style={[styles.googleText, styles.o1]}>o</Text>
+          <Text style={[styles.googleText, styles.o2]}>o</Text>
+          <Text style={[styles.googleText, styles.g2]}>g</Text>
+          <Text style={[styles.googleText, styles.l]}>l</Text>
+          <Text style={[styles.googleText, styles.e]}>e</Text>
+        </View>
         <Text style={styles.developers}>d e v e l o p e r s</Text>
       </View>
 

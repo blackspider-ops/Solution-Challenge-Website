@@ -297,12 +297,12 @@ export async function sendCertificates(
       try {
         // Generate PDF using React PDF
         const pdfBuffer = await renderToBuffer(
-          <CertificatePDF
-            name={recipient.userName}
-            team={recipient.teamName || "N/A"}
-            track={recipient.trackName || "N/A"}
-            certificateName={certificate.name}
-          />
+          CertificatePDF({
+            name: recipient.userName,
+            team: recipient.teamName || "N/A",
+            track: recipient.trackName || "N/A",
+            certificateName: certificate.name,
+          })
         );
 
         // Create nice email body
