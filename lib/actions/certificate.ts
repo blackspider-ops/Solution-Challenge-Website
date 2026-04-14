@@ -7,55 +7,30 @@ import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Function to convert HTML to PDF using Puppeteer
+// Function to convert HTML to PDF using API route
 async function htmlToPdf(html: string): Promise<Buffer> {
-  let browser;
   try {
-    // Dynamically import puppeteer based on environment
-    const isProduction = process.env.VERCEL || process.env.NODE_ENV === 'production';
+    const baseUrl = process.env.VERCEL_URL 
+      ? `https://${process.env.VERCEL_URL}`
+      : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
     
-    if (isProduction) {
-      const puppeteer = await import('puppeteer-core');
-      const chromium = await import('@sparticuz/chromium');
-      
-      browser = await puppeteer.default.launch({
-        args: [...chromium.default.args, '--no-sandbox', '--disable-setuid-sandbox'],
-        defaultViewport: { width: 1920, height: 1080 },
-        executablePath: await chromium.default.executablePath(),
-        headless: true,
-      });
-    } else {
-      const puppeteer = await import('puppeteer');
-      browser = await puppeteer.default.launch({
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      });
-    }
-
-    const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'domcontentloaded' });
-    
-    // Wait a bit for fonts to load
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const pdfBuffer = await page.pdf({
-      format: 'A4',
-      landscape: true,
-      printBackground: true,
-      margin: { top: 0, right: 0, bottom: 0, left: 0 },
+    const response = await fetch(`${baseUrl}/api/generate-pdf`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ html }),
     });
 
-    await browser.close();
-    return Buffer.from(pdfBuffer);
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.details || 'PDF generation failed');
+    }
+
+    const arrayBuffer = await response.arrayBuffer();
+    return Buffer.from(arrayBuffer);
   } catch (error) {
     console.error('PDF generation error:', error);
-    if (browser) {
-      try {
-        await browser.close();
-      } catch (e) {
-        console.error('Error closing browser:', e);
-      }
-    }
     throw error;
   }
 }
