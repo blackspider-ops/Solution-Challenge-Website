@@ -27,7 +27,7 @@ async function htmlToPdf(html: string): Promise<Buffer> {
       body: JSON.stringify({
         source: html,
         landscape: true,
-        format: '1100x850',
+        format: 'Letter',
         margin: {
           top: '0mm',
           right: '0mm',
@@ -36,6 +36,7 @@ async function htmlToPdf(html: string): Promise<Buffer> {
         },
         use_print: false,
         delay: 2000,
+        scale: 0.75,
       }),
     });
 
