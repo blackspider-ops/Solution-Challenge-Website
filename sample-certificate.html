@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Product+Sans:wght@400;700&family=Roboto:wght@300;400;500;700&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      margin: 0;
+      padding: 30px;
+      background: #f5f5f5;
+      font-family: 'Roboto', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    
+    .certificate {
+      background: white;
+      width: 1100px;
+      height: 850px;
+      padding: 60px 80px;
+      position: relative;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+      background-image: 
+        radial-gradient(circle at 20% 30%, rgba(66, 133, 244, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(234, 67, 53, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 40% 80%, rgba(251, 188, 4, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 90% 20%, rgba(52, 168, 83, 0.03) 0%, transparent 50%);
+      background-size: 100% 100%;
+    }
+    
+    /* Google Logo Styling */
+    .header {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+    
+    .google-logo {
+      display: inline-block;
+      margin-bottom: 5px;
+    }
+    
+    .google-logo span {
+      font-family: 'Product Sans', 'Roboto', sans-serif;
+      font-size: 56px;
+      font-weight: 700;
+      display: inline-block;
+      letter-spacing: -2px;
+    }
+    
+    .google-logo .g { color: #4285F4; }
+    .google-logo .o1 { color: #EA4335; }
+    .google-logo .o2 { color: #FBBC04; }
+    .google-logo .g2 { color: #4285F4; }
+    .google-logo .l { color: #34A853; }
+    .google-logo .e { color: #EA4335; }
+    
+    .developers {
+      font-size: 16px;
+      color: #5f6368;
+      letter-spacing: 8px;
+      font-weight: 400;
+      margin-top: 5px;
+    }
+    
+    /* Border Design */
+    .border-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 8px;
+      background: linear-gradient(to right, #4285F4 0%, #EA4335 25%, #FBBC04 50%, #34A853 75%, #4285F4 100%);
+    }
+    
+    .border-bottom {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 8px;
+      background: linear-gradient(to right, #4285F4 0%, #EA4335 25%, #FBBC04 50%, #34A853 75%, #4285F4 100%);
+    }
+    
+    .inner-border {
+      position: absolute;
+      top: 30px;
+      left: 30px;
+      right: 30px;
+      bottom: 30px;
+      border: 2px solid #e8eaed;
+    }
+    
+    /* Content */
+    .content {
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .certificate-title {
+      font-size: 38px;
+      font-weight: 300;
+      color: #202124;
+      margin: 40px 0 20px;
+      letter-spacing: 1px;
+    }
+    
+    .presented-to {
+      font-size: 16px;
+      color: #5f6368;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 25px;
+      font-weight: 500;
+    }
+    
+    .recipient-name {
+      font-size: 64px;
+      font-weight: 700;
+      color: #1a73e8;
+      margin: 25px 0 35px;
+      font-family: 'Product Sans', 'Roboto', sans-serif;
+    }
+    
+    .description {
+      font-size: 18px;
+      color: #5f6368;
+      line-height: 1.6;
+      max-width: 800px;
+      margin: 0 auto 40px;
+      font-weight: 400;
+    }
+    
+    .details {
+      display: flex;
+      justify-content: center;
+      gap: 80px;
+      margin: 50px 0;
+    }
+    
+    .detail-box {
+      text-align: center;
+    }
+    
+    .detail-label {
+      font-size: 12px;
+      color: #80868b;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    
+    .detail-value {
+      font-size: 20px;
+      color: #202124;
+      font-weight: 500;
+    }
+    
+    /* Footer */
+    .footer {
+      position: absolute;
+      bottom: 60px;
+      left: 80px;
+      right: 80px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    
+    .signature {
+      text-align: left;
+      position: relative;
+    }
+    
+    .stamp {
+      position: absolute;
+      right: -100px;
+      top: -15px;
+      width: 110px;
+      height: 110px;
+      border: 4px solid rgba(234, 67, 53, 0.7);
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transform: rotate(-12deg);
+      opacity: 0.75;
+      background: radial-gradient(circle at 30% 30%, rgba(234, 67, 53, 0.05), transparent);
+      box-shadow: 
+        inset 0 0 20px rgba(234, 67, 53, 0.1),
+        0 2px 8px rgba(234, 67, 53, 0.2);
+    }
+    
+    .stamp::before {
+      content: '';
+      position: absolute;
+      inset: 8px;
+      border: 2px solid rgba(234, 67, 53, 0.5);
+      border-radius: 50%;
+    }
+    
+    .stamp-content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+    
+    .stamp-text-top {
+      font-size: 13px;
+      font-weight: 800;
+      color: #EA4335;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      font-family: 'Arial Black', sans-serif;
+    }
+    
+    .stamp-text-bottom {
+      font-size: 10px;
+      font-weight: 700;
+      color: #EA4335;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: 4px;
+      font-family: 'Arial', sans-serif;
+    }
+    
+    .stamp-icon {
+      font-size: 28px;
+      margin: 5px 0;
+      color: #EA4335;
+      font-weight: bold;
+    }
+    
+    .signature-line {
+      width: 250px;
+      height: 1px;
+      background: #dadce0;
+      margin-bottom: 10px;
+    }
+    
+    .signature-name {
+      font-family: 'Brush Script MT', 'Lucida Handwriting', cursive;
+      font-size: 36px;
+      font-weight: 400;
+      color: #000;
+      margin-bottom: 8px;
+      font-style: italic;
+    }
+    
+    .signature-title {
+      font-size: 14px;
+      color: #5f6368;
+      line-height: 1.5;
+    }
+    
+    .date {
+      text-align: right;
+    }
+    
+    .date-label {
+      font-size: 12px;
+      color: #80868b;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 5px;
+    }
+    
+    .date-value {
+      font-size: 16px;
+      color: #202124;
+      font-weight: 500;
+    }
+    
+    /* Decorative Elements */
+    .corner-decoration {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      opacity: 0.1;
+    }
+    
+    .corner-decoration.top-left {
+      top: 40px;
+      left: 40px;
+      border-top: 3px solid #4285F4;
+      border-left: 3px solid #4285F4;
+    }
+    
+    .corner-decoration.top-right {
+      top: 40px;
+      right: 40px;
+      border-top: 3px solid #EA4335;
+      border-right: 3px solid #EA4335;
+    }
+    
+    .corner-decoration.bottom-left {
+      bottom: 40px;
+      left: 40px;
+      border-bottom: 3px solid #34A853;
+      border-left: 3px solid #34A853;
+    }
+    
+    .corner-decoration.bottom-right {
+      bottom: 40px;
+      right: 40px;
+      border-bottom: 3px solid #FBBC04;
+      border-right: 3px solid #FBBC04;
+    }
+  </style>
+</head>
+<body>
+  <div class="certificate">
+    <div class="border-top"></div>
+    <div class="border-bottom"></div>
+    <div class="inner-border"></div>
+    
+    <div class="corner-decoration top-left"></div>
+    <div class="corner-decoration top-right"></div>
+    <div class="corner-decoration bottom-left"></div>
+    <div class="corner-decoration bottom-right"></div>
+    
+    <div class="header">
+      <div class="google-logo">
+        <span class="g">G</span><span class="o1">o</span><span class="o2">o</span><span class="g2">g</span><span class="l">l</span><span class="e">e</span>
+      </div>
+      <div class="developers">d e v e l o p e r s</div>
+    </div>
+    
+    <div class="content">
+      <h1 class="certificate-title">Certificate of Participation</h1>
+      
+      <div class="presented-to">This is to certify that</div>
+      
+      <div class="recipient-name">{{name}}</div>
+      
+      <p class="description">
+        has successfully participated in the GDG @ Penn State Solution Challenge 2026, 
+        demonstrating creativity, technical excellence, and commitment to building 
+        innovative solutions for real-world challenges.
+      </p>
+      
+      <div class="details">
+        <div class="detail-box">
+          <div class="detail-label">Team</div>
+          <div class="detail-value">{{team}}</div>
+        </div>
+        <div class="detail-box">
+          <div class="detail-label">Track</div>
+          <div class="detail-value">{{track}}</div>
+        </div>
+        <div class="detail-box">
+          <div class="detail-label">Event</div>
+          <div class="detail-value">April 11-12, 2026</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <div class="signature">
+        <div class="stamp">
+          <div class="stamp-content">
+            <div class="stamp-text-top">VERIFIED</div>
+            <div class="stamp-icon">✓</div>
+            <div class="stamp-text-bottom">GDG PSU</div>
+          </div>
+        </div>
+        <div class="signature-line"></div>
+        <div class="signature-name">Tejas</div>
+        <div class="signature-title">
+          President<br>
+          Google Developer Groups @ Penn State
+        </div>
+      </div>
+      
+      <div class="date">
+        <div class="date-label">Date Issued</div>
+        <div class="date-value">April 12, 2026</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
