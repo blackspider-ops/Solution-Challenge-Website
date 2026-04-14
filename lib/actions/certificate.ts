@@ -4,39 +4,41 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { certificateSchema, sendCertificateSchema, type CertificateInput, type SendCertificateInput } from "@/lib/schemas/certificate";
 import { Resend } from "resend";
+import puppeteer from "puppeteer-core";
+import chromium from "@sparticuz/chromium";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Function to convert HTML to PDF using a free API
+// Function to convert HTML to PDF using Puppeteer
 async function htmlToPdf(html: string): Promise<Buffer> {
+  let browser;
   try {
-    // Use html2pdf.app free API
-    const response = await fetch('https://api.html2pdf.app/v1/generate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        html: html,
-        options: {
-          format: 'A4',
-          landscape: true,
-          printBackground: true,
-          margin: { top: 0, right: 0, bottom: 0, left: 0 },
-        },
-      }),
+    // Launch browser with chromium
+    browser = await puppeteer.launch({
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath(),
+      headless: chromium.headless,
     });
 
-    if (!response.ok) {
-      throw new Error('PDF generation failed');
-    }
+    const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: 'networkidle0' });
+    
+    const pdfBuffer = await page.pdf({
+      format: 'A4',
+      landscape: true,
+      printBackground: true,
+      margin: { top: 0, right: 0, bottom: 0, left: 0 },
+    });
 
-    const arrayBuffer = await response.arrayBuffer();
-    return Buffer.from(arrayBuffer);
+    return Buffer.from(pdfBuffer);
   } catch (error) {
     console.error('PDF generation error:', error);
-    // Fallback: return HTML as base64
-    throw error;
+    throw new Error('Failed to generate PDF');
+  } finally {
+    if (browser) {
+      await browser.close();
+    }
   }
 }
 
