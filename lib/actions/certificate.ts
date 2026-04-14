@@ -4,7 +4,6 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { certificateSchema, sendCertificateSchema, type CertificateInput, type SendCertificateInput } from "@/lib/schemas/certificate";
 import { Resend } from "resend";
-import htmlPdf from "html-pdf-node";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -303,15 +302,8 @@ export async function sendCertificates(
         // Add signature (remove placeholder if exists)
         certificateHtml = certificateHtml.replace(/\{\{signature\}\}/g, "");
 
-        // Generate PDF from HTML
-        const file = { content: certificateHtml };
-        const options = { 
-          format: 'A4', 
-          landscape: true,
-          printBackground: true,
-          margin: { top: 0, right: 0, bottom: 0, left: 0 },
-        };
-        const pdfBuffer = await htmlPdf.generatePdf(file, options);
+        // Convert HTML to base64 for attachment
+        const htmlBase64 = Buffer.from(certificateHtml, 'utf-8').toString('base64');
 
         // Create nice email body
         const emailHtml = `
@@ -346,7 +338,13 @@ export async function sendCertificates(
       <p style="margin: 5px 0 0 0;">Track: ${recipient.trackName || "N/A"}</p>
     </div>
     
-    <p>Your certificate is attached to this email as a PDF file. You can print it directly or save it for your records.</p>
+    <p>Your certificate is attached to this email as an HTML file. To save it as a PDF:</p>
+    <ol>
+      <li>Download and open the attached HTML file in your web browser</li>
+      <li>Press Ctrl+P (Windows) or Cmd+P (Mac) to print</li>
+      <li>Select "Save as PDF" as the destination</li>
+      <li>Click Save</li>
+    </ol>
     
     <p>Thank you for your outstanding participation and dedication. Your creativity and technical excellence made this event truly special!</p>
     
@@ -366,8 +364,9 @@ export async function sendCertificates(
           html: emailHtml,
           attachments: [
             {
-              filename: `${certificate.name.replace(/\s+/g, '_')}_${recipient.userName.replace(/\s+/g, '_')}.pdf`,
-              content: pdfBuffer,
+              filename: `${certificate.name.replace(/\s+/g, '_')}_${recipient.userName.replace(/\s+/g, '_')}.html`,
+              content: htmlBase64,
+              encoding: 'base64',
             },
           ],
         });
