@@ -10,45 +10,41 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'HTML content required' }, { status: 400 });
     }
 
-    // Dynamically import puppeteer based on environment
-    const isProduction = process.env.VERCEL || process.env.NODE_ENV === 'production';
+    // Use PDFShift API for reliable HTML to PDF conversion
+    const pdfShiftApiKey = process.env.PDFSHIFT_API_KEY;
     
-    let browser;
-    
-    if (isProduction) {
-      const puppeteer = await import('puppeteer-core');
-      const chromium = await import('@sparticuz/chromium');
-      
-      browser = await puppeteer.default.launch({
-        args: [...chromium.default.args, '--no-sandbox', '--disable-setuid-sandbox'],
-        defaultViewport: { width: 1920, height: 1080 },
-        executablePath: await chromium.default.executablePath(),
-        headless: true,
-      });
-    } else {
-      const puppeteer = await import('puppeteer');
-      browser = await puppeteer.default.launch({
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    if (!pdfShiftApiKey) {
+      // Fallback: return HTML if no API key
+      return new NextResponse(Buffer.from(html), {
+        headers: {
+          'Content-Type': 'text/html',
+          'Content-Disposition': 'attachment; filename="certificate.html"',
+        },
       });
     }
 
-    const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'networkidle0' });
-    
-    // Wait for fonts to load
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    const pdfBuffer = await page.pdf({
-      format: 'A4',
-      landscape: true,
-      printBackground: true,
-      margin: { top: 0, right: 0, bottom: 0, left: 0 },
+    const response = await fetch('https://api.pdfshift.io/v3/convert/pdf', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Basic ${Buffer.from(`api:${pdfShiftApiKey}`).toString('base64')}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        source: html,
+        landscape: true,
+        format: 'A4',
+        margin: { top: 0, right: 0, bottom: 0, left: 0 },
+        print_background: true,
+      }),
     });
 
-    await browser.close();
+    if (!response.ok) {
+      throw new Error(`PDFShift API error: ${response.statusText}`);
+    }
 
-    return new NextResponse(pdfBuffer, {
+    const pdfBuffer = await response.arrayBuffer();
+
+    return new NextResponse(Buffer.from(pdfBuffer), {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': 'attachment; filename="certificate.pdf"',
