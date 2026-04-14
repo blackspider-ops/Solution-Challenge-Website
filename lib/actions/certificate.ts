@@ -14,6 +14,8 @@ async function htmlToPdf(html: string): Promise<Buffer> {
       ? `https://${process.env.VERCEL_URL}`
       : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
     
+    console.log(`Calling PDF API at: ${baseUrl}/api/generate-pdf`);
+    
     const response = await fetch(`${baseUrl}/api/generate-pdf`, {
       method: 'POST',
       headers: {
@@ -22,12 +24,16 @@ async function htmlToPdf(html: string): Promise<Buffer> {
       body: JSON.stringify({ html }),
     });
 
+    console.log(`PDF API response status: ${response.status}`);
+
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.details || 'PDF generation failed');
+      const errorText = await response.text();
+      console.error(`PDF API error response: ${errorText}`);
+      throw new Error(`PDF generation failed: ${response.status} - ${errorText}`);
     }
 
     const arrayBuffer = await response.arrayBuffer();
+    console.log(`PDF generated, size: ${arrayBuffer.byteLength} bytes`);
     return Buffer.from(arrayBuffer);
   } catch (error) {
     console.error('PDF generation error:', error);
@@ -335,8 +341,18 @@ export async function sendCertificates(
           .replace(/\{\{signature\}\}/g, "");
 
         // Generate PDF from HTML
-        const pdfBuffer = await htmlToPdf(certificateHtml);
-        const filename = `${certificate.name.replace(/\s+/g, '_')}_${recipient.userName.replace(/\s+/g, '_')}.pdf`;
+        let pdfBuffer: Buffer;
+        let filename: string;
+        
+        try {
+          pdfBuffer = await htmlToPdf(certificateHtml);
+          filename = `${certificate.name.replace(/\s+/g, '_')}_${recipient.userName.replace(/\s+/g, '_')}.pdf`;
+          console.log(`PDF generated successfully for ${recipient.userName}`);
+        } catch (pdfError) {
+          console.error(`PDF generation failed for ${recipient.userName}:`, pdfError);
+          // Skip this recipient if PDF fails
+          continue;
+        }
 
         // Create nice email body
         const emailHtml = `
