@@ -36,7 +36,7 @@ async function htmlToPdf(html: string): Promise<Buffer> {
     await page.setContent(html, { waitUntil: 'domcontentloaded' });
     
     // Wait a bit for fonts to load
-    await page.waitForTimeout(1000);
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
     const pdfBuffer = await page.pdf({
       format: 'A4',
