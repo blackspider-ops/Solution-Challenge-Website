@@ -4,10 +4,41 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { certificateSchema, sendCertificateSchema, type CertificateInput, type SendCertificateInput } from "@/lib/schemas/certificate";
 import { Resend } from "resend";
-import { renderToBuffer } from "@react-pdf/renderer";
-import { CertificatePDF } from "@/lib/pdf/certificate-pdf";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+
+// Function to convert HTML to PDF using a free API
+async function htmlToPdf(html: string): Promise<Buffer> {
+  try {
+    // Use html2pdf.app free API
+    const response = await fetch('https://api.html2pdf.app/v1/generate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        html: html,
+        options: {
+          format: 'A4',
+          landscape: true,
+          printBackground: true,
+          margin: { top: 0, right: 0, bottom: 0, left: 0 },
+        },
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('PDF generation failed');
+    }
+
+    const arrayBuffer = await response.arrayBuffer();
+    return Buffer.from(arrayBuffer);
+  } catch (error) {
+    console.error('PDF generation error:', error);
+    // Fallback: return HTML as base64
+    throw error;
+  }
+}
 
 // ─── Create Certificate Template ────────────────────────────────────────────
 
@@ -295,15 +326,15 @@ export async function sendCertificates(
     let sent = 0;
     for (const recipient of toSend) {
       try {
-        // Generate PDF using React PDF
-        const pdfBuffer = await renderToBuffer(
-          CertificatePDF({
-            name: recipient.userName,
-            team: recipient.teamName || "N/A",
-            track: recipient.trackName || "N/A",
-            certificateName: certificate.name,
-          })
-        );
+        // Replace placeholders in HTML certificate
+        let certificateHtml = certificate.htmlContent
+          .replace(/\{\{name\}\}/g, recipient.userName)
+          .replace(/\{\{team\}\}/g, recipient.teamName || "N/A")
+          .replace(/\{\{track\}\}/g, recipient.trackName || "N/A")
+          .replace(/\{\{signature\}\}/g, "");
+
+        // Generate PDF from HTML
+        const pdfBuffer = await htmlToPdf(certificateHtml);
 
         // Create nice email body
         const emailHtml = `
