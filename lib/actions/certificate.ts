@@ -34,7 +34,6 @@ async function htmlToPdf(html: string): Promise<Buffer> {
           bottom: '0mm',
           left: '0mm'
         },
-        use_print: false,
         delay: 2000,
       }),
     });

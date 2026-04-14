@@ -2,9 +2,11 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=1100, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=block" rel="stylesheet">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Product+Sans:wght@400;700&family=Roboto:wght@300;400;500;700&display=swap');
-    
     * {
       margin: 0;
       padding: 0;
@@ -13,13 +15,11 @@
     
     body {
       margin: 0;
-      padding: 30px;
-      background: #f5f5f5;
-      font-family: 'Roboto', sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
+      padding: 0;
+      background: white;
+      font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      width: 1100px;
+      height: 850px;
     }
     
     .certificate {
@@ -28,12 +28,11 @@
       height: 850px;
       padding: 60px 80px;
       position: relative;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.15);
       background-image: 
-        radial-gradient(circle at 20% 30%, rgba(197, 34, 31, 0.03) 0%, transparent 50%),
-        radial-gradient(circle at 80% 70%, rgba(227, 116, 0, 0.03) 0%, transparent 50%),
-        radial-gradient(circle at 40% 80%, rgba(244, 180, 0, 0.03) 0%, transparent 50%),
-        radial-gradient(circle at 90% 20%, rgba(15, 157, 88, 0.03) 0%, transparent 50%);
+        radial-gradient(circle at 20% 30%, rgba(234, 67, 53, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(251, 188, 4, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 40% 80%, rgba(52, 168, 83, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 90% 20%, rgba(66, 133, 244, 0.03) 0%, transparent 50%);
       background-size: 100% 100%;
     }
     
@@ -56,16 +55,16 @@
       letter-spacing: -2px;
     }
     
-    .google-logo .g { color: #C5221F; }
-    .google-logo .o1 { color: #E37400; }
-    .google-logo .o2 { color: #F09300; }
-    .google-logo .g2 { color: #F4B400; }
-    .google-logo .l { color: #0F9D58; }
-    .google-logo .e { color: #0F9D58; }
+    .google-logo .g { color: #EA4335; }
+    .google-logo .o1 { color: #FBBC04; }
+    .google-logo .o2 { color: #34A853; }
+    .google-logo .g2 { color: #4285F4; }
+    .google-logo .l { color: #EA4335; }
+    .google-logo .e { color: #FBBC04; }
     
     .developers {
       font-size: 16px;
-      background: linear-gradient(90deg, #E37400 0%, #F09300 25%, #F4B400 50%, #0F9D58 100%);
+      background: linear-gradient(90deg, #F4B400 0%, #F09300 50%, #E37400 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -81,7 +80,7 @@
       left: 0;
       right: 0;
       height: 8px;
-      background: linear-gradient(to right, #C5221F 0%, #E37400 20%, #F09300 40%, #F4B400 60%, #0F9D58 80%, #0F9D58 100%);
+      background: linear-gradient(to right, #EA4335 0%, #FBBC04 25%, #34A853 50%, #4285F4 75%, #EA4335 100%);
     }
     
     .border-bottom {
@@ -90,7 +89,7 @@
       left: 0;
       right: 0;
       height: 8px;
-      background: linear-gradient(to right, #C5221F 0%, #E37400 20%, #F09300 40%, #F4B400 60%, #0F9D58 80%, #0F9D58 100%);
+      background: linear-gradient(to right, #EA4335 0%, #FBBC04 25%, #34A853 50%, #4285F4 75%, #EA4335 100%);
     }
     
     .inner-border {
@@ -129,7 +128,7 @@
     .recipient-name {
       font-size: 64px;
       font-weight: 700;
-      background: linear-gradient(90deg, #C5221F 0%, #E37400 25%, #F4B400 50%, #0F9D58 75%);
+      background: linear-gradient(90deg, #EA4335 0%, #FBBC04 25%, #34A853 50%, #4285F4 75%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -288,6 +287,20 @@
       font-weight: 500;
     }
     
+    /* Print-specific styles for PDF generation */
+    @media print {
+      body {
+        width: 1100px;
+        height: 850px;
+        margin: 0;
+        padding: 0;
+      }
+      .certificate {
+        page-break-after: avoid;
+        page-break-inside: avoid;
+      }
+    }
+    
     /* Decorative Elements */
     .corner-decoration {
       position: absolute;
@@ -299,29 +312,29 @@
     .corner-decoration.top-left {
       top: 40px;
       left: 40px;
-      border-top: 3px solid #C5221F;
-      border-left: 3px solid #C5221F;
+      border-top: 3px solid #EA4335;
+      border-left: 3px solid #EA4335;
     }
     
     .corner-decoration.top-right {
       top: 40px;
       right: 40px;
-      border-top: 3px solid #E37400;
-      border-right: 3px solid #E37400;
+      border-top: 3px solid #FBBC04;
+      border-right: 3px solid #FBBC04;
     }
     
     .corner-decoration.bottom-left {
       bottom: 40px;
       left: 40px;
-      border-bottom: 3px solid #F4B400;
-      border-left: 3px solid #F4B400;
+      border-bottom: 3px solid #34A853;
+      border-left: 3px solid #34A853;
     }
     
     .corner-decoration.bottom-right {
       bottom: 40px;
       right: 40px;
-      border-bottom: 3px solid #0F9D58;
-      border-right: 3px solid #0F9D58;
+      border-bottom: 3px solid #4285F4;
+      border-right: 3px solid #4285F4;
     }
   </style>
 </head>
