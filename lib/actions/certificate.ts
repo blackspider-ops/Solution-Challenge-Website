@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { certificateSchema, sendCertificateSchema, type CertificateInput, type SendCertificateInput } from "@/lib/schemas/certificate";
 import { Resend } from "resend";
+import puppeteer from "puppeteer";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -302,6 +303,21 @@ export async function sendCertificates(
         // Add signature (remove placeholder if exists)
         certificateHtml = certificateHtml.replace(/\{\{signature\}\}/g, "");
 
+        // Generate PDF from HTML using Puppeteer
+        const browser = await puppeteer.launch({
+          headless: true,
+          args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        });
+        const page = await browser.newPage();
+        await page.setContent(certificateHtml, { waitUntil: 'networkidle0' });
+        const pdfBuffer = await page.pdf({
+          format: 'A4',
+          landscape: true,
+          printBackground: true,
+          margin: { top: 0, right: 0, bottom: 0, left: 0 },
+        });
+        await browser.close();
+
         // Create nice email body
         const emailHtml = `
 <!DOCTYPE html>
@@ -309,13 +325,13 @@ export async function sendCertificates(
 <head>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
-    .header { text-align: center; padding: 30px 0; border-bottom: 3px solid #4285F4; }
-    .logo { font-size: 32px; font-weight: bold; background: linear-gradient(90deg, #4285F4, #EA4335, #FBBC04, #34A853); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .header { text-align: center; padding: 30px 0; border-bottom: 3px solid #C5221F; }
+    .logo { font-size: 32px; font-weight: bold; background: linear-gradient(90deg, #C5221F, #E37400, #F4B400, #0F9D58); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     .content { padding: 30px 0; }
     h1 { color: #202124; font-size: 24px; margin-bottom: 20px; }
     p { color: #5f6368; margin-bottom: 15px; }
     .highlight { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
-    .button { display: inline-block; background: #4285F4; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; margin: 20px 0; }
+    .button { display: inline-block; background: #C5221F; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; margin: 20px 0; }
     .footer { text-align: center; padding: 20px 0; border-top: 1px solid #e8eaed; color: #80868b; font-size: 14px; }
   </style>
 </head>
@@ -335,12 +351,7 @@ export async function sendCertificates(
       <p style="margin: 5px 0 0 0;">Track: ${recipient.trackName || "N/A"}</p>
     </div>
     
-    <p>Your certificate is attached to this email as an HTML file. You can:</p>
-    <ul>
-      <li>Open it in any web browser</li>
-      <li>Print it directly from your browser (Ctrl/Cmd + P)</li>
-      <li>Save it as a PDF using your browser's "Print to PDF" option</li>
-    </ul>
+    <p>Your certificate is attached to this email as a PDF file. You can print it directly or save it for your records.</p>
     
     <p>Thank you for your outstanding participation and dedication. Your creativity and technical excellence made this event truly special!</p>
     
@@ -360,8 +371,8 @@ export async function sendCertificates(
           html: emailHtml,
           attachments: [
             {
-              filename: `${certificate.name.replace(/\s+/g, '_')}_${recipient.userName.replace(/\s+/g, '_')}.html`,
-              content: Buffer.from(certificateHtml, 'utf-8'),
+              filename: `${certificate.name.replace(/\s+/g, '_')}_${recipient.userName.replace(/\s+/g, '_')}.pdf`,
+              content: pdfBuffer,
             },
           ],
         });
