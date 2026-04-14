@@ -7,33 +7,42 @@ import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Function to convert HTML to PDF using API route
+// Function to convert HTML to PDF using PDFShift API directly
 async function htmlToPdf(html: string): Promise<Buffer> {
   try {
-    const baseUrl = process.env.VERCEL_URL 
-      ? `https://${process.env.VERCEL_URL}`
-      : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const pdfShiftApiKey = process.env.PDFSHIFT_API_KEY;
     
-    console.log(`Calling PDF API at: ${baseUrl}/api/generate-pdf`);
+    if (!pdfShiftApiKey) {
+      throw new Error('PDFSHIFT_API_KEY not configured');
+    }
+
+    console.log('Calling PDFShift API...');
     
-    const response = await fetch(`${baseUrl}/api/generate-pdf`, {
+    const response = await fetch('https://api.pdfshift.io/v3/convert/pdf', {
       method: 'POST',
       headers: {
+        'Authorization': `Basic ${Buffer.from(`api:${pdfShiftApiKey}`).toString('base64')}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ html }),
+      body: JSON.stringify({
+        source: html,
+        landscape: true,
+        format: 'A4',
+        margin: { top: 0, right: 0, bottom: 0, left: 0 },
+        print_background: true,
+      }),
     });
 
-    console.log(`PDF API response status: ${response.status}`);
+    console.log(`PDFShift API response status: ${response.status}`);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`PDF API error response: ${errorText}`);
-      throw new Error(`PDF generation failed: ${response.status} - ${errorText}`);
+      console.error(`PDFShift API error: ${errorText}`);
+      throw new Error(`PDFShift API error: ${response.status}`);
     }
 
     const arrayBuffer = await response.arrayBuffer();
-    console.log(`PDF generated, size: ${arrayBuffer.byteLength} bytes`);
+    console.log(`PDF generated successfully, size: ${arrayBuffer.byteLength} bytes`);
     return Buffer.from(arrayBuffer);
   } catch (error) {
     console.error('PDF generation error:', error);
