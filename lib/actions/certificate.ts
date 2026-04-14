@@ -4,6 +4,8 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { certificateSchema, sendCertificateSchema, type CertificateInput, type SendCertificateInput } from "@/lib/schemas/certificate";
 import { Resend } from "resend";
+import { renderToBuffer } from "@react-pdf/renderer";
+import { CertificatePDF } from "@/lib/pdf/certificate-pdf";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -293,17 +295,15 @@ export async function sendCertificates(
     let sent = 0;
     for (const recipient of toSend) {
       try {
-        // Replace placeholders in HTML
-        let certificateHtml = certificate.htmlContent
-          .replace(/\{\{name\}\}/g, recipient.userName)
-          .replace(/\{\{team\}\}/g, recipient.teamName || "N/A")
-          .replace(/\{\{track\}\}/g, recipient.trackName || "N/A");
-
-        // Add signature (remove placeholder if exists)
-        certificateHtml = certificateHtml.replace(/\{\{signature\}\}/g, "");
-
-        // Convert HTML to base64 for attachment
-        const htmlBase64 = Buffer.from(certificateHtml, 'utf-8').toString('base64');
+        // Generate PDF using React PDF
+        const pdfBuffer = await renderToBuffer(
+          <CertificatePDF
+            name={recipient.userName}
+            team={recipient.teamName || "N/A"}
+            track={recipient.trackName || "N/A"}
+            certificateName={certificate.name}
+          />
+        );
 
         // Create nice email body
         const emailHtml = `
@@ -318,7 +318,6 @@ export async function sendCertificates(
     h1 { color: #202124; font-size: 24px; margin-bottom: 20px; }
     p { color: #5f6368; margin-bottom: 15px; }
     .highlight { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
-    .button { display: inline-block; background: #C5221F; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; margin: 20px 0; }
     .footer { text-align: center; padding: 20px 0; border-top: 1px solid #e8eaed; color: #80868b; font-size: 14px; }
   </style>
 </head>
@@ -338,13 +337,7 @@ export async function sendCertificates(
       <p style="margin: 5px 0 0 0;">Track: ${recipient.trackName || "N/A"}</p>
     </div>
     
-    <p>Your certificate is attached to this email as an HTML file. To save it as a PDF:</p>
-    <ol>
-      <li>Download and open the attached HTML file in your web browser</li>
-      <li>Press Ctrl+P (Windows) or Cmd+P (Mac) to print</li>
-      <li>Select "Save as PDF" as the destination</li>
-      <li>Click Save</li>
-    </ol>
+    <p>Your certificate is attached to this email as a PDF file. You can print it directly or save it for your records.</p>
     
     <p>Thank you for your outstanding participation and dedication. Your creativity and technical excellence made this event truly special!</p>
     
@@ -364,8 +357,8 @@ export async function sendCertificates(
           html: emailHtml,
           attachments: [
             {
-              filename: `${certificate.name.replace(/\s+/g, '_')}_${recipient.userName.replace(/\s+/g, '_')}.html`,
-              content: htmlBase64,
+              filename: `${certificate.name.replace(/\s+/g, '_')}_${recipient.userName.replace(/\s+/g, '_')}.pdf`,
+              content: pdfBuffer,
             },
           ],
         });
