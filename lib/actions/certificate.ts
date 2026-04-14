@@ -361,7 +361,7 @@ export async function sendCertificates(
           attachments: [
             {
               filename: `${certificate.name.replace(/\s+/g, '_')}_${recipient.userName.replace(/\s+/g, '_')}.html`,
-              content: certificateHtml,
+              content: Buffer.from(certificateHtml, 'utf-8'),
             },
           ],
         });
