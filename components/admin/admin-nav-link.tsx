@@ -3,35 +3,41 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-<<<<<<< HEAD
-  LayoutDashboard, Users, QrCode, Upload, Megaphone, Layers, Settings, FileEdit, UserCheck, Clock, Scale, UtensilsCrossed, DoorOpen,
-=======
-  LayoutDashboard, Users, QrCode, Upload, Megaphone, Layers, Settings, FileEdit, UserCheck, Clock, Scale, UtensilsCrossed, DoorOpen, Award, Medal,
->>>>>>> e717674 (Add certificate system with email sending and audience targeting)
+  LayoutDashboard,
+  Users,
+  QrCode,
+  Upload,
+  Megaphone,
+  Layers,
+  Settings,
+  FileEdit,
+  UserCheck,
+  Clock,
+  Scale,
+  UtensilsCrossed,
+  DoorOpen,
+  Medal,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const adminNavItems = [
-  { href: "/admin",                    label: "Overview",          icon: LayoutDashboard },
-  { href: "/admin/users",              label: "Users",             icon: Users },
-  { href: "/admin/registrations",      label: "Registrations",     icon: Users },
-  { href: "/admin/registration-form",  label: "Registration Form", icon: FileEdit },
-  { href: "/admin/waitlist",           label: "Waitlist",          icon: Clock },
-  { href: "/admin/volunteers",         label: "Volunteers",        icon: UserCheck },
-  { href: "/admin/teams",              label: "Teams",             icon: Users },
-  { href: "/admin/submissions",        label: "Submissions",       icon: Upload },
-  { href: "/admin/judging-criteria",   label: "Judging Criteria",  icon: Scale },
-  { href: "/admin/tracks",             label: "Tracks",            icon: Layers },
-  { href: "/admin/rooms",              label: "Hacking Spaces",    icon: DoorOpen },
-  { href: "/admin/content",            label: "Content",           icon: Settings },
-  { href: "/admin/checkin",            label: "Check-in",          icon: QrCode },
-  { href: "/admin/food",               label: "Food Distribution", icon: UtensilsCrossed },
-  { href: "/admin/announcements",      label: "Announcements",     icon: Megaphone },
-<<<<<<< HEAD
-=======
-  { href: "/admin/certificates",       label: "Certificates",      icon: Medal },
->>>>>>> e717674 (Add certificate system with email sending and audience targeting)
+  { href: "/admin", label: "Overview", icon: LayoutDashboard },
+  { href: "/admin/users", label: "Users", icon: Users },
+  { href: "/admin/registrations", label: "Registrations", icon: Users },
+  { href: "/admin/registration-form", label: "Registration Form", icon: FileEdit },
+  { href: "/admin/waitlist", label: "Waitlist", icon: Clock },
+  { href: "/admin/volunteers", label: "Volunteers", icon: UserCheck },
+  { href: "/admin/teams", label: "Teams", icon: Users },
+  { href: "/admin/submissions", label: "Submissions", icon: Upload },
+  { href: "/admin/judging-criteria", label: "Judging Criteria", icon: Scale },
+  { href: "/admin/tracks", label: "Tracks", icon: Layers },
+  { href: "/admin/rooms", label: "Hacking Spaces", icon: DoorOpen },
+  { href: "/admin/content", label: "Content", icon: Settings },
+  { href: "/admin/checkin", label: "Check-in", icon: QrCode },
+  { href: "/admin/food", label: "Food Distribution", icon: UtensilsCrossed },
+  { href: "/admin/announcements", label: "Announcements", icon: Megaphone },
+  { href: "/admin/certificates", label: "Certificates", icon: Medal },
 ];
 
 interface AdminNavLinkProps {
@@ -61,7 +67,6 @@ function AdminNavLinkItem({ href, icon: Icon, children }: AdminNavLinkProps) {
   );
 }
 
-/** Renders the full admin nav — owns navItems internally */
 export function AdminNav() {
   return (
     <>
