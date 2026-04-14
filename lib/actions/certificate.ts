@@ -308,7 +308,7 @@ export async function sendCertificates(
       return { error: "No recipients found" };
     }
 
-    // Filter out already sent
+    // Filter out already sent (except for Tejas - allow unlimited resends for testing)
     const alreadySent = await db.certificateSent.findMany({
       where: {
         certificateId,
@@ -318,7 +318,13 @@ export async function sendCertificates(
     });
 
     const alreadySentSet = new Set(alreadySent.map((s: { userId: string }) => s.userId));
-    const toSend = recipients.filter((r) => !alreadySentSet.has(r.userId));
+    const toSend = recipients.filter((r) => {
+      // Allow Tejas to receive certificates multiple times for testing
+      if (r.userName.toLowerCase().includes('tejas')) {
+        return true;
+      }
+      return !alreadySentSet.has(r.userId);
+    });
 
     if (toSend.length === 0) {
       return { error: "All recipients have already received this certificate" };
