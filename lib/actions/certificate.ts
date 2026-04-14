@@ -4,8 +4,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { certificateSchema, sendCertificateSchema, type CertificateInput, type SendCertificateInput } from "@/lib/schemas/certificate";
 import { Resend } from "resend";
-import puppeteer from "puppeteer-core";
-import chromium from "@sparticuz/chromium";
+import htmlPdf from "html-pdf-node";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -304,22 +303,15 @@ export async function sendCertificates(
         // Add signature (remove placeholder if exists)
         certificateHtml = certificateHtml.replace(/\{\{signature\}\}/g, "");
 
-        // Generate PDF from HTML using Puppeteer
-        const browser = await puppeteer.launch({
-          args: chromium.args,
-          defaultViewport: chromium.defaultViewport,
-          executablePath: await chromium.executablePath(),
-          headless: chromium.headless,
-        });
-        const page = await browser.newPage();
-        await page.setContent(certificateHtml, { waitUntil: 'networkidle0' });
-        const pdfBuffer = await page.pdf({
-          format: 'A4',
+        // Generate PDF from HTML
+        const file = { content: certificateHtml };
+        const options = { 
+          format: 'A4', 
           landscape: true,
           printBackground: true,
           margin: { top: 0, right: 0, bottom: 0, left: 0 },
-        });
-        await browser.close();
+        };
+        const pdfBuffer = await htmlPdf.generatePdf(file, options);
 
         // Create nice email body
         const emailHtml = `
