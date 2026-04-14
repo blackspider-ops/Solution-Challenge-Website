@@ -282,7 +282,7 @@ export async function sendCertificates(
       select: { userId: true },
     });
 
-    const alreadySentSet = new Set(alreadySent.map((s) => s.userId));
+    const alreadySentSet = new Set(alreadySent.map((s: { userId: string }) => s.userId));
     const toSend = recipients.filter((r) => !alreadySentSet.has(r.userId));
 
     if (toSend.length === 0) {
@@ -366,7 +366,6 @@ export async function sendCertificates(
             {
               filename: `${certificate.name.replace(/\s+/g, '_')}_${recipient.userName.replace(/\s+/g, '_')}.html`,
               content: htmlBase64,
-              encoding: 'base64',
             },
           ],
         });
