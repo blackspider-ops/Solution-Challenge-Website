@@ -27,7 +27,7 @@ async function htmlToPdf(html: string): Promise<Buffer> {
       body: JSON.stringify({
         source: html,
         landscape: true,
-        format: 'A4',
+        format: '1100x850',
         margin: {
           top: '0mm',
           right: '0mm',
@@ -35,6 +35,7 @@ async function htmlToPdf(html: string): Promise<Buffer> {
           left: '0mm'
         },
         use_print: false,
+        wait_delay: 2000,
       }),
     });
 
@@ -426,16 +427,26 @@ export async function sendCertificates(
           ],
         });
 
-        // Record as sent
-        await db.certificateSent.create({
-          data: {
+        // Record as sent (skip if already sent for Tejas to allow testing)
+        const existingRecord = await db.certificateSent.findFirst({
+          where: {
             certificateId,
             userId: recipient.userId,
-            teamId: teamId || null,
           },
         });
 
+        if (!existingRecord) {
+          await db.certificateSent.create({
+            data: {
+              certificateId,
+              userId: recipient.userId,
+              teamId: teamId || null,
+            },
+          });
+        }
+
         sent++;
+        console.log(`Successfully sent certificate to ${recipient.userEmail}`);
       } catch (error) {
         console.error(`Failed to send certificate to ${recipient.userEmail}:`, error);
       }
