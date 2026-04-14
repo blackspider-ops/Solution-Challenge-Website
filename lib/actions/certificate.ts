@@ -4,7 +4,8 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { certificateSchema, sendCertificateSchema, type CertificateInput, type SendCertificateInput } from "@/lib/schemas/certificate";
 import { Resend } from "resend";
-import puppeteer from "puppeteer";
+import puppeteer from "puppeteer-core";
+import chromium from "@sparticuz/chromium";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -305,8 +306,10 @@ export async function sendCertificates(
 
         // Generate PDF from HTML using Puppeteer
         const browser = await puppeteer.launch({
-          headless: true,
-          args: ['--no-sandbox', '--disable-setuid-sandbox'],
+          args: chromium.args,
+          defaultViewport: chromium.defaultViewport,
+          executablePath: await chromium.executablePath(),
+          headless: chromium.headless,
         });
         const page = await browser.newPage();
         await page.setContent(certificateHtml, { waitUntil: 'networkidle0' });
