@@ -294,25 +294,76 @@ export async function sendCertificates(
     for (const recipient of toSend) {
       try {
         // Replace placeholders in HTML
-        let html = certificate.htmlContent
+        let certificateHtml = certificate.htmlContent
           .replace(/\{\{name\}\}/g, recipient.userName)
           .replace(/\{\{team\}\}/g, recipient.teamName || "N/A")
           .replace(/\{\{track\}\}/g, recipient.trackName || "N/A");
 
-        // Add signature
-        html = html.replace(
-          /\{\{signature\}\}/g,
-          `<div style="margin-top: 40px;">
-            <p style="margin: 0; font-weight: bold;">Tejas Singhal</p>
-            <p style="margin: 0; color: #666;">President, GDG @ Penn State</p>
-          </div>`
-        );
+        // Add signature (remove placeholder if exists)
+        certificateHtml = certificateHtml.replace(/\{\{signature\}\}/g, "");
+
+        // Create nice email body
+        const emailHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { text-align: center; padding: 30px 0; border-bottom: 3px solid #4285F4; }
+    .logo { font-size: 32px; font-weight: bold; background: linear-gradient(90deg, #4285F4, #EA4335, #FBBC04, #34A853); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .content { padding: 30px 0; }
+    h1 { color: #202124; font-size: 24px; margin-bottom: 20px; }
+    p { color: #5f6368; margin-bottom: 15px; }
+    .highlight { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
+    .button { display: inline-block; background: #4285F4; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; margin: 20px 0; }
+    .footer { text-align: center; padding: 20px 0; border-top: 1px solid #e8eaed; color: #80868b; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">GOOGLE developers</div>
+  </div>
+  
+  <div class="content">
+    <h1>🎉 Congratulations, ${recipient.userName}!</h1>
+    
+    <p>We're thrilled to present you with your <strong>${certificate.name}</strong> for participating in the GDG @ Penn State Solution Challenge 2026!</p>
+    
+    <div class="highlight">
+      <p style="margin: 0;"><strong>📋 Your Details:</strong></p>
+      <p style="margin: 5px 0 0 0;">Team: ${recipient.teamName || "N/A"}</p>
+      <p style="margin: 5px 0 0 0;">Track: ${recipient.trackName || "N/A"}</p>
+    </div>
+    
+    <p>Your certificate is attached to this email as an HTML file. You can:</p>
+    <ul>
+      <li>Open it in any web browser</li>
+      <li>Print it directly from your browser (Ctrl/Cmd + P)</li>
+      <li>Save it as a PDF using your browser's "Print to PDF" option</li>
+    </ul>
+    
+    <p>Thank you for your outstanding participation and dedication. Your creativity and technical excellence made this event truly special!</p>
+    
+    <p style="margin-top: 30px;">Best regards,<br><strong>Tejas Singhal</strong><br>President, Google Developer Groups @ Penn State</p>
+  </div>
+  
+  <div class="footer">
+    <p>Google Developer Groups @ Penn State<br>Solution Challenge 2026</p>
+  </div>
+</body>
+</html>`;
 
         await resend.emails.send({
           from: process.env.EMAIL_FROM || "GDG PSU <noreply@gdgpsu.dev>",
           to: recipient.userEmail,
-          subject: `${certificate.name} - GDG PSU Solution Challenge`,
-          html,
+          subject: `🎓 Your ${certificate.name} - GDG PSU Solution Challenge 2026`,
+          html: emailHtml,
+          attachments: [
+            {
+              filename: `${certificate.name.replace(/\s+/g, '_')}_${recipient.userName.replace(/\s+/g, '_')}.html`,
+              content: certificateHtml,
+            },
+          ],
         });
 
         // Record as sent
