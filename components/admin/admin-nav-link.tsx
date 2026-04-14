@@ -3,7 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+<<<<<<< HEAD
   LayoutDashboard, Users, QrCode, Upload, Megaphone, Layers, Settings, FileEdit, UserCheck, Clock, Scale, UtensilsCrossed, DoorOpen,
+=======
+  LayoutDashboard, Users, QrCode, Upload, Megaphone, Layers, Settings, FileEdit, UserCheck, Clock, Scale, UtensilsCrossed, DoorOpen, Award, Medal,
+>>>>>>> e717674 (Add certificate system with email sending and audience targeting)
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -24,6 +28,10 @@ const adminNavItems = [
   { href: "/admin/checkin",            label: "Check-in",          icon: QrCode },
   { href: "/admin/food",               label: "Food Distribution", icon: UtensilsCrossed },
   { href: "/admin/announcements",      label: "Announcements",     icon: Megaphone },
+<<<<<<< HEAD
+=======
+  { href: "/admin/certificates",       label: "Certificates",      icon: Medal },
+>>>>>>> e717674 (Add certificate system with email sending and audience targeting)
 ];
 
 interface AdminNavLinkProps {
