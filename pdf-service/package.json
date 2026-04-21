@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+    "postinstall": "node -e \"try { require('puppeteer').executablePath() } catch(e) { }\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
