@@ -27,20 +27,19 @@ async function htmlToPdf(html: string): Promise<Buffer> {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`PDF service error: ${errorData.error || response.statusText}`);
+      const contentType = response.headers.get('content-type');
+      if (contentType?.includes('application/json')) {
+        const errorData = await response.json();
+        throw new Error(`PDF service error: ${errorData.error || response.statusText}`);
+      }
+      throw new Error(`PDF service error: ${response.statusText}`);
     }
 
-    const data = await response.json();
+    // Get PDF as binary buffer
+    const arrayBuffer = await response.arrayBuffer();
+    const pdfBuffer = Buffer.from(arrayBuffer);
     
-    if (!data.success || !data.pdf) {
-      throw new Error('PDF service returned invalid response');
-    }
-
-    console.log(`PDF received from service, size: ${data.size} bytes, base64 length: ${data.pdf.length}`);
-    
-    // Convert base64 to buffer
-    const pdfBuffer = Buffer.from(data.pdf, 'base64');
+    console.log(`PDF received, size: ${pdfBuffer.length} bytes`);
     
     // Validate PDF header
     if (pdfBuffer.length < 4 || pdfBuffer.toString('utf8', 0, 4) !== '%PDF') {
@@ -48,7 +47,7 @@ async function htmlToPdf(html: string): Promise<Buffer> {
       throw new Error('Generated PDF is invalid (missing PDF header)');
     }
     
-    console.log(`Valid PDF buffer created, size: ${pdfBuffer.length} bytes`);
+    console.log('Valid PDF received');
     return pdfBuffer;
   } catch (error) {
     console.error('PDF generation error:', error);

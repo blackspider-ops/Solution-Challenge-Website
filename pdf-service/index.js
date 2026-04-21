@@ -61,15 +61,10 @@ app.post('/generate-pdf', async (req, res) => {
       throw new Error('Generated PDF is empty');
     }
 
-    // Send PDF as base64
-    const base64Pdf = pdfBuffer.toString('base64');
-    console.log('Base64 length:', base64Pdf.length);
-    
-    res.json({
-      success: true,
-      pdf: base64Pdf,
-      size: pdfBuffer.length,
-    });
+    // Send PDF as binary with proper headers
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Length', pdfBuffer.length);
+    res.send(pdfBuffer);
 
   } catch (error) {
     console.error('PDF generation error:', error);
