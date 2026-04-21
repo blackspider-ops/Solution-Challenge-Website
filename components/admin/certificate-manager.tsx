@@ -274,6 +274,28 @@ export function CertificateManager({ certificates }: { certificates: Certificate
                 </p>
               </div>
 
+              {/* Preview Section */}
+              {form.watch("htmlContent") && (
+                <div className="space-y-1.5">
+                  <Label>Preview</Label>
+                  <div className="border rounded-lg overflow-hidden bg-white">
+                    <iframe
+                      srcDoc={form.watch("htmlContent")
+                        .replace(/\{\{name\}\}/g, "John Doe")
+                        .replace(/\{\{team\}\}/g, "Sample Team")
+                        .replace(/\{\{track\}\}/g, "Sample Track")
+                        .replace(/\{\{signature\}\}/g, "")}
+                      className="w-full h-[500px] border-0"
+                      title="Certificate Preview"
+                      sandbox="allow-same-origin"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Preview with sample data: John Doe, Sample Team, Sample Track
+                  </p>
+                </div>
+              )}
+
               <div className="flex gap-2">
                 <Button type="submit" disabled={isPending}>
                   {isPending ? "Saving..." : isEditing ? "Save" : "Create"}
