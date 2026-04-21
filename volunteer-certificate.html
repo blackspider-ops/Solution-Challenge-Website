@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1100, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=block" rel="stylesheet">
+  <style>
+    @page {
+      size: 11in 8.5in landscape;
+      margin: 0;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      margin: 0;
+      padding: 0;
+      background: white;
+      font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      width: 1100px;
+      height: 850px;
+      overflow: hidden;
+    }
+    
+    .certificate {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      width: 1100px;
+      height: 850px;
+      padding: 60px 80px;
+      position: relative;
+    }
+    
+    .inner-card {
+      background: white;
+      width: 100%;
+      height: 100%;
+      border-radius: 20px;
+      padding: 60px 80px;
+      position: relative;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    
+    /* Google Logo Styling */
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    
+    .google-logo {
+      display: inline-block;
+      margin-bottom: 5px;
+    }
+    
+    .google-logo span {
+      font-family: 'Roboto', sans-serif;
+      font-size: 48px;
+      font-weight: 700;
+      display: inline-block;
+      letter-spacing: -2px;
+    }
+    
+    .google-logo .g { color: #EA4335; }
+    .google-logo .o1 { color: #FBBC04; }
+    .google-logo .o2 { color: #34A853; }
+    .google-logo .g2 { color: #4285F4; }
+    .google-logo .l { color: #EA4335; }
+    .google-logo .e { color: #FBBC04; }
+    
+    .developers {
+      font-size: 14px;
+      color: #F09300;
+      letter-spacing: 6px;
+      font-weight: 400;
+      margin-top: 5px;
+      text-transform: lowercase;
+    }
+    
+    /* Content */
+    .content {
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .certificate-title {
+      font-size: 42px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin: 30px 0 20px;
+      letter-spacing: 1px;
+    }
+    
+    .presented-to {
+      font-size: 14px;
+      color: #5f6368;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
+    
+    .recipient-name {
+      font-size: 56px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin: 20px 0 30px;
+      font-family: 'Roboto', sans-serif;
+    }
+    
+    .description {
+      font-size: 16px;
+      color: #5f6368;
+      line-height: 1.8;
+      max-width: 700px;
+      margin: 0 auto 40px;
+      font-weight: 400;
+    }
+    
+    .volunteer-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 12px 30px;
+      border-radius: 50px;
+      font-size: 16px;
+      font-weight: 600;
+      margin: 20px 0;
+      letter-spacing: 1px;
+    }
+    
+    /* Footer */
+    .footer {
+      position: absolute;
+      bottom: 60px;
+      left: 80px;
+      right: 80px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    
+    .signature {
+      text-align: left;
+    }
+    
+    .signature-line {
+      width: 250px;
+      height: 1px;
+      background: #dadce0;
+      margin-bottom: 10px;
+    }
+    
+    .signature-name {
+      font-family: 'Brush Script MT', 'Lucida Handwriting', cursive;
+      font-size: 32px;
+      font-weight: 400;
+      color: #000;
+      margin-bottom: 8px;
+      font-style: italic;
+    }
+    
+    .signature-title {
+      font-size: 12px;
+      color: #5f6368;
+      line-height: 1.5;
+    }
+    
+    .date {
+      text-align: right;
+    }
+    
+    .date-label {
+      font-size: 11px;
+      color: #80868b;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 5px;
+    }
+    
+    .date-value {
+      font-size: 15px;
+      color: #202124;
+      font-weight: 500;
+    }
+    
+    /* Decorative stars */
+    .star {
+      position: absolute;
+      color: #667eea;
+      opacity: 0.2;
+      font-size: 24px;
+    }
+    
+    .star-1 { top: 50px; left: 100px; }
+    .star-2 { top: 80px; right: 120px; }
+    .star-3 { bottom: 100px; left: 150px; }
+    .star-4 { bottom: 120px; right: 100px; }
+  </style>
+</head>
+<body>
+  <div class="certificate">
+    <div class="inner-card">
+      <div class="star star-1">★</div>
+      <div class="star star-2">★</div>
+      <div class="star star-3">★</div>
+      <div class="star star-4">★</div>
+      
+      <div class="header">
+        <div class="google-logo">
+          <span class="g">G</span><span class="o1">o</span><span class="o2">o</span><span class="g2">g</span><span class="l">l</span><span class="e">e</span>
+        </div>
+        <div class="developers">developers</div>
+      </div>
+      
+      <div class="content">
+        <h1 class="certificate-title">Certificate of Appreciation</h1>
+        
+        <div class="presented-to">This is presented to</div>
+        
+        <div class="recipient-name">{{name}}</div>
+        
+        <div class="volunteer-badge">★ VOLUNTEER ★</div>
+        
+        <p class="description">
+          For dedicating their time, energy, and passion to make the GDG @ Penn State 
+          Solution Challenge 2026 a tremendous success. Your commitment to helping others 
+          and creating an amazing experience for all participants is deeply appreciated.
+        </p>
+      </div>
+      
+      <div class="footer">
+        <div class="signature">
+          <div class="signature-line"></div>
+          <div class="signature-name">Tejas</div>
+          <div class="signature-title">
+            President<br>
+            Google Developer Groups @ Penn State
+          </div>
+        </div>
+        
+        <div class="date">
+          <div class="date-label">Date Issued</div>
+          <div class="date-value">April 12, 2026</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
