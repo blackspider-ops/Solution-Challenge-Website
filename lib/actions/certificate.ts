@@ -283,7 +283,8 @@ async function createCertificatePdf(name: string, team: string, track: string): 
       color: COLORS.red,
     });
     
-    page.drawText('✓', {
+    // Draw checkmark as "V" since ✓ isn't supported
+    page.drawText('V', {
       x: stampX - 6,
       y: stampY - 5,
       size: 20,
