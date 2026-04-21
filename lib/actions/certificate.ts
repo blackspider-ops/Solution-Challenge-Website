@@ -34,11 +34,7 @@ async function htmlToPdf(html: string): Promise<Buffer> {
           bottom: 0,
           left: 0
         },
-        delay: 3000,
-        viewport: {
-          width: 1100,
-          height: 850
-        }
+        delay: 3000
       }),
     });
 
