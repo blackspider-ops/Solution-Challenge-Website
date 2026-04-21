@@ -14,15 +14,6 @@ const nextConfig = {
   turbopack: {
     root: __dirname,
   },
-  experimental: {
-    serverComponentsExternalPackages: ['@sparticuz/chromium-min'],
-  },
-  webpack: (config, { isServer }) => {
-    if (isServer) {
-      config.externals = [...(config.externals || []), '@sparticuz/chromium-min'];
-    }
-    return config;
-  },
   async headers() {
     return [
       {
