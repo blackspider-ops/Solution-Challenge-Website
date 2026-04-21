@@ -29,12 +29,16 @@ async function htmlToPdf(html: string): Promise<Buffer> {
         landscape: true,
         format: 'Letter',
         margin: {
-          top: '0mm',
-          right: '0mm',
-          bottom: '0mm',
-          left: '0mm'
+          top: 0,
+          right: 0,
+          bottom: 0,
+          left: 0
         },
-        delay: 2000,
+        delay: 3000,
+        viewport: {
+          width: 1100,
+          height: 850
+        }
       }),
     });
 
