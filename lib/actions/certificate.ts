@@ -4,57 +4,46 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { certificateSchema, sendCertificateSchema, type CertificateInput, type SendCertificateInput } from "@/lib/schemas/certificate";
 import { Resend } from "resend";
-import puppeteer from "puppeteer-core";
-import chromium from "@sparticuz/chromium";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Function to convert HTML to PDF using Puppeteer
+// Function to convert HTML to PDF using external PDF service
 async function htmlToPdf(html: string): Promise<Buffer> {
-  let browser = null;
-  
   try {
-    console.log('Launching browser...');
+    const pdfServiceUrl = process.env.PDF_SERVICE_URL;
     
-    // Use minimal args to reduce memory
-    const minimalArgs = [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-gpu',
-      '--single-process',
-      '--no-zygote',
-    ];
+    if (!pdfServiceUrl) {
+      throw new Error('PDF_SERVICE_URL environment variable not configured');
+    }
 
-    browser = await puppeteer.launch({
-      args: minimalArgs,
-      executablePath: await chromium.executablePath(),
-      headless: chromium.headless,
-    });
-
-    const page = await browser.newPage();
+    console.log('Calling PDF service...');
     
-    await page.setContent(html, {
-      waitUntil: 'networkidle0',
+    const response = await fetch(`${pdfServiceUrl}/generate-pdf`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ html }),
     });
 
-    console.log('Generating PDF...');
-    const pdfBuffer = await page.pdf({
-      format: 'Letter',
-      landscape: true,
-      printBackground: true,
-      margin: { top: 0, right: 0, bottom: 0, left: 0 },
-    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`PDF service error: ${errorData.error || response.statusText}`);
+    }
 
-    console.log(`PDF generated, size: ${pdfBuffer.length} bytes`);
-    return Buffer.from(pdfBuffer);
+    const data = await response.json();
+    
+    if (!data.success || !data.pdf) {
+      throw new Error('PDF service returned invalid response');
+    }
+
+    console.log(`PDF generated successfully, size: ${data.size} bytes`);
+    
+    // Convert base64 to buffer
+    return Buffer.from(data.pdf, 'base64');
   } catch (error) {
     console.error('PDF generation error:', error);
     throw error;
-  } finally {
-    if (browser) {
-      await browser.close();
-    }
   }
 }
 

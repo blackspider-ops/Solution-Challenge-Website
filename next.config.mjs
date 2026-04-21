@@ -14,18 +14,6 @@ const nextConfig = {
   turbopack: {
     root: __dirname,
   },
-  experimental: {
-    serverComponentsExternalPackages: ['@sparticuz/chromium'],
-  },
-  webpack: (config, { isServer }) => {
-    if (isServer) {
-      config.externals = config.externals || [];
-      config.externals.push({
-        '@sparticuz/chromium': 'commonjs @sparticuz/chromium',
-      });
-    }
-    return config;
-  },
   async headers() {
     return [
       {
