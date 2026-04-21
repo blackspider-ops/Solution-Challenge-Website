@@ -26,6 +26,8 @@ app.post('/generate-pdf', async (req, res) => {
     }
 
     console.log('Launching browser...');
+    console.log('HTML length:', html.length);
+    
     browser = await puppeteer.launch({
       headless: true,
       args: [
@@ -50,26 +52,37 @@ app.post('/generate-pdf', async (req, res) => {
       landscape: true,
       printBackground: true,
       margin: { top: 0, right: 0, bottom: 0, left: 0 },
+      preferCSSPageSize: true,
     });
 
     console.log(`PDF generated successfully, size: ${pdfBuffer.length} bytes`);
 
+    if (pdfBuffer.length === 0) {
+      throw new Error('Generated PDF is empty');
+    }
+
     // Send PDF as base64
+    const base64Pdf = pdfBuffer.toString('base64');
+    console.log('Base64 length:', base64Pdf.length);
+    
     res.json({
       success: true,
-      pdf: pdfBuffer.toString('base64'),
+      pdf: base64Pdf,
       size: pdfBuffer.length,
     });
 
   } catch (error) {
     console.error('PDF generation error:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({
       success: false,
       error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
     });
   } finally {
     if (browser) {
       await browser.close();
+      console.log('Browser closed');
     }
   }
 });
