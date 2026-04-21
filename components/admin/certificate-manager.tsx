@@ -278,20 +278,22 @@ export function CertificateManager({ certificates }: { certificates: Certificate
               {form.watch("htmlContent") && (
                 <div className="space-y-1.5">
                   <Label>Preview</Label>
-                  <div className="border rounded-lg overflow-hidden bg-white">
-                    <iframe
-                      srcDoc={form.watch("htmlContent")
-                        .replace(/\{\{name\}\}/g, "John Doe")
-                        .replace(/\{\{team\}\}/g, "Sample Team")
-                        .replace(/\{\{track\}\}/g, "Sample Track")
-                        .replace(/\{\{signature\}\}/g, "")}
-                      className="w-full h-[500px] border-0"
-                      title="Certificate Preview"
-                      sandbox="allow-same-origin"
-                    />
+                  <div className="border rounded-lg overflow-auto bg-gray-100 p-4">
+                    <div className="bg-white rounded shadow-lg" style={{ width: '1100px', height: '850px', transform: 'scale(0.7)', transformOrigin: 'top left' }}>
+                      <iframe
+                        srcDoc={form.watch("htmlContent")
+                          .replace(/\{\{name\}\}/g, "John Doe")
+                          .replace(/\{\{team\}\}/g, "Sample Team")
+                          .replace(/\{\{track\}\}/g, "Sample Track")
+                          .replace(/\{\{signature\}\}/g, "")}
+                        className="w-full h-full border-0"
+                        title="Certificate Preview"
+                        sandbox="allow-same-origin"
+                      />
+                    </div>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Preview with sample data: John Doe, Sample Team, Sample Track
+                    Preview with sample data: John Doe, Sample Team, Sample Track (scaled to 70%)
                   </p>
                 </div>
               )}
