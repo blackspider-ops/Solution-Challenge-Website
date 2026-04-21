@@ -2,7 +2,6 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=1100, initial-scale=1">
   <style>
     @page {
       size: 11in 8.5in landscape;
@@ -26,7 +25,7 @@
     }
     
     .certificate {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #7c3aed;
       width: 1100px;
       height: 850px;
       padding: 60px 80px;
@@ -41,6 +40,7 @@
       padding: 60px 80px;
       position: relative;
       box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      border: 3px solid #a78bfa;
     }
     
     /* Google Logo Styling */
@@ -88,7 +88,7 @@
     .certificate-title {
       font-size: 42px;
       font-weight: 700;
-      color: #667eea;
+      color: #7c3aed;
       margin: 30px 0 20px;
       letter-spacing: 1px;
     }
@@ -105,7 +105,7 @@
     .recipient-name {
       font-size: 56px;
       font-weight: 700;
-      color: #764ba2;
+      color: #6d28d9;
       margin: 20px 0 30px;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
     }
@@ -121,7 +121,7 @@
     
     .volunteer-badge {
       display: inline-block;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #7c3aed;
       color: white;
       padding: 12px 30px;
       border-radius: 50px;
@@ -129,6 +129,7 @@
       font-weight: 600;
       margin: 20px 0;
       letter-spacing: 1px;
+      border: 2px solid #6d28d9;
     }
     
     /* Footer */
@@ -148,8 +149,8 @@
     
     .signature-line {
       width: 250px;
-      height: 1px;
-      background: #dadce0;
+      height: 2px;
+      background: #7c3aed;
       margin-bottom: 10px;
     }
     
@@ -186,27 +187,50 @@
       font-weight: 500;
     }
     
-    /* Decorative stars */
-    .star {
+    /* Corner decorations */
+    .corner {
       position: absolute;
-      color: #667eea;
-      opacity: 0.2;
-      font-size: 24px;
+      width: 60px;
+      height: 60px;
+      border: 3px solid #a78bfa;
     }
     
-    .star-1 { top: 50px; left: 100px; }
-    .star-2 { top: 80px; right: 120px; }
-    .star-3 { bottom: 100px; left: 150px; }
-    .star-4 { bottom: 120px; right: 100px; }
+    .corner-tl {
+      top: 40px;
+      left: 40px;
+      border-right: none;
+      border-bottom: none;
+    }
+    
+    .corner-tr {
+      top: 40px;
+      right: 40px;
+      border-left: none;
+      border-bottom: none;
+    }
+    
+    .corner-bl {
+      bottom: 40px;
+      left: 40px;
+      border-right: none;
+      border-top: none;
+    }
+    
+    .corner-br {
+      bottom: 40px;
+      right: 40px;
+      border-left: none;
+      border-top: none;
+    }
   </style>
 </head>
 <body>
   <div class="certificate">
     <div class="inner-card">
-      <div class="star star-1">★</div>
-      <div class="star star-2">★</div>
-      <div class="star star-3">★</div>
-      <div class="star star-4">★</div>
+      <div class="corner corner-tl"></div>
+      <div class="corner corner-tr"></div>
+      <div class="corner corner-bl"></div>
+      <div class="corner corner-br"></div>
       
       <div class="header">
         <div class="google-logo">
@@ -222,7 +246,7 @@
         
         <div class="recipient-name">{{name}}</div>
         
-        <div class="volunteer-badge">★ VOLUNTEER ★</div>
+        <div class="volunteer-badge">VOLUNTEER</div>
         
         <p class="description">
           For dedicating their time, energy, and passion to make the GDG @ Penn State 
