@@ -37,10 +37,19 @@ async function htmlToPdf(html: string): Promise<Buffer> {
       throw new Error('PDF service returned invalid response');
     }
 
-    console.log(`PDF generated successfully, size: ${data.size} bytes`);
+    console.log(`PDF received from service, size: ${data.size} bytes, base64 length: ${data.pdf.length}`);
     
     // Convert base64 to buffer
-    return Buffer.from(data.pdf, 'base64');
+    const pdfBuffer = Buffer.from(data.pdf, 'base64');
+    
+    // Validate PDF header
+    if (pdfBuffer.length < 4 || pdfBuffer.toString('utf8', 0, 4) !== '%PDF') {
+      console.error('Invalid PDF header. First 20 bytes:', pdfBuffer.toString('hex', 0, 20));
+      throw new Error('Generated PDF is invalid (missing PDF header)');
+    }
+    
+    console.log(`Valid PDF buffer created, size: ${pdfBuffer.length} bytes`);
+    return pdfBuffer;
   } catch (error) {
     console.error('PDF generation error:', error);
     throw error;
