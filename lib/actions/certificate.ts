@@ -4,246 +4,395 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { certificateSchema, sendCertificateSchema, type CertificateInput, type SendCertificateInput } from "@/lib/schemas/certificate";
 import { Resend } from "resend";
-import PDFDocument from "pdfkit";
+import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Google brand colors
+// Google brand colors (converted to RGB 0-1 scale)
 const COLORS = {
-  red: '#EA4335',
-  yellow: '#FBBC04',
-  green: '#34A853',
-  blue: '#4285F4',
-  orange: '#F09300',
-  gray: '#5f6368',
-  darkGray: '#202124',
-  lightGray: '#e8eaed',
+  red: rgb(0.918, 0.263, 0.208),      // #EA4335
+  yellow: rgb(0.984, 0.737, 0.016),   // #FBBC04
+  green: rgb(0.204, 0.659, 0.325),    // #34A853
+  blue: rgb(0.259, 0.522, 0.957),     // #4285F4
+  orange: rgb(0.941, 0.576, 0),       // #F09300
+  gray: rgb(0.373, 0.388, 0.408),     // #5f6368
+  darkGray: rgb(0.125, 0.129, 0.141), // #202124
+  lightGray: rgb(0.910, 0.918, 0.929),// #e8eaed
+  black: rgb(0, 0, 0),
 };
 
-// Function to create certificate PDF using PDFKit
+// Function to create certificate PDF using pdf-lib
 async function createCertificatePdf(name: string, team: string, track: string): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    try {
-      console.log(`Generating PDF for ${name}...`);
-      
-      // Create PDF in landscape mode (11in x 8.5in)
-      const doc = new PDFDocument({
-        size: [792, 612], // 11in x 8.5in in points (72 points per inch)
-        layout: 'landscape',
-        margins: { top: 60, bottom: 60, left: 80, right: 80 },
+  try {
+    console.log(`Generating PDF for ${name}...`);
+    
+    // Create PDF in landscape mode (11in x 8.5in = 792pt x 612pt)
+    const pdfDoc = await PDFDocument.create();
+    const page = pdfDoc.addPage([792, 612]);
+    
+    // Load fonts
+    const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const italicFont = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
+
+    const { width, height } = page.getSize();
+
+    // Draw colored border at top (8pt height)
+    const borderHeight = 8;
+    const segmentWidth = width / 4;
+    page.drawRectangle({ x: 0, y: height - borderHeight, width: segmentWidth, height: borderHeight, color: COLORS.red });
+    page.drawRectangle({ x: segmentWidth, y: height - borderHeight, width: segmentWidth, height: borderHeight, color: COLORS.yellow });
+    page.drawRectangle({ x: segmentWidth * 2, y: height - borderHeight, width: segmentWidth, height: borderHeight, color: COLORS.green });
+    page.drawRectangle({ x: segmentWidth * 3, y: height - borderHeight, width: segmentWidth, height: borderHeight, color: COLORS.blue });
+
+    // Draw colored border at bottom
+    page.drawRectangle({ x: 0, y: 0, width: segmentWidth, height: borderHeight, color: COLORS.red });
+    page.drawRectangle({ x: segmentWidth, y: 0, width: segmentWidth, height: borderHeight, color: COLORS.yellow });
+    page.drawRectangle({ x: segmentWidth * 2, y: 0, width: segmentWidth, height: borderHeight, color: COLORS.green });
+    page.drawRectangle({ x: segmentWidth * 3, y: 0, width: segmentWidth, height: borderHeight, color: COLORS.blue });
+
+    // Draw inner border rectangle
+    page.drawRectangle({
+      x: 30,
+      y: 30,
+      width: width - 60,
+      height: height - 60,
+      borderColor: COLORS.lightGray,
+      borderWidth: 2,
+    });
+
+    // Google logo text (centered at top)
+    const logoSize = 56;
+    const logoY = height - 100;
+    let logoX = 200;
+    
+    page.drawText('G', { x: logoX, y: logoY, size: logoSize, font: boldFont, color: COLORS.red });
+    logoX += boldFont.widthOfTextAtSize('G', logoSize);
+    page.drawText('o', { x: logoX, y: logoY, size: logoSize, font: boldFont, color: COLORS.yellow });
+    logoX += boldFont.widthOfTextAtSize('o', logoSize);
+    page.drawText('o', { x: logoX, y: logoY, size: logoSize, font: boldFont, color: COLORS.green });
+    logoX += boldFont.widthOfTextAtSize('o', logoSize);
+    page.drawText('g', { x: logoX, y: logoY, size: logoSize, font: boldFont, color: COLORS.blue });
+    logoX += boldFont.widthOfTextAtSize('g', logoSize);
+    page.drawText('l', { x: logoX, y: logoY, size: logoSize, font: boldFont, color: COLORS.red });
+    logoX += boldFont.widthOfTextAtSize('l', logoSize);
+    page.drawText('e', { x: logoX, y: logoY, size: logoSize, font: boldFont, color: COLORS.yellow });
+
+    // "developers" text
+    const devText = 'developers';
+    const devSize = 16;
+    const devWidth = regularFont.widthOfTextAtSize(devText, devSize);
+    page.drawText(devText, {
+      x: (width - devWidth) / 2,
+      y: height - 135,
+      size: devSize,
+      font: regularFont,
+      color: COLORS.orange,
+    });
+
+    // Certificate title
+    const titleText = 'Certificate of Participation';
+    const titleSize = 38;
+    const titleWidth = regularFont.widthOfTextAtSize(titleText, titleSize);
+    page.drawText(titleText, {
+      x: (width - titleWidth) / 2,
+      y: height - 200,
+      size: titleSize,
+      font: regularFont,
+      color: COLORS.darkGray,
+    });
+
+    // "THIS IS TO CERTIFY THAT"
+    const certifyText = 'THIS IS TO CERTIFY THAT';
+    const certifySize = 12;
+    const certifyWidth = regularFont.widthOfTextAtSize(certifyText, certifySize);
+    page.drawText(certifyText, {
+      x: (width - certifyWidth) / 2,
+      y: height - 250,
+      size: certifySize,
+      font: regularFont,
+      color: COLORS.gray,
+    });
+
+    // Recipient name (large, blue)
+    const nameSize = 48;
+    const nameWidth = boldFont.widthOfTextAtSize(name, nameSize);
+    page.drawText(name, {
+      x: (width - nameWidth) / 2,
+      y: height - 310,
+      size: nameSize,
+      font: boldFont,
+      color: COLORS.blue,
+    });
+
+    // Description (multi-line)
+    const descSize = 14;
+    const descLines = [
+      'has successfully participated in the GDG @ Penn State Solution Challenge 2026,',
+      'demonstrating creativity, technical excellence, and commitment to building',
+      'innovative solutions for real-world challenges.',
+    ];
+    
+    let descY = height - 360;
+    descLines.forEach((line) => {
+      const lineWidth = regularFont.widthOfTextAtSize(line, descSize);
+      page.drawText(line, {
+        x: (width - lineWidth) / 2,
+        y: descY,
+        size: descSize,
+        font: regularFont,
+        color: COLORS.gray,
       });
+      descY -= 20;
+    });
 
-      const chunks: Buffer[] = [];
-      doc.on('data', (chunk) => chunks.push(chunk));
-      doc.on('end', () => resolve(Buffer.concat(chunks)));
-      doc.on('error', reject);
+    // Details section (Team, Track, Event)
+    const detailsY = 180;
+    const labelSize = 10;
+    const valueSize = 16;
+    
+    // Team
+    const teamLabel = 'TEAM';
+    const teamLabelWidth = regularFont.widthOfTextAtSize(teamLabel, labelSize);
+    page.drawText(teamLabel, {
+      x: 200 - teamLabelWidth / 2,
+      y: detailsY + 30,
+      size: labelSize,
+      font: regularFont,
+      color: COLORS.gray,
+    });
+    const teamValue = team || 'N/A';
+    const teamValueWidth = boldFont.widthOfTextAtSize(teamValue, valueSize);
+    page.drawText(teamValue, {
+      x: 200 - teamValueWidth / 2,
+      y: detailsY + 10,
+      size: valueSize,
+      font: boldFont,
+      color: COLORS.darkGray,
+    });
 
-      // Draw colored border at top
-      const borderHeight = 8;
-      const gradientStops = [
-        { pos: 0, color: COLORS.red },
-        { pos: 0.25, color: COLORS.yellow },
-        { pos: 0.5, color: COLORS.green },
-        { pos: 0.75, color: COLORS.blue },
-        { pos: 1, color: COLORS.red },
-      ];
-      
-      // Top border (simulate gradient with rectangles)
-      const borderWidth = 792;
-      const segmentWidth = borderWidth / 4;
-      doc.rect(0, 0, segmentWidth, borderHeight).fill(COLORS.red);
-      doc.rect(segmentWidth, 0, segmentWidth, borderHeight).fill(COLORS.yellow);
-      doc.rect(segmentWidth * 2, 0, segmentWidth, borderHeight).fill(COLORS.green);
-      doc.rect(segmentWidth * 3, 0, segmentWidth, borderHeight).fill(COLORS.blue);
+    // Track
+    const trackLabel = 'TRACK';
+    const trackLabelWidth = regularFont.widthOfTextAtSize(trackLabel, labelSize);
+    page.drawText(trackLabel, {
+      x: 396 - trackLabelWidth / 2,
+      y: detailsY + 30,
+      size: labelSize,
+      font: regularFont,
+      color: COLORS.gray,
+    });
+    const trackValue = track || 'N/A';
+    const trackValueWidth = boldFont.widthOfTextAtSize(trackValue, valueSize);
+    page.drawText(trackValue, {
+      x: 396 - trackValueWidth / 2,
+      y: detailsY + 10,
+      size: valueSize,
+      font: boldFont,
+      color: COLORS.darkGray,
+    });
 
-      // Bottom border
-      doc.rect(0, 604, segmentWidth, borderHeight).fill(COLORS.red);
-      doc.rect(segmentWidth, 604, segmentWidth, borderHeight).fill(COLORS.yellow);
-      doc.rect(segmentWidth * 2, 604, segmentWidth, borderHeight).fill(COLORS.green);
-      doc.rect(segmentWidth * 3, 604, segmentWidth, borderHeight).fill(COLORS.blue);
+    // Event
+    const eventLabel = 'EVENT';
+    const eventLabelWidth = regularFont.widthOfTextAtSize(eventLabel, labelSize);
+    page.drawText(eventLabel, {
+      x: 592 - eventLabelWidth / 2,
+      y: detailsY + 30,
+      size: labelSize,
+      font: regularFont,
+      color: COLORS.gray,
+    });
+    const eventValue = 'April 11-12, 2026';
+    const eventValueWidth = boldFont.widthOfTextAtSize(eventValue, valueSize);
+    page.drawText(eventValue, {
+      x: 592 - eventValueWidth / 2,
+      y: detailsY + 10,
+      size: valueSize,
+      font: boldFont,
+      color: COLORS.darkGray,
+    });
 
-      // Inner border
-      doc.rect(30, 30, 732, 552)
-        .lineWidth(2)
-        .stroke(COLORS.lightGray);
+    // Signature section
+    const signatureY = 90;
+    
+    // Signature line
+    page.drawLine({
+      start: { x: 80, y: signatureY + 40 },
+      end: { x: 280, y: signatureY + 40 },
+      thickness: 1,
+      color: COLORS.lightGray,
+    });
 
-      // Google logo text
-      doc.fontSize(56).font('Helvetica-Bold');
-      const logoY = 80;
-      let logoX = 200;
-      
-      doc.fillColor(COLORS.red).text('G', logoX, logoY, { continued: true });
-      logoX += doc.widthOfString('G');
-      doc.fillColor(COLORS.yellow).text('o', logoX, logoY, { continued: true });
-      logoX += doc.widthOfString('o');
-      doc.fillColor(COLORS.green).text('o', logoX, logoY, { continued: true });
-      logoX += doc.widthOfString('o');
-      doc.fillColor(COLORS.blue).text('g', logoX, logoY, { continued: true });
-      logoX += doc.widthOfString('g');
-      doc.fillColor(COLORS.red).text('l', logoX, logoY, { continued: true });
-      logoX += doc.widthOfString('l');
-      doc.fillColor(COLORS.yellow).text('e', logoX, logoY);
+    // Signature name (italic for cursive effect)
+    page.drawText('Tejas', {
+      x: 80,
+      y: signatureY + 45,
+      size: 28,
+      font: italicFont,
+      color: COLORS.black,
+    });
 
-      // "developers" text
-      doc.fontSize(16)
-        .font('Helvetica')
-        .fillColor(COLORS.orange)
-        .text('developers', 0, 145, { align: 'center' });
+    // Signature title
+    page.drawText('President', {
+      x: 80,
+      y: signatureY + 20,
+      size: 11,
+      font: regularFont,
+      color: COLORS.gray,
+    });
+    page.drawText('Google Developer Groups @ Penn State', {
+      x: 80,
+      y: signatureY + 5,
+      size: 11,
+      font: regularFont,
+      color: COLORS.gray,
+    });
 
-      // Certificate title
-      doc.fontSize(38)
-        .font('Helvetica-Light')
-        .fillColor(COLORS.darkGray)
-        .text('Certificate of Participation', 0, 200, { align: 'center' });
+    // VERIFIED stamp (circles)
+    const stampX = 350;
+    const stampY = signatureY + 40;
+    const stampRadius = 45;
+    
+    // Outer circle
+    page.drawCircle({
+      x: stampX,
+      y: stampY,
+      size: stampRadius,
+      borderColor: COLORS.red,
+      borderWidth: 4,
+      opacity: 0.75,
+    });
+    
+    // Inner circle
+    page.drawCircle({
+      x: stampX,
+      y: stampY,
+      size: stampRadius - 8,
+      borderColor: COLORS.red,
+      borderWidth: 2,
+      opacity: 0.75,
+    });
 
-      // "This is to certify that"
-      doc.fontSize(12)
-        .font('Helvetica')
-        .fillColor(COLORS.gray)
-        .text('THIS IS TO CERTIFY THAT', 0, 250, { align: 'center' });
+    // Stamp text
+    const verifiedText = 'VERIFIED';
+    const verifiedWidth = boldFont.widthOfTextAtSize(verifiedText, 11);
+    page.drawText(verifiedText, {
+      x: stampX - verifiedWidth / 2,
+      y: stampY + 10,
+      size: 11,
+      font: boldFont,
+      color: COLORS.red,
+    });
+    
+    page.drawText('✓', {
+      x: stampX - 6,
+      y: stampY - 5,
+      size: 20,
+      font: boldFont,
+      color: COLORS.red,
+    });
+    
+    const gdgText = 'GDG PSU';
+    const gdgWidth = boldFont.widthOfTextAtSize(gdgText, 8);
+    page.drawText(gdgText, {
+      x: stampX - gdgWidth / 2,
+      y: stampY - 20,
+      size: 8,
+      font: boldFont,
+      color: COLORS.red,
+    });
 
-      // Recipient name (large, blue)
-      doc.fontSize(48)
-        .font('Helvetica-Bold')
-        .fillColor(COLORS.blue)
-        .text(name, 0, 280, { align: 'center' });
+    // Date issued
+    page.drawText('DATE ISSUED', {
+      x: 650,
+      y: signatureY + 40,
+      size: 10,
+      font: regularFont,
+      color: COLORS.gray,
+    });
+    page.drawText('April 12, 2026', {
+      x: 630,
+      y: signatureY + 20,
+      size: 13,
+      font: boldFont,
+      color: COLORS.darkGray,
+    });
 
-      // Description
-      const description = 'has successfully participated in the GDG @ Penn State Solution Challenge 2026,\ndemonstrating creativity, technical excellence, and commitment to building\ninnovative solutions for real-world challenges.';
-      doc.fontSize(14)
-        .font('Helvetica')
-        .fillColor(COLORS.gray)
-        .text(description, 80, 350, { align: 'center', width: 632 });
+    // Corner decorations (L-shapes)
+    const cornerSize = 40;
+    const cornerOffset = 40;
+    const cornerOpacity = 0.1;
+    
+    // Top-left (red)
+    page.drawLine({
+      start: { x: cornerOffset, y: height - cornerOffset },
+      end: { x: cornerOffset, y: height - cornerOffset - cornerSize },
+      thickness: 3,
+      color: COLORS.red,
+      opacity: cornerOpacity,
+    });
+    page.drawLine({
+      start: { x: cornerOffset, y: height - cornerOffset },
+      end: { x: cornerOffset + cornerSize, y: height - cornerOffset },
+      thickness: 3,
+      color: COLORS.red,
+      opacity: cornerOpacity,
+    });
 
-      // Details section (Team, Track, Event)
-      const detailsY = 430;
-      const detailSpacing = 200;
-      
-      // Team
-      doc.fontSize(10)
-        .font('Helvetica')
-        .fillColor(COLORS.gray)
-        .text('TEAM', 150, detailsY, { width: 150, align: 'center' });
-      doc.fontSize(16)
-        .font('Helvetica-Bold')
-        .fillColor(COLORS.darkGray)
-        .text(team || 'N/A', 150, detailsY + 20, { width: 150, align: 'center' });
+    // Top-right (yellow)
+    page.drawLine({
+      start: { x: width - cornerOffset, y: height - cornerOffset },
+      end: { x: width - cornerOffset, y: height - cornerOffset - cornerSize },
+      thickness: 3,
+      color: COLORS.yellow,
+      opacity: cornerOpacity,
+    });
+    page.drawLine({
+      start: { x: width - cornerOffset, y: height - cornerOffset },
+      end: { x: width - cornerOffset - cornerSize, y: height - cornerOffset },
+      thickness: 3,
+      color: COLORS.yellow,
+      opacity: cornerOpacity,
+    });
 
-      // Track
-      doc.fontSize(10)
-        .font('Helvetica')
-        .fillColor(COLORS.gray)
-        .text('TRACK', 320, detailsY, { width: 150, align: 'center' });
-      doc.fontSize(16)
-        .font('Helvetica-Bold')
-        .fillColor(COLORS.darkGray)
-        .text(track || 'N/A', 320, detailsY + 20, { width: 150, align: 'center' });
+    // Bottom-left (green)
+    page.drawLine({
+      start: { x: cornerOffset, y: cornerOffset },
+      end: { x: cornerOffset, y: cornerOffset + cornerSize },
+      thickness: 3,
+      color: COLORS.green,
+      opacity: cornerOpacity,
+    });
+    page.drawLine({
+      start: { x: cornerOffset, y: cornerOffset },
+      end: { x: cornerOffset + cornerSize, y: cornerOffset },
+      thickness: 3,
+      color: COLORS.green,
+      opacity: cornerOpacity,
+    });
 
-      // Event
-      doc.fontSize(10)
-        .font('Helvetica')
-        .fillColor(COLORS.gray)
-        .text('EVENT', 490, detailsY, { width: 150, align: 'center' });
-      doc.fontSize(16)
-        .font('Helvetica-Bold')
-        .fillColor(COLORS.darkGray)
-        .text('April 11-12, 2026', 490, detailsY + 20, { width: 150, align: 'center' });
+    // Bottom-right (blue)
+    page.drawLine({
+      start: { x: width - cornerOffset, y: cornerOffset },
+      end: { x: width - cornerOffset, y: cornerOffset + cornerSize },
+      thickness: 3,
+      color: COLORS.blue,
+      opacity: cornerOpacity,
+    });
+    page.drawLine({
+      start: { x: width - cornerOffset, y: cornerOffset },
+      end: { x: width - cornerOffset - cornerSize, y: cornerOffset },
+      thickness: 3,
+      color: COLORS.blue,
+      opacity: cornerOpacity,
+    });
 
-      // Signature section
-      const signatureY = 520;
-      
-      // Signature line
-      doc.moveTo(80, signatureY)
-        .lineTo(280, signatureY)
-        .stroke(COLORS.lightGray);
-
-      // Signature name (cursive-style)
-      doc.fontSize(28)
-        .font('Helvetica-Oblique')
-        .fillColor('#000000')
-        .text('Tejas', 80, signatureY + 10);
-
-      // Signature title
-      doc.fontSize(11)
-        .font('Helvetica')
-        .fillColor(COLORS.gray)
-        .text('President\nGoogle Developer Groups @ Penn State', 80, signatureY + 45);
-
-      // VERIFIED stamp (circle)
-      const stampX = 350;
-      const stampY = signatureY + 30;
-      const stampRadius = 45;
-      
-      doc.circle(stampX, stampY, stampRadius)
-        .lineWidth(4)
-        .stroke(COLORS.red);
-      
-      doc.circle(stampX, stampY, stampRadius - 8)
-        .lineWidth(2)
-        .stroke(COLORS.red);
-
-      doc.fontSize(11)
-        .font('Helvetica-Bold')
-        .fillColor(COLORS.red)
-        .text('VERIFIED', stampX - 30, stampY - 15, { width: 60, align: 'center' });
-      
-      doc.fontSize(20)
-        .text('✓', stampX - 10, stampY - 5);
-      
-      doc.fontSize(8)
-        .font('Helvetica-Bold')
-        .text('GDG PSU', stampX - 25, stampY + 15, { width: 50, align: 'center' });
-
-      // Date issued
-      doc.fontSize(10)
-        .font('Helvetica')
-        .fillColor(COLORS.gray)
-        .text('DATE ISSUED', 600, signatureY, { width: 112, align: 'right' });
-      doc.fontSize(13)
-        .font('Helvetica-Bold')
-        .fillColor(COLORS.darkGray)
-        .text('April 12, 2026', 600, signatureY + 20, { width: 112, align: 'right' });
-
-      // Corner decorations
-      const cornerSize = 40;
-      const cornerOffset = 40;
-      
-      // Top-left
-      doc.moveTo(cornerOffset, cornerOffset + cornerSize)
-        .lineTo(cornerOffset, cornerOffset)
-        .lineTo(cornerOffset + cornerSize, cornerOffset)
-        .lineWidth(3)
-        .opacity(0.1)
-        .stroke(COLORS.red);
-
-      // Top-right
-      doc.opacity(0.1)
-        .moveTo(792 - cornerOffset - cornerSize, cornerOffset)
-        .lineTo(792 - cornerOffset, cornerOffset)
-        .lineTo(792 - cornerOffset, cornerOffset + cornerSize)
-        .stroke(COLORS.yellow);
-
-      // Bottom-left
-      doc.opacity(0.1)
-        .moveTo(cornerOffset, 612 - cornerOffset - cornerSize)
-        .lineTo(cornerOffset, 612 - cornerOffset)
-        .lineTo(cornerOffset + cornerSize, 612 - cornerOffset)
-        .stroke(COLORS.green);
-
-      // Bottom-right
-      doc.opacity(0.1)
-        .moveTo(792 - cornerOffset - cornerSize, 612 - cornerOffset)
-        .lineTo(792 - cornerOffset, 612 - cornerOffset)
-        .lineTo(792 - cornerOffset, 612 - cornerOffset - cornerSize)
-        .stroke(COLORS.blue);
-
-      doc.end();
-      console.log('PDF generation complete');
-    } catch (error) {
-      console.error('PDF generation error:', error);
-      reject(error);
-    }
-  });
+    const pdfBytes = await pdfDoc.save();
+    console.log(`PDF generation complete, size: ${pdfBytes.length} bytes`);
+    return Buffer.from(pdfBytes);
+  } catch (error) {
+    console.error('PDF generation error:', error);
+    throw error;
+  }
 }
 
 // ─── Create Certificate Template ────────────────────────────────────────────
