@@ -14,6 +14,9 @@ const nextConfig = {
   turbopack: {
     root: __dirname,
   },
+  experimental: {
+    serverComponentsExternalPackages: ['@sparticuz/chromium'],
+  },
   async headers() {
     return [
       {
