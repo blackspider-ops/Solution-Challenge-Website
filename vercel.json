@@ -2,6 +2,12 @@
   "buildCommand": "npm run db:generate && npm run build",
   "installCommand": "npm install",
   "framework": "nextjs",
+  "functions": {
+    "app/api/**/*.ts": {
+      "maxDuration": 60,
+      "memory": 3008
+    }
+  },
   "crons": [{
     "path": "/api/cron/send-announcements",
     "schedule": "0 9 * * *"

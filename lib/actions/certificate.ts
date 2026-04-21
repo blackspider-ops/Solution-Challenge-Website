@@ -4,54 +4,74 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { certificateSchema, sendCertificateSchema, type CertificateInput, type SendCertificateInput } from "@/lib/schemas/certificate";
 import { Resend } from "resend";
+import puppeteer from "puppeteer-core";
+import chromium from "@sparticuz/chromium-min";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Function to convert HTML to PDF using PDFShift API directly
+// Function to convert HTML to PDF using Puppeteer + Chromium
 async function htmlToPdf(html: string): Promise<Buffer> {
+  let browser = null;
+  
   try {
-    const pdfShiftApiKey = process.env.PDFSHIFT_API_KEY;
+    console.log('Launching Chromium browser...');
     
-    if (!pdfShiftApiKey) {
-      throw new Error('PDFSHIFT_API_KEY not configured');
-    }
+    // Configure Chromium for serverless
+    const executablePath = await chromium.executablePath(
+      process.env.CHROMIUM_EXECUTABLE_PATH || 
+      'https://github.com/Sparticuz/chromium/releases/download/v131.0.0/chromium-v131.0.0-pack.tar'
+    );
 
-    console.log('Calling PDFShift API...');
-    
-    const response = await fetch('https://api.pdfshift.io/v3/convert/pdf', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Basic ${Buffer.from(`api:${pdfShiftApiKey}`).toString('base64')}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        source: html,
-        landscape: true,
-        format: 'Letter',
-        margin: {
-          top: 0,
-          right: 0,
-          bottom: 0,
-          left: 0
-        },
-        delay: 3000
-      }),
+    browser = await puppeteer.launch({
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath,
+      headless: chromium.headless,
     });
 
-    console.log(`PDFShift API response status: ${response.status}`);
+    console.log('Browser launched, creating page...');
+    const page = await browser.newPage();
+    
+    // Set viewport to certificate dimensions
+    await page.setViewport({
+      width: 1100,
+      height: 850,
+      deviceScaleFactor: 2, // Higher quality
+    });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`PDFShift API error: ${errorText}`);
-      throw new Error(`PDFShift API error: ${response.status}`);
-    }
+    console.log('Setting page content...');
+    await page.setContent(html, {
+      waitUntil: ['networkidle0', 'load'],
+    });
 
-    const arrayBuffer = await response.arrayBuffer();
-    console.log(`PDF generated successfully, size: ${arrayBuffer.byteLength} bytes`);
-    return Buffer.from(arrayBuffer);
+    // Wait a bit for fonts to load
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    console.log('Generating PDF...');
+    const pdfBuffer = await page.pdf({
+      width: '11in',
+      height: '8.5in',
+      landscape: true,
+      printBackground: true,
+      margin: {
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
+      },
+      preferCSSPageSize: true,
+    });
+
+    console.log(`PDF generated successfully, size: ${pdfBuffer.length} bytes`);
+    return Buffer.from(pdfBuffer);
   } catch (error) {
     console.error('PDF generation error:', error);
     throw error;
+  } finally {
+    if (browser) {
+      await browser.close();
+      console.log('Browser closed');
+    }
   }
 }
 
