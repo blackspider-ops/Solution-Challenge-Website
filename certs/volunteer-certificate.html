@@ -25,37 +25,39 @@
     }
     
     .certificate {
-      background: #7c3aed;
+      background: white;
       width: 1100px;
       height: 850px;
-      padding: 60px 80px;
+      padding: 0;
       position: relative;
     }
     
-    .inner-card {
-      background: white;
-      width: 100%;
+    /* Purple accent bar at top */
+    .top-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 12px;
+      background: linear-gradient(90deg, #7c3aed 0%, #a78bfa 50%, #7c3aed 100%);
+    }
+    
+    /* Main content area */
+    .content-wrapper {
+      padding: 60px 100px;
       height: 100%;
-      border-radius: 20px;
-      padding: 60px 80px;
-      position: relative;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      border: 3px solid #a78bfa;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
     
-    /* Google Logo Styling */
+    /* Header with Google logo */
     .header {
       text-align: center;
-      margin-bottom: 40px;
-    }
-    
-    .google-logo {
-      display: inline-block;
-      margin-bottom: 5px;
+      margin-bottom: 20px;
     }
     
     .google-logo span {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
       font-size: 48px;
       font-weight: 700;
       display: inline-block;
@@ -78,23 +80,26 @@
       text-transform: lowercase;
     }
     
-    /* Content */
-    .content {
+    /* Main content */
+    .main-content {
       text-align: center;
-      position: relative;
-      z-index: 1;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding-bottom: 40px;
     }
     
     .certificate-title {
       font-size: 42px;
       font-weight: 700;
       color: #7c3aed;
-      margin: 30px 0 20px;
+      margin-bottom: 25px;
       letter-spacing: 1px;
     }
     
     .presented-to {
-      font-size: 14px;
+      font-size: 13px;
       color: #5f6368;
       text-transform: uppercase;
       letter-spacing: 3px;
@@ -106,68 +111,64 @@
       font-size: 56px;
       font-weight: 700;
       color: #6d28d9;
-      margin: 20px 0 30px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-    }
-    
-    .description {
-      font-size: 16px;
-      color: #5f6368;
-      line-height: 1.8;
-      max-width: 700px;
-      margin: 0 auto 40px;
-      font-weight: 400;
+      margin-bottom: 25px;
     }
     
     .volunteer-badge {
       display: inline-block;
       background: #7c3aed;
       color: white;
-      padding: 12px 30px;
+      padding: 10px 35px;
       border-radius: 50px;
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 600;
-      margin: 20px 0;
-      letter-spacing: 1px;
-      border: 2px solid #6d28d9;
+      margin-bottom: 25px;
+      letter-spacing: 2px;
     }
     
-    /* Footer */
+    .description {
+      font-size: 15px;
+      color: #5f6368;
+      line-height: 1.7;
+      max-width: 750px;
+      margin: 0 auto;
+      font-weight: 400;
+    }
+    
+    /* Footer section */
     .footer {
-      position: absolute;
-      bottom: 60px;
-      left: 80px;
-      right: 80px;
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
+      padding-top: 30px;
+      border-top: 1px solid #e8eaed;
     }
     
-    .signature {
+    .signature-section {
       text-align: left;
     }
     
-    .signature-line {
-      width: 250px;
-      height: 2px;
-      background: #7c3aed;
-      margin-bottom: 10px;
+    .signature-image {
+      width: 120px;
+      height: auto;
+      display: block;
+      margin-bottom: 5px;
     }
     
     .signature-name {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 600;
-      color: #000;
-      margin-bottom: 8px;
+      color: #202124;
+      margin-bottom: 3px;
     }
     
     .signature-title {
       font-size: 12px;
       color: #5f6368;
-      line-height: 1.5;
+      line-height: 1.4;
     }
     
-    .date {
+    .date-section {
       text-align: right;
     }
     
@@ -185,51 +186,56 @@
       font-weight: 500;
     }
     
-    /* Corner decorations */
-    .corner {
+    /* Decorative elements */
+    .corner-accent {
       position: absolute;
-      width: 60px;
-      height: 60px;
-      border: 3px solid #a78bfa;
+      width: 80px;
+      height: 80px;
     }
     
-    .corner-tl {
-      top: 40px;
-      left: 40px;
-      border-right: none;
-      border-bottom: none;
+    .corner-accent.top-left {
+      top: 30px;
+      left: 30px;
+      border-top: 3px solid #a78bfa;
+      border-left: 3px solid #a78bfa;
+      opacity: 0.4;
     }
     
-    .corner-tr {
-      top: 40px;
-      right: 40px;
-      border-left: none;
-      border-bottom: none;
+    .corner-accent.top-right {
+      top: 30px;
+      right: 30px;
+      border-top: 3px solid #a78bfa;
+      border-right: 3px solid #a78bfa;
+      opacity: 0.4;
     }
     
-    .corner-bl {
-      bottom: 40px;
-      left: 40px;
-      border-right: none;
-      border-top: none;
+    .corner-accent.bottom-left {
+      bottom: 30px;
+      left: 30px;
+      border-bottom: 3px solid #a78bfa;
+      border-left: 3px solid #a78bfa;
+      opacity: 0.4;
     }
     
-    .corner-br {
-      bottom: 40px;
-      right: 40px;
-      border-left: none;
-      border-top: none;
+    .corner-accent.bottom-right {
+      bottom: 30px;
+      right: 30px;
+      border-bottom: 3px solid #a78bfa;
+      border-right: 3px solid #a78bfa;
+      opacity: 0.4;
     }
   </style>
 </head>
 <body>
   <div class="certificate">
-    <div class="inner-card">
-      <div class="corner corner-tl"></div>
-      <div class="corner corner-tr"></div>
-      <div class="corner corner-bl"></div>
-      <div class="corner corner-br"></div>
-      
+    <div class="top-bar"></div>
+    
+    <div class="corner-accent top-left"></div>
+    <div class="corner-accent top-right"></div>
+    <div class="corner-accent bottom-left"></div>
+    <div class="corner-accent bottom-right"></div>
+    
+    <div class="content-wrapper">
       <div class="header">
         <div class="google-logo">
           <span class="g">G</span><span class="o1">o</span><span class="o2">o</span><span class="g2">g</span><span class="l">l</span><span class="e">e</span>
@@ -237,7 +243,7 @@
         <div class="developers">developers</div>
       </div>
       
-      <div class="content">
+      <div class="main-content">
         <h1 class="certificate-title">Certificate of Appreciation</h1>
         
         <div class="presented-to">This is presented to</div>
@@ -254,17 +260,13 @@
       </div>
       
       <div class="footer">
-        <div class="signature">
-          <div class="signature-line"></div>
-          <img src="https://sign-solution-challenge-cert.pages.dev/IMG_0730.PNG" alt="Signature" style="width: 200px; height: auto; margin-bottom: 5px;" />
+        <div class="signature-section">
+          <img src="https://sign-solution-challenge-cert.pages.dev/IMG_0730.PNG" alt="Signature" class="signature-image" />
           <div class="signature-name">Tejas Singhal</div>
-          <div class="signature-title">
-            President<br>
-            Google Developer Groups @ Penn State
-          </div>
+          <div class="signature-title">President, GDG @ Penn State</div>
         </div>
         
-        <div class="date">
+        <div class="date-section">
           <div class="date-label">Date Issued</div>
           <div class="date-value">April 12, 2026</div>
         </div>
