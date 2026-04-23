@@ -349,7 +349,8 @@ export function CertificateManager({ certificates }: { certificates: Certificate
                           .replace(/\{\{name\}\}/g, "John Doe")
                           .replace(/\{\{team\}\}/g, "Sample Team")
                           .replace(/\{\{track\}\}/g, "Sample Track")
-                          .replace(/\{\{signature\}\}/g, "")}
+                          .replace(/\{\{signature\}\}/g, "")
+                          .replace(/src="signature\.png"/g, 'src="https://sign-solution-challenge-cert.pages.dev/IMG_0730.PNG"')}
                         className="w-full h-full border-0"
                         title="Certificate Preview"
                         sandbox="allow-same-origin"
