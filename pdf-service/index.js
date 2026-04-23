@@ -9,6 +9,9 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
+// Serve static files (signature image)
+app.use(express.static(__dirname));
+
 // Health check
 app.get('/', (req, res) => {
   res.json({ status: 'PDF Service is running', version: '1.0.0' });

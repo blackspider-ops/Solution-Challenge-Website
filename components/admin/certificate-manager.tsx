@@ -160,7 +160,7 @@ export function CertificateManager({ certificates }: { certificates: Certificate
       </div>
       <div class="footer">
         <div class="signature-section">
-          <img src="https://sign-solution-challenge-cert.pages.dev/IMG_0730.PNG" alt="Signature" class="signature-image" />
+          <img src="signature.png" alt="Signature" class="signature-image" />
           <div class="signature-name">Tejas Singhal</div>
           <div class="signature-title">President, GDG @ Penn State</div>
         </div>
