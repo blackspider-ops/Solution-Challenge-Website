@@ -43,8 +43,11 @@ app.post('/generate-pdf', async (req, res) => {
     console.log('Setting content...');
     await page.setContent(html, {
       waitUntil: 'networkidle0',
-      timeout: 30000,
+      timeout: 60000, // Increased to 60s for external images
     });
+    
+    // Wait a bit extra for images to fully load
+    await page.waitForTimeout(2000);
 
     console.log('Generating PDF...');
     const pdfBuffer = await page.pdf({
