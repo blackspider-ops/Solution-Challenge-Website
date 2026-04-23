@@ -47,7 +47,7 @@ app.post('/generate-pdf', async (req, res) => {
     });
     
     // Wait a bit extra for images to fully load
-    await page.waitForTimeout(2000);
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     console.log('Generating PDF...');
     const pdfBuffer = await page.pdf({
