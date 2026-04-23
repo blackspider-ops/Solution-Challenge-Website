@@ -18,12 +18,22 @@ async function htmlToPdf(html: string): Promise<Buffer> {
 
     console.log('Calling PDF service...');
     
+    // Replace signature.png with base64 data URL
+    const signatureBase64 = await fetch(`${pdfServiceUrl}/signature.png`)
+      .then(res => res.arrayBuffer())
+      .then(buffer => `data:image/png;base64,${Buffer.from(buffer).toString('base64')}`);
+    
+    const htmlWithEmbeddedSignature = html.replace(
+      /src="signature\.png"/g,
+      `src="${signatureBase64}"`
+    );
+    
     const response = await fetch(`${pdfServiceUrl}/generate-pdf`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ html }),
+      body: JSON.stringify({ html: htmlWithEmbeddedSignature }),
     });
 
     if (!response.ok) {
