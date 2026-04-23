@@ -42,12 +42,21 @@ app.post('/generate-pdf', async (req, res) => {
     
     console.log('Setting content...');
     await page.setContent(html, {
-      waitUntil: 'networkidle0',
-      timeout: 60000, // Increased to 60s for external images
+      waitUntil: 'domcontentloaded', // Changed from networkidle0 to be faster
+      timeout: 30000,
     });
     
-    // Wait a bit extra for images to fully load
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Wait for images to load with a reasonable timeout
+    await page.evaluate(() => {
+      return Promise.all(
+        Array.from(document.images)
+          .filter(img => !img.complete)
+          .map(img => new Promise(resolve => {
+            img.onload = img.onerror = resolve;
+            setTimeout(resolve, 3000); // Max 3s per image
+          }))
+      );
+    });
 
     console.log('Generating PDF...');
     const pdfBuffer = await page.pdf({
