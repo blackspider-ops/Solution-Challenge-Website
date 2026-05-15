@@ -393,8 +393,14 @@ export async function sendCertificates(
 
     // Send emails
     let sent = 0;
+    console.log(`\n📧 Starting certificate send process for ${toSend.length} recipients`);
+    console.log(`Certificate: ${certificate.name}`);
+    console.log(`---`);
+    
     for (const recipient of toSend) {
       try {
+        console.log(`\n[${sent + 1}/${toSend.length}] Processing: ${recipient.userName} (${recipient.userEmail})`);
+        
         // Replace placeholders in HTML certificate
         let certificateHtml = certificate.htmlContent
           .replace(/\{\{name\}\}/g, recipient.userName)
@@ -406,11 +412,12 @@ export async function sendCertificates(
         let filename: string;
         
         try {
+          console.log(`  ⏳ Generating PDF...`);
           pdfBuffer = await htmlToPdf(certificateHtml);
           filename = `${certificate.name.replace(/\s+/g, '_')}_${recipient.userName.replace(/\s+/g, '_')}.pdf`;
-          console.log(`PDF generated successfully for ${recipient.userName}`);
+          console.log(`  ✅ PDF generated successfully`);
         } catch (pdfError) {
-          console.error(`PDF generation failed for ${recipient.userName}:`, pdfError);
+          console.error(`  ❌ PDF generation failed:`, pdfError);
           continue;
         }
 
@@ -459,6 +466,7 @@ export async function sendCertificates(
 </body>
 </html>`;
 
+        console.log(`  ⏳ Sending email...`);
         await resend.emails.send({
           from: process.env.EMAIL_FROM || "GDG PSU <noreply@gdgpsu.dev>",
           to: recipient.userEmail,
@@ -471,6 +479,7 @@ export async function sendCertificates(
             },
           ],
         });
+        console.log(`  ✅ Email sent successfully`);
 
         // Record as sent (skip if already sent for Tejas to allow testing)
         const existingRecord = await db.certificateSent.findFirst({
@@ -488,18 +497,23 @@ export async function sendCertificates(
               teamId: teamId || null,
             },
           });
+          console.log(`  ✅ Recorded in database`);
+        } else {
+          console.log(`  ℹ️  Already recorded (testing mode)`);
         }
 
         sent++;
-        console.log(`Successfully sent certificate to ${recipient.userEmail}`);
+        console.log(`  ✅ COMPLETE - Total sent: ${sent}/${toSend.length}`);
       } catch (error) {
-        console.error(`Failed to send certificate to ${recipient.userEmail}:`, error);
+        console.error(`  ❌ FAILED for ${recipient.userName} (${recipient.userEmail}):`, error);
       }
     }
 
+    console.log(`\n📊 SUMMARY: Successfully sent ${sent} out of ${toSend.length} certificates`);
+    console.log(`---\n`);
     return { data: { sent } };
   } catch (error) {
-    console.error("Send certificates error:", error);
+    console.error("❌ Send certificates error:", error);
     return { error: "Failed to send certificates" };
   }
 }
