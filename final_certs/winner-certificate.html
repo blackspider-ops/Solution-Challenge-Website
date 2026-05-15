@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Winner — GDG @ PSU Solution Challenge 2026</title>
+<style>
+  @page { size: 11in 8.5in landscape; margin: 0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    margin: 0; padding: 0;
+    background: #f8f9fa;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    width: 1100px; height: 850px; overflow: hidden;
+  }
+  .certificate {
+    background: #fff; width: 1100px; height: 850px;
+    position: relative; overflow: hidden;
+  }
+
+  /* gold top bar */
+  .top-bar {
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 8px;
+    background: linear-gradient(90deg, #FBBC04 0%, #F9AB00 50%, #FBBC04 100%);
+  }
+  /* green accent below */
+  .top-accent {
+    position: absolute; top: 8px; left: 0; right: 0;
+    height: 2px; background: #34A853;
+  }
+
+  /* full decorative border */
+  .border-wrap {
+    position: absolute; top: 20px; left: 20px;
+    right: 20px; bottom: 20px;
+    border: 1.5px solid #e8eaed; pointer-events: none;
+  }
+  .border-inner {
+    position: absolute; top: 26px; left: 26px;
+    right: 26px; bottom: 26px;
+    border: 1px solid #f1f3f4; pointer-events: none;
+  }
+
+  /* star decorations */
+  .star {
+    position: absolute; font-size: 20px; color: #FBBC04; opacity: 0.25;
+    font-family: Georgia, serif;
+  }
+  .star.s1 { top: 44px; left: 44px; }
+  .star.s2 { top: 44px; right: 44px; }
+  .star.s3 { bottom: 44px; left: 44px; }
+  .star.s4 { bottom: 44px; right: 44px; }
+
+  /* laurel decorative dots */
+  .dot-line {
+    position: absolute; top: 32px; left: 80px; right: 80px;
+    height: 1px;
+    background: repeating-linear-gradient(
+      90deg,
+      #FBBC04 0px, #FBBC04 4px,
+      transparent 4px, transparent 10px
+    );
+    opacity: 0.3;
+  }
+  .dot-line-bottom {
+    position: absolute; bottom: 32px; left: 80px; right: 80px;
+    height: 1px;
+    background: repeating-linear-gradient(
+      90deg,
+      #34A853 0px, #34A853 4px,
+      transparent 4px, transparent 10px
+    );
+    opacity: 0.3;
+  }
+
+  .content { padding: 60px 80px; height: 100%; display: flex; flex-direction: column; }
+
+  .header { display: flex; align-items: center; gap: 24px; margin-bottom: 16px; }
+  .logo-wrap { flex-shrink: 0; }
+  .logo-wrap svg { width: 100px; height: auto; display: block; }
+  .brand-main { font-size: 22px; font-weight: 600; color: #202124; letter-spacing: -0.3px; }
+  .brand-sub { font-size: 13px; color: #5f6368; letter-spacing: 1.5px; font-weight: 400; margin-top: 2px; }
+
+  .sep {
+    width: 100%; height: 2px;
+    background: linear-gradient(90deg, #FBBC04, #34A853, #4285F4);
+    margin-bottom: 16px; border-radius: 1px;
+  }
+
+  .body { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 0 30px; }
+
+  .cert-title {
+    font-size: 12px; letter-spacing: 3.5px; text-transform: uppercase;
+    color: #FBBC04; font-weight: 700; margin-bottom: 6px;
+  }
+  .cert-heading {
+    font-size: 44px; font-weight: 300; color: #202124;
+    margin-bottom: 16px; letter-spacing: -0.5px;
+  }
+  .cert-heading strong {
+    font-weight: 700;
+    background: linear-gradient(135deg, #FBBC04, #F9AB00);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .presented { font-size: 12px; color: #80868b; text-transform: uppercase; letter-spacing: 2.5px; margin-bottom: 12px; }
+  .recipient {
+    font-size: 54px; font-weight: 700; color: #202124;
+    margin-bottom: 4px; line-height: 1.1;
+  }
+  .recipient small { font-size: 24px; font-weight: 400; color: #5f6368; }
+
+  .badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #fef7e0, #fdf3d0);
+    color: #b8860b;
+    padding: 7px 22px; border-radius: 100px; font-size: 13px;
+    font-weight: 700; letter-spacing: 2px; margin: 16px 0 20px;
+    text-transform: uppercase;
+    border: 1px solid #FBBC04;
+  }
+
+  .desc {
+    font-size: 15px; color: #5f6368; line-height: 1.75;
+    max-width: 800px; margin: 0 auto 0 0;
+  }
+  .desc .hl { color: #202124; font-weight: 500; }
+
+  .event-line {
+    font-size: 14px; color: #4285F4; font-weight: 500;
+    margin-top: 16px;
+  }
+
+  .footer {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    padding-top: 20px; border-top: 1px solid #e8eaed;
+    margin-top: auto;
+  }
+  .sig-wrap { text-align: left; }
+  .sig-img { width: 120px; height: auto; display: block; margin-bottom: 5px; }
+  .sig-name { font-size: 16px; font-weight: 600; color: #202124; margin-bottom: 3px; }
+  .sig-title { font-size: 12px; color: #5f6368; line-height: 1.4; }
+  .date-wrap { text-align: right; }
+  .date-label { font-size: 10px; color: #80868b; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px; }
+  .date-value { font-size: 15px; color: #202124; font-weight: 500; }
+</style>
+</head>
+<body>
+<div class="certificate">
+  <div class="top-bar"></div>
+  <div class="top-accent"></div>
+  <div class="border-wrap"></div>
+  <div class="border-inner"></div>
+  <div class="dot-line"></div>
+  <div class="dot-line-bottom"></div>
+  <div class="star s1">&#9733;</div>
+  <div class="star s2">&#9733;</div>
+  <div class="star s3">&#9733;</div>
+  <div class="star s4">&#9733;</div>
+
+  <div class="content">
+    <div class="header">
+      <div class="logo-wrap">
+        <svg viewBox="0 0 270 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M96.7179 0C99.2743 0.741117 101.656 1.33545 103.908 2.2494C112.503 5.73784 118.432 11.9667 121.271 20.7191C125.347 33.282 122.613 44.5508 113.223 53.8255C109.857 57.1505 105.636 59.6179 101.767 62.4246C96.0733 66.5555 90.3454 70.6397 84.6515 74.7298C93.9079 81.3993 103.416 87.8289 112.425 94.8945C118.121 99.362 121.207 105.764 122.481 112.994C123.79 120.426 122.633 127.406 118.942 133.927C114.295 142.136 107.276 147.182 98.0071 148.993C87.5734 151.031 78.6093 147.913 70.2319 141.635C57.1524 131.833 43.7919 122.405 30.5335 112.842C24.5635 108.536 18.4758 104.39 12.5809 99.9847C5.9262 95.0116 1.48209 88.565 0.143354 80.0699C-0.0477846 76.6562 -0.0477846 73.3124 0.143354 69.6644C1.44753 61.2202 5.53088 54.6982 11.9418 49.8608C21.4291 42.7019 31.2184 35.9435 40.872 29.0047C47.8329 24.0014 54.7469 18.9321 61.7482 13.9861C66.9539 10.3085 72.1359 6.56572 77.5863 3.2797C80.2372 1.68151 83.4783 1.06235 86.4522 0C89.796 0 93.1399 0 96.7179 0ZM29.6054 105.601C45.2155 116.82 60.8193 128.048 76.439 139.253C82.3836 143.518 88.8722 145.472 96.2371 143.99C107.51 141.721 116.129 133.42 117.367 121.34C118.397 111.289 114.716 103.031 106.335 97.0236C86.4491 82.7705 66.5878 68.4832 46.7443 54.1714C40.1886 49.4433 32.9684 48.0374 25.1177 49.5395C14.9821 51.4787 5.53192 62.0715 4.97696 72.2781C4.45325 81.9099 8.04917 89.7674 15.7489 95.6109C20.189 98.9807 24.777 102.156 29.6054 105.601ZM36.2721 39.064C34.3181 40.4988 32.3641 41.9336 29.9081 43.737C30.9266 43.8983 31.2277 43.9974 31.5244 43.9854C38.6684 43.6979 44.7776 46.3315 50.4415 50.4551C60.1313 57.5098 69.8974 64.4596 79.6162 71.4424C79.9141 71.2989 80.1562 71.2226 80.3521 71.0821C89.4836 64.53 98.7397 58.1427 107.705 51.3703C117.889 43.6774 119.932 30.5301 115.079 19.8655C108.263 4.88601 89.0361 1.15691 76.7209 9.99872C63.3307 19.6123 49.9547 29.2456 36.2721 39.064Z" fill="#101011"/>
+          <path d="M183.22 0C186.137 0.927504 189.075 1.43288 191.452 2.86844C196.761 6.07615 201.872 9.63421 206.918 13.2522C220.269 22.8241 233.566 32.4714 246.835 42.1573C251.815 45.7926 256.864 49.3799 261.503 53.4223C266.172 57.4899 268.389 63.1341 269.425 69.1344C271.446 80.8337 267.83 90.7707 259.024 98.5365C254.428 102.589 249.151 105.871 244.158 109.469C234.184 116.654 224.202 123.83 214.207 130.986C207.305 135.929 200.503 141.029 193.405 145.674C189.625 148.148 185.149 149.225 180.561 149.509C174.682 149.872 168.98 149.138 163.719 146.402C154.4 141.554 148.532 133.793 147.079 123.51C145.175 110.028 150.278 99.2937 161.635 91.5121C169.506 86.1187 177.164 80.4128 185.025 74.769C177.548 69.3408 170.298 63.7751 162.733 58.676C156.117 54.2163 150.773 48.8582 148.373 41.1398C145.228 31.0243 146.336 21.3815 152.599 12.6434C156.857 6.70306 162.529 2.67314 169.708 0.924966C170.571 0.714776 171.448 0.560184 172.386 0.189913C175.965 5.06639e-07 179.475 5e-07 183.22 0ZM264.508 74.7488C264.502 66.3771 261.348 59.3438 254.624 54.4373C233.911 39.3247 213.027 24.446 192.207 9.48164C186.255 5.20419 179.384 4.45788 172.616 5.8168C161.936 7.96148 155.011 14.892 152.693 25.4989C150.403 35.9732 153.767 44.9122 162.307 51.5947C166.369 54.7729 170.657 57.6615 174.848 60.6749C191.204 72.4366 207.478 84.3154 223.955 95.906C232.355 101.814 241.543 102.337 250.658 97.6082C259.598 92.9704 264.158 85.3275 264.508 74.7488ZM170.044 143.328C172.298 143.718 174.544 144.379 176.808 144.447C183.044 144.636 188.638 142.636 193.692 138.987C205.8 130.243 217.939 121.541 230.065 112.823C233.007 110.708 235.949 108.592 239.407 106.105C232.77 105.652 227.024 104.307 222.026 100.885C216.278 96.9486 210.668 92.8106 205.003 88.7536C199.961 85.1428 194.926 81.523 189.925 77.9342C188.029 79.2962 186.348 80.4991 184.672 81.7093C176.998 87.2501 169.216 92.6475 161.683 98.3742C153.457 104.628 149.813 116.425 152.969 125.76C155.808 134.158 161.296 140.064 170.044 143.328Z" fill="#10110F"/>
+          <path d="M29.4546 105.509C24.7797 102.155 20.1916 98.9805 15.7515 95.6108C8.05183 89.7672 4.45592 81.9097 4.97962 72.2779C5.53458 62.0714 14.9847 51.4786 25.1203 49.5393C32.9711 48.0373 40.1913 49.4431 46.7469 54.1712C66.5905 68.483 86.4517 82.7703 106.338 97.0234C114.719 103.031 118.4 111.289 117.37 121.34C116.132 133.42 107.513 141.721 96.2397 143.99C88.8749 145.472 82.3863 143.518 76.4417 139.253C60.8219 128.048 45.2182 116.82 29.4546 105.509Z" fill="#4285F4"/>
+          <path d="M36.4205 38.9671C49.9529 29.2456 63.3289 19.6123 76.7191 9.99868C89.0343 1.15686 108.261 4.88597 115.078 19.8655C119.931 30.5301 117.887 43.6773 107.703 51.3703C98.7379 58.1427 89.4818 64.53 80.3503 71.082C80.1544 71.2226 79.9123 71.2988 79.6143 71.4423C69.8956 64.4595 60.1295 57.5097 50.4397 50.4551C44.7758 46.3315 38.6665 43.6979 31.5226 43.9854C31.2259 43.9973 30.9248 43.8983 29.9062 43.7369C32.3623 41.9335 34.3163 40.4987 36.4205 38.9671Z" fill="#EA4335"/>
+          <path d="M264.508 74.9873C264.157 85.3273 259.597 92.9702 250.657 97.608C241.542 102.337 232.354 101.814 223.955 95.9058C207.478 84.3152 191.203 72.4364 174.847 60.6747C170.656 57.6614 166.368 54.7728 162.306 51.5945C153.766 44.912 150.402 35.973 152.692 25.4987C155.011 14.8918 161.935 7.9613 172.616 5.81663C179.383 4.4577 186.254 5.20401 192.206 9.48147C213.027 24.4459 233.91 39.3246 254.623 54.4371C261.348 59.3436 264.501 66.3769 264.508 74.9873Z" fill="#34A853"/>
+          <path d="M169.897 143.188C161.295 140.064 155.807 134.158 152.968 125.76C149.812 116.425 153.456 104.628 161.682 98.3741C169.214 92.6474 176.997 87.25 184.671 81.7092C186.347 80.499 188.028 79.2961 189.924 77.9341C194.924 81.5229 199.96 85.1427 205.002 88.7535C210.667 92.8105 216.277 96.9485 222.025 100.885C227.023 104.307 232.769 105.652 239.406 106.105C235.947 108.592 233.006 110.707 230.064 112.823C217.937 121.541 205.799 130.243 193.691 138.986C188.636 142.636 183.043 144.636 176.806 144.447C174.543 144.379 172.297 143.718 169.897 143.188Z" fill="#FBBC05"/>
+        </svg>
+      </div>
+      <div class="brand">
+        <div class="brand-main">Google Developer Groups</div>
+        <div class="brand-sub">On Campus &bull; Penn State</div>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <div class="body">
+      <div class="cert-title">GDG @ PSU Solution Challenge 2026</div>
+      <h1 class="cert-heading">Certificate of <strong>Excellence</strong></h1>
+      <div class="presented">Awarded to</div>
+      <div class="recipient">{{name}} <small>{{team}}</small></div>
+      <div class="badge">1st Place Winner</div>
+      <p class="desc">
+        For outstanding achievement and an exceptional winning submission at
+        the <span class="hl">Solution Challenge 2026</span>.
+        Your team&rsquo;s ingenuity, execution, and use of Google technology
+        exemplify the very best of what this community builds.
+      </p>
+      <div class="event-line">{{track}}</div>
+    </div>
+
+    <div class="footer">
+      <div class="sig-wrap">
+        <img src="signature.png" alt="Signature" class="sig-img">
+        <div class="sig-name">Tejas Singhal</div>
+        <div class="sig-title">President, GDG @ Penn State</div>
+      </div>
+      <div class="date-wrap">
+        <div class="date-label">Date Issued</div>
+        <div class="date-value">May 15, 2026</div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
