@@ -19,6 +19,10 @@ export const sendCertificateSchema = z.object({
   audience: z.enum(["all", "registered", "checked_in", "volunteers", "admins", "team", "individual"]),
   teamId: z.string().optional(),
   userIds: z.array(z.string()).optional(),
+  excludeUserIds: z.array(z.string()).optional(),
+  excludeTeamIds: z.array(z.string()).optional(),
+  excludeVolunteers: z.boolean().optional(),
+  excludeAdmins: z.boolean().optional(),
 });
 
 export type SendCertificateInput = z.infer<typeof sendCertificateSchema>;

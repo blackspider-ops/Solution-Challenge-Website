@@ -55,6 +55,17 @@ export function CertificateManager({ certificates }: { certificates: Certificate
   }>({ users: [], teams: [] });
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
   const [selectedTeam, setSelectedTeam] = useState<string>("");
+  
+  // Exclude states
+  const [excludeSearchQuery, setExcludeSearchQuery] = useState("");
+  const [excludeSearchResults, setExcludeSearchResults] = useState<{
+    users: Array<{ id: string; name: string; email: string; teamName?: string }>;
+    teams: Array<{ id: string; name: string; memberCount: number; trackName?: string }>;
+  }>({ users: [], teams: [] });
+  const [excludedUsers, setExcludedUsers] = useState<Set<string>>(new Set());
+  const [excludedTeams, setExcludedTeams] = useState<Set<string>>(new Set());
+  const [excludeVolunteers, setExcludeVolunteers] = useState(false);
+  const [excludeAdmins, setExcludeAdmins] = useState(false);
 
   const isEditing = typeof mode === "object" && "edit" in mode;
   const editTarget = isEditing ? mode.edit : null;
@@ -221,6 +232,12 @@ export function CertificateManager({ certificates }: { certificates: Certificate
     setSearchResults({ users: [], teams: [] });
     setSelectedUsers(new Set());
     setSelectedTeam("");
+    setExcludeSearchQuery("");
+    setExcludeSearchResults({ users: [], teams: [] });
+    setExcludedUsers(new Set());
+    setExcludedTeams(new Set());
+    setExcludeVolunteers(false);
+    setExcludeAdmins(false);
   }
 
   async function handleSearch() {
@@ -239,6 +256,21 @@ export function CertificateManager({ certificates }: { certificates: Certificate
     });
   }
 
+  async function handleExcludeSearch() {
+    if (excludeSearchQuery.trim().length < 2) {
+      return;
+    }
+
+    startTransition(async () => {
+      try {
+        const results = await searchUsersAndTeams(excludeSearchQuery);
+        setExcludeSearchResults(results);
+      } catch {
+        toast.error("Exclude search failed");
+      }
+    });
+  }
+
   function toggleUser(userId: string) {
     const newSet = new Set(selectedUsers);
     if (newSet.has(userId)) {
@@ -247,6 +279,26 @@ export function CertificateManager({ certificates }: { certificates: Certificate
       newSet.add(userId);
     }
     setSelectedUsers(newSet);
+  }
+
+  function toggleExcludeUser(userId: string) {
+    const newSet = new Set(excludedUsers);
+    if (newSet.has(userId)) {
+      newSet.delete(userId);
+    } else {
+      newSet.add(userId);
+    }
+    setExcludedUsers(newSet);
+  }
+
+  function toggleExcludeTeam(teamId: string) {
+    const newSet = new Set(excludedTeams);
+    if (newSet.has(teamId)) {
+      newSet.delete(teamId);
+    } else {
+      newSet.add(teamId);
+    }
+    setExcludedTeams(newSet);
   }
 
   function confirmSend() {
@@ -269,6 +321,20 @@ export function CertificateManager({ certificates }: { certificates: Certificate
         return;
       }
       data.userIds = Array.from(selectedUsers);
+    }
+
+    // Add exclusions
+    if (excludedUsers.size > 0) {
+      data.excludeUserIds = Array.from(excludedUsers);
+    }
+    if (excludedTeams.size > 0) {
+      data.excludeTeamIds = Array.from(excludedTeams);
+    }
+    if (excludeVolunteers) {
+      data.excludeVolunteers = true;
+    }
+    if (excludeAdmins) {
+      data.excludeAdmins = true;
     }
 
     startTransition(async () => {
@@ -551,6 +617,120 @@ export function CertificateManager({ certificates }: { certificates: Certificate
                     </button>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* Exclude Section */}
+            {sendAudience !== "individual" && sendAudience !== "team" && (
+              <div className="space-y-3 pt-4 border-t">
+                <Label className="text-base font-semibold">Exclude from sending</Label>
+                
+                {/* Quick exclude checkboxes */}
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={excludeVolunteers}
+                      onChange={(e) => setExcludeVolunteers(e.target.checked)}
+                      className="w-4 h-4 rounded border-border"
+                    />
+                    <span className="text-sm">Exclude Volunteers</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={excludeAdmins}
+                      onChange={(e) => setExcludeAdmins(e.target.checked)}
+                      className="w-4 h-4 rounded border-border"
+                    />
+                    <span className="text-sm">Exclude Admins</span>
+                  </label>
+                </div>
+
+                {/* Exclude search */}
+                <div className="space-y-2">
+                  <Label className="text-sm">Exclude specific users or teams</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      value={excludeSearchQuery}
+                      onChange={(e) => {
+                        setExcludeSearchQuery(e.target.value);
+                        if (e.target.value.length >= 2) {
+                          handleExcludeSearch();
+                        } else {
+                          setExcludeSearchResults({ users: [], teams: [] });
+                        }
+                      }}
+                      placeholder="Type to search users or teams to exclude..."
+                      className="text-sm"
+                    />
+                  </div>
+                </div>
+
+                {/* Exclude results */}
+                {(excludeSearchResults.users.length > 0 || excludeSearchResults.teams.length > 0) && (
+                  <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-2">
+                    {excludeSearchResults.teams.length > 0 && (
+                      <div className="space-y-1">
+                        <p className="text-xs font-medium text-muted-foreground px-2">Teams</p>
+                        {excludeSearchResults.teams.map((team) => (
+                          <button
+                            key={team.id}
+                            onClick={() => toggleExcludeTeam(team.id)}
+                            className={`w-full text-left p-2 rounded border transition-colors text-sm ${
+                              excludedTeams.has(team.id)
+                                ? "border-red-500 bg-red-50"
+                                : "border-border hover:border-red-300"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <Users className="w-3 h-3" />
+                              <div className="flex-1">
+                                <p className="font-medium text-xs">{team.name}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {team.memberCount} members
+                                </p>
+                              </div>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    {excludeSearchResults.users.length > 0 && (
+                      <div className="space-y-1">
+                        <p className="text-xs font-medium text-muted-foreground px-2">Users</p>
+                        {excludeSearchResults.users.map((user) => (
+                          <button
+                            key={user.id}
+                            onClick={() => toggleExcludeUser(user.id)}
+                            className={`w-full text-left p-2 rounded border transition-colors text-sm ${
+                              excludedUsers.has(user.id)
+                                ? "border-red-500 bg-red-50"
+                                : "border-border hover:border-red-300"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <User className="w-3 h-3" />
+                              <div className="flex-1">
+                                <p className="font-medium text-xs">{user.name}</p>
+                                <p className="text-xs text-muted-foreground">{user.email}</p>
+                              </div>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Excluded summary */}
+                {(excludedUsers.size > 0 || excludedTeams.size > 0 || excludeVolunteers || excludeAdmins) && (
+                  <div className="text-xs text-muted-foreground bg-muted p-2 rounded">
+                    Excluding: {excludedUsers.size} users, {excludedTeams.size} teams
+                    {excludeVolunteers && ", all volunteers"}
+                    {excludeAdmins && ", all admins"}
+                  </div>
+                )}
               </div>
             )}
           </div>

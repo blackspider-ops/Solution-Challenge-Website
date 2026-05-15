@@ -141,7 +141,7 @@ export async function sendCertificates(
   const parsed = sendCertificateSchema.safeParse(input);
   if (!parsed.success) return { error: parsed.error.errors[0].message };
 
-  const { certificateId, audience, teamId, userIds } = parsed.data;
+  const { certificateId, audience, teamId, userIds, excludeUserIds, excludeTeamIds, excludeVolunteers, excludeAdmins } = parsed.data;
 
   try {
     // Get certificate template
@@ -329,6 +329,44 @@ export async function sendCertificates(
 
     if (recipients.length === 0) {
       return { error: "No recipients found" };
+    }
+
+    // Apply exclusions
+    if (excludeUserIds && excludeUserIds.length > 0) {
+      const excludeSet = new Set(excludeUserIds);
+      recipients = recipients.filter(r => !excludeSet.has(r.userId));
+    }
+
+    if (excludeTeamIds && excludeTeamIds.length > 0) {
+      // Get users in excluded teams
+      const excludedTeamMembers = await db.teamMember.findMany({
+        where: { teamId: { in: excludeTeamIds } },
+        select: { userId: true },
+      });
+      const excludeTeamUserSet = new Set(excludedTeamMembers.map(m => m.userId));
+      recipients = recipients.filter(r => !excludeTeamUserSet.has(r.userId));
+    }
+
+    if (excludeVolunteers) {
+      const volunteers = await db.user.findMany({
+        where: { role: "volunteer" },
+        select: { id: true },
+      });
+      const volunteerSet = new Set(volunteers.map(v => v.id));
+      recipients = recipients.filter(r => !volunteerSet.has(r.userId));
+    }
+
+    if (excludeAdmins) {
+      const admins = await db.user.findMany({
+        where: { role: "admin" },
+        select: { id: true },
+      });
+      const adminSet = new Set(admins.map(a => a.id));
+      recipients = recipients.filter(r => !adminSet.has(r.userId));
+    }
+
+    if (recipients.length === 0) {
+      return { error: "No recipients found after applying exclusions" };
     }
 
     // Filter out already sent (except for Tejas - allow unlimited resends for testing)
